@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-blue: #174F73;
+  --color-brand-blue-dark: #103A55;
+  --color-brand-gold: #C59B4B;
+  --color-brand-ivory: #FAF8F3;
+  --color-brand-charcoal: #292725;
+  --color-brand-red: #B83232;
+
+  --font-sans: "Inter", "Noto Sans Gujarati", ui-sans-serif, system-ui, sans-serif;
+  --font-gujarati: "Noto Sans Gujarati", "Inter", sans-serif;
+}
+
+@layer base {
+  :root {
+    --background: #FAF8F3;
+    --foreground: #292725;
+  }
+
+  body {
+    background-color: #FAF8F3;
+    color: #292725;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@keyframes ticker-scroll {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-ticker {
+  display: flex;
+  width: max-content;
+  animation: ticker-scroll 38s linear infinite;
+}
+
+.animate-ticker:hover {
+  animation-play-state: paused;
+}
