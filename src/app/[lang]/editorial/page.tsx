@@ -6,7 +6,6 @@ import { isValidLocale, Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { newsDataProvider } from "@/lib/data/provider";
 import { getLocalizedText } from "@/lib/data/types";
-import { DemoBadge } from "@/components/shared/DemoBadge";
 
 export async function generateMetadata({
   params,
@@ -36,10 +35,10 @@ export default async function EditorialListingPage({
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b-2 border-[#174F73] pb-4">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b-2 border-[#016BB7] pb-4">
         <div className="flex items-center gap-3">
-          <span className="font-gujarati inline-flex items-center gap-1.5 rounded bg-[#174F73] px-3.5 py-1.5 text-lg font-extrabold text-white">
-            <Feather className="h-4 w-4 text-[#C59B4B]" />
+          <span className="font-gujarati inline-flex items-center gap-1.5 rounded bg-[#016BB7] px-3.5 py-1.5 text-lg font-extrabold text-white">
+            <Feather className="h-4 w-4 text-white" />
             <span>અગ્રલેખ</span>
           </span>
           <div>
@@ -55,21 +54,21 @@ export default async function EditorialListingPage({
         </div>
 
         <div className="flex items-center gap-3">
-          <DemoBadge variant="gold" />
+          
           <Link
             href={`/${locale}/editorial/archive`}
-            className="inline-flex items-center gap-1.5 rounded bg-[#174F73] px-4 py-2 text-xs sm:text-sm font-bold text-white hover:bg-[#103A55]"
+            className="inline-flex items-center gap-1.5 rounded bg-[#016BB7] px-4 py-2 text-xs sm:text-sm font-bold text-white hover:bg-[#016BB7]/90"
           >
-            <Archive className="h-4 w-4 text-[#C59B4B]" />
+            <Archive className="h-4 w-4 text-white" />
             <span>{dict.home.editorialArchiveCta}</span>
           </Link>
         </div>
       </div>
 
       {/* Today's Featured Editorial */}
-      <article className="mb-8 rounded-md border-2 border-[#C59B4B] bg-white p-6 sm:p-8">
+      <article className="mb-8 rounded-md border-2 border-[#016BB7] bg-white p-6 sm:p-8">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-          <span className="rounded-xs bg-[#174F73] px-3 py-0.5 text-xs font-bold uppercase text-white">
+          <span className="rounded-xs bg-[#016BB7] px-3 py-0.5 text-xs font-bold uppercase text-white">
             {dict.home.todaysEditorial} • અગ્રલેખ
           </span>
           <span className="text-xs font-semibold text-[#292725]/65">
@@ -81,11 +80,11 @@ export default async function EditorialListingPage({
           {getLocalizedText(todaysEditorial.title, locale)}
         </h2>
 
-        <p className="mt-3 text-base font-medium text-[#174F73]">
+        <p className="mt-3 text-base font-medium text-[#016BB7]">
           {getLocalizedText(todaysEditorial.excerpt, locale)}
         </p>
 
-        <div className="mt-4 space-y-3 border-l-2 border-[#C59B4B] pl-4 text-sm sm:text-base text-[#292725]/85 leading-relaxed">
+        <div className="mt-4 space-y-3 border-l-2 border-[#016BB7] pl-4 text-sm sm:text-base text-[#292725]/85 leading-relaxed">
           {todaysEditorial.teaserParagraphs[locale]?.map((p, idx) => (
             <p key={idx}>{p}</p>
           ))}
@@ -99,16 +98,16 @@ export default async function EditorialListingPage({
 
           <Link
             href={`/${locale}/epaper?page=${todaysEditorial.epaperPageNumber}`}
-            className="inline-flex items-center gap-2 rounded bg-[#174F73] px-4 py-2 text-xs sm:text-sm font-bold text-white hover:bg-[#103A55]"
+            className="inline-flex items-center gap-2 rounded bg-[#016BB7] px-4 py-2 text-xs sm:text-sm font-bold text-white hover:bg-[#016BB7]/90"
           >
-            <BookOpen className="h-4 w-4 text-[#C59B4B]" />
+            <BookOpen className="h-4 w-4 text-white" />
             <span>{dict.home.readInEpaper}</span>
           </Link>
         </div>
       </article>
 
       {/* Previous Editorials */}
-      <h2 className="text-xl font-extrabold text-[#174F73] mb-4">
+      <h2 className="text-xl font-extrabold text-[#016BB7] mb-4">
         {dict.home.previousEditorials}
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -119,7 +118,7 @@ export default async function EditorialListingPage({
           >
             <div>
               <div className="flex items-center justify-between text-xs mb-2">
-                <span className="font-gujarati font-bold text-[#174F73]">
+                <span className="font-gujarati font-bold text-[#016BB7]">
                   {ed.tag} • {getLocalizedText(ed.authorRole, locale)}
                 </span>
                 <span className="text-[#292725]/60">{ed.publishedDate}</span>
@@ -138,7 +137,7 @@ export default async function EditorialListingPage({
               </span>
               <Link
                 href={`/${locale}/epaper?page=${ed.epaperPageNumber}`}
-                className="font-bold text-[#174F73] hover:underline"
+                className="font-bold text-[#016BB7] hover:underline"
               >
                 {dict.home.readInEpaper} →
               </Link>

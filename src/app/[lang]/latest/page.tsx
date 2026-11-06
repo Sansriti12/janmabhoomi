@@ -32,9 +32,9 @@ export default async function LatestNewsPage({
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b-2 border-[#174F73] pb-3">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b-2 border-[#016BB7] pb-3">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#174F73]">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#016BB7]">
             {dict.nav.latest}
           </h1>
           <p className="mt-1 text-xs sm:text-sm text-[#292725]/70">

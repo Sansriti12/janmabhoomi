@@ -1,0 +1,14 @@
+{
+  "name": "Janmabhoomi Digital Newspaper",
+  "short_name": "Janmabhoomi",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "theme_color": "#174F73",
+  "background_color": "#FAF8F3",
+  "display": "standalone"
+}

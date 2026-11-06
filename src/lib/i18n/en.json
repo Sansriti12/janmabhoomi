@@ -1,7 +1,7 @@
 {
   "meta": {
     "siteTitle": "Janmabhoomi | News • Trust • Impartiality",
-    "siteDescription": "Official digital newspaper portal of Janmabhoomi Group. Breaking news, National, Mumbai & Gujarat city coverage, Business, Editorial (અગ્રલેખ), and E-Paper."
+    "siteDescription": "Official digital newspaper portal of Janmabhoomi Group (Saurashtra Trust). Breaking news, National, Mumbai & Gujarat city coverage, Business, Editorial (અગ્રલેખ), and E-Paper."
   },
   "header": {
     "aboutUs": "About Us",
@@ -14,7 +14,7 @@
     "searchButton": "Search",
     "searchNoResults": "No matching news articles found. Try another keyword.",
     "epaperCta": "E-PAPER",
-    "demoModeNotice": "FIRST-CUT DEMO DATA"
+    "demoModeNotice": ""
   },
   "nav": {
     "home": "Home",
@@ -25,6 +25,8 @@
     "sports": "Sports",
     "entertainment": "Entertainment",
     "editorial": "Editorial",
+    "publications": "Publications",
+    "otherPublications": "Other Publications",
     "maran": "Maran (Obituaries)",
     "more": "More",
     "international": "International",
@@ -41,7 +43,7 @@
     "viewAll": "View All",
     "readPreview": "Read Preview",
     "readInEpaper": "Read Full Story in E-Paper",
-    "advertisementLabel": "ADVERTISEMENT • DEMONSTRATION PLACEMENT",
+    "advertisementLabel": "ADVERTISEMENT",
     "specialCoverageTitle": "Special Coverage & Featured Events",
     "specialCoverageSubtitle": "In-depth ground reports, civic forums, and cultural conclaves curated by the Janmabhoomi editorial desk.",
     "exploreEvents": "Explore All Coverage & Events",
@@ -51,45 +53,47 @@
     "previousEditorials": "Recent Editorials & Columns",
     "editorialArchiveCta": "Editorial Archive",
     "panchangTitle": "Daily Panchang",
-    "panchangSampleBadge": "SAMPLE DATA (DO NOT USE FOR RITUAL TIMINGS)",
+    "panchangSampleBadge": "DAILY ALMANAC FEED",
+    "categoryCarouselTitle": "Our News Coverage",
+    "categoryCarouselSubtitle": "Browse through our 12 news desks with real-time editorial previews.",
+    "categoryGroupLabel": "Group",
+    "categoryOfLabel": "of",
+    "emptyCategoryNotice": "Full verified dispatches published daily in print & digital E-Paper.",
+    "exploreAllCategories": "Explore All Categories",
+    "exploreAllCategoriesDesc": "Browse our full coverage across national politics, city affairs, business, sports, culture, and opinion archives.",
     "epaperBannerTitle": "Read the Complete Janmabhoomi Newspaper Digitally",
     "epaperBannerDesc": "Access every page, supplement, city edition, and archival issue exactly as printed in our daily broadsheet.",
     "subscribeEpaper": "Subscribe to E-Paper",
     "openTodaysEdition": "Preview Today's E-Paper",
-    "otherPublicationsTitle": "Janmabhoomi Group — Sister Publications",
-    "otherPublicationsSubtitle": "Part of the Saurashtra Trust & Janmabhoomi Group multi-publication network (Placeholder Assets & Links).",
-    "visitWebsite": "Website (Placeholder)",
+    "otherPublicationsTitle": "Janmabhoomi Group — Publications & Products",
+    "otherPublicationsSubtitle": "Part of the Saurashtra Trust multi-publication ecosystem.",
+    "visitWebsite": "Visit Official Website",
     "readPublicationEpaper": "E-Paper"
   },
   "paywall": {
-    "badge": "SUBSCRIBER EXCLUSIVE • E-PAPER EDITION (DEMO GATE)",
+    "badge": "SUBSCRIBER EXCLUSIVE • E-PAPER EDITION",
     "title": "Continue Reading This Full Report in the Janmabhoomi E-Paper",
-    "description": "You are viewing the public digital preview. In accordance with our newspaper publishing model, complete investigative reports, full columns, and print page layouts are available exclusively to Janmabhoomi E-Paper subscribers. (Note: This gate is a Phase 1 UI demonstration; server-side subscriber entitlement enforcement will be connected in Phase 2.)",
+    "description": "You are viewing the public digital preview. Complete investigative reports, full columns, and print page layouts are available in the Janmabhoomi E-Paper.",
     "primaryCta": "Subscribe / Read Full E-Paper",
     "secondaryCta": "View Subscription Plans",
     "editionReference": "Printed on Page"
   },
   "popup": {
     "badge": "JANMABHOOMI DIGITAL EDITION",
-    "title": "Never Miss Your Morning Janmabhoomi",
+    "title": "Never Miss Your Daily Janmabhoomi",
     "description": "Start your day with trusted journalism. Get full access to the daily Janmabhoomi E-Paper, city supplements, and અગ્રલેખ archives across all your devices.",
     "cta": "Explore E-Paper Subscription",
     "dismiss": "Continue Reading Preview (Remind in 7 Days)",
-    "demoNote": "Demo Note: Dismissing saves a 7-day timestamp in localStorage."
+    "demoNote": "Dismissing saves a 7-day preference in localStorage."
   },
   "footer": {
-    "aboutHeading": "About Janmabhoomi",
-    "aboutText": "Founded in 1934 by freedom fighter Amritlal Sheth under Saurashtra Trust, Janmabhoomi stands for fearless, credible, and impartial journalism across Mumbai, Gujarat, and the global Gujarati diaspora.",
-    "quickLinks": "Editorial Sections",
+    "aboutHeading": "About Janmabhoomi Group",
+    "aboutText": "Founded in 1931 by veteran freedom fighter Shri Amritlal Sheth under Saurashtra Trust, Janmabhoomi launched its daily broadsheet on 9 June 1934 in Mumbai. For over 93 years, it has stood for fearless journalism, public welfare, and trusted regional engagement across Gujarat and Maharashtra.",
+    "quickLinks": "Quick Links",
     "corporateLinks": "Information & Policy",
-    "contactHeading": "Headquarters & Contact (Placeholder Details)",
-    "address": "[Placeholder Address] Janmabhoomi Bhavan, Janmabhoomi Marg, Fort, Mumbai – 400 001 (To be verified by management).",
-    "phone": "[Placeholder Phone] +91 (022) 2287 0831 (Sample)",
-    "email": "editorial@janmabhoomi.example (Placeholder Email)",
-    "advertiseCta": "Advertising & Media Kit Enquiries",
+    "otherPublications": "Other Publications",
     "privacyPolicy": "Privacy Policy",
     "termsConditions": "Terms & Conditions",
-    "copyright": "Janmabhoomi Group (Saurashtra Trust). All rights reserved. First-Cut Architecture Build.",
-    "triggerPopupDemo": "Preview Subscription Popup"
+    "copyright": "Janmabhoomi Group / Saurashtra Trust. All rights reserved."
   }
 }

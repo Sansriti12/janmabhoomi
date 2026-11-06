@@ -1,11 +1,16 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-blue: #174F73;
-  --color-brand-blue-dark: #103A55;
-  --color-brand-gold: #C59B4B;
-  --color-brand-ivory: #FAF8F3;
-  --color-brand-charcoal: #292725;
+  /* Official Janmabhoomi Brand Palette (Derived from Master Vector Logo & Trust Guidelines) */
+  --color-brand-blue: #016BB7;
+  --color-brand-blue-dark: #015a99;
+  --color-brand-blue-navy: #0B3558;
+  --color-brand-blue-light: #F0F6FA;
+  --color-brand-blue-border: #C5DDF0;
+  --color-brand-blue-subtle: #E3F0FA;
+  --color-brand-blue-accent: #016BB7;
+
+  --color-brand-charcoal: #1F2937;
   --color-brand-red: #B83232;
 
   --font-sans: "Inter", "Noto Sans Gujarati", ui-sans-serif, system-ui, sans-serif;
@@ -14,15 +19,23 @@
 
 @layer base {
   :root {
-    --background: #FAF8F3;
-    --foreground: #292725;
+    --background: #FFFFFF;
+    --foreground: #1F2937;
+    --primary: #016BB7;
+    --brand-blue: #016BB7;
+    --primary-dark: #015a99;
   }
 
   body {
-    background-color: #FAF8F3;
-    color: #292725;
+    background-color: #FFFFFF;
+    color: #1F2937;
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: inherit;
   }
 }
 
@@ -43,4 +56,19 @@
 
 .animate-ticker:hover {
   animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-ticker {
+    animation: none !important;
+  }
+}
+
+/* Scrollbar styling for horizontal carousels */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

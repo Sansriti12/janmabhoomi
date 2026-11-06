@@ -38,16 +38,16 @@ export default async function EditorialArchivePage({
       <div className="mb-4">
         <Link
           href={`/${locale}/editorial`}
-          className="inline-flex items-center gap-1 text-xs font-bold text-[#174F73] hover:underline"
+          className="inline-flex items-center gap-1 text-xs font-bold text-[#016BB7] hover:underline"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           <span>{dict.nav.editorial} (અગ્રલેખ)</span>
         </Link>
       </div>
 
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b-2 border-[#174F73] pb-3.5">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b-2 border-[#016BB7] pb-3.5">
         <div className="flex items-center gap-2.5">
-          <Archive className="h-6 w-6 text-[#174F73]" />
+          <Archive className="h-6 w-6 text-[#016BB7]" />
           <h1 className="text-2xl sm:text-3xl font-extrabold text-[#292725]">
             {dict.home.editorialArchiveCta} (અગ્રલેખ આર્કાઇવ)
           </h1>
@@ -63,7 +63,7 @@ export default async function EditorialArchivePage({
           >
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-xs">
-                <span className="font-gujarati font-bold text-[#174F73]">
+                <span className="font-gujarati font-bold text-[#016BB7]">
                   {ed.tag}
                 </span>
                 <span>•</span>
@@ -87,9 +87,9 @@ export default async function EditorialArchivePage({
 
             <Link
               href={`/${locale}/epaper?page=${ed.epaperPageNumber}`}
-              className="shrink-0 inline-flex items-center gap-1.5 rounded bg-[#174F73] px-3.5 py-2 text-xs font-bold text-white hover:bg-[#103A55]"
+              className="shrink-0 inline-flex items-center gap-1.5 rounded bg-[#016BB7] px-3.5 py-2 text-xs font-bold text-white hover:bg-[#016BB7]/90"
             >
-              <BookOpen className="h-3.5 w-3.5 text-[#C59B4B]" />
+              <BookOpen className="h-3.5 w-3.5 text-[#016BB7]" />
               <span>{dict.home.readInEpaper}</span>
             </Link>
           </article>

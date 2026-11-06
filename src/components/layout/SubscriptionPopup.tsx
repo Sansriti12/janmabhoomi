@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { X, Newspaper, CheckCircle2 } from "lucide-react";
 import { Locale } from "@/lib/i18n/config";
@@ -16,18 +16,40 @@ const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 const INITIAL_DELAY_MS = 35000; // 35 seconds (within required 30–45s window)
 
 /**
- * Delayed Subscription Popup
+ * Delayed Subscription Popup (Accessible Edition)
  * - Displays after ~35 seconds if not dismissed within the past 7 days
  * - Remembers dismissal for 7 days in localStorage
- * - Compact mobile-friendly bottom-sheet / modal design
- * - Also listens for `janmabhoomi:open-sub-popup` custom event so reviewers can preview it immediately
+ * - WCAG compliant: Focus trap, Escape-key listener, background scroll lock, focus restoration
+ * - Mobile-friendly bottom-sheet with touch-friendly touch targets
+ * - Listens for `janmabhoomi:open-sub-popup` custom event for reviewer manual preview
  */
 export function SubscriptionPopup({ lang, dict }: SubscriptionPopupProps) {
   const [visible, setVisible] = useState(false);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
+
+  const handleDismiss = useCallback(() => {
+    setVisible(false);
+    try {
+      const expiresAt = Date.now() + SEVEN_DAYS_MS;
+      localStorage.setItem(DISMISS_STORAGE_KEY, String(expiresAt));
+    } catch {
+      // Ignore storage errors in restricted browsing
+    }
+
+    // Restore focus to previously focused element
+    if (previouslyFocusedElementRef.current && typeof previouslyFocusedElementRef.current.focus === "function") {
+      previouslyFocusedElementRef.current.focus();
+    }
+  }, []);
 
   useEffect(() => {
     // Allow instant manual trigger from the Footer "Preview Subscription Popup" button for testing
-    const handleManualOpen = () => setVisible(true);
+    const handleManualOpen = () => {
+      previouslyFocusedElementRef.current = document.activeElement as HTMLElement | null;
+      setVisible(true);
+    };
     window.addEventListener("janmabhoomi:open-sub-popup", handleManualOpen);
 
     // Check if user dismissed within last 7 days
@@ -46,6 +68,7 @@ export function SubscriptionPopup({ lang, dict }: SubscriptionPopupProps) {
     }
 
     const timer = window.setTimeout(() => {
+      previouslyFocusedElementRef.current = document.activeElement as HTMLElement | null;
       setVisible(true);
     }, INITIAL_DELAY_MS);
 
@@ -55,15 +78,62 @@ export function SubscriptionPopup({ lang, dict }: SubscriptionPopupProps) {
     };
   }, []);
 
-  const handleDismiss = () => {
-    setVisible(false);
-    try {
-      const expiresAt = Date.now() + SEVEN_DAYS_MS;
-      localStorage.setItem(DISMISS_STORAGE_KEY, String(expiresAt));
-    } catch {
-      // Ignore storage errors
-    }
-  };
+  // Focus trap, Escape-key handling, and body scroll lock when modal is open
+  useEffect(() => {
+    if (!visible) return;
+
+    // 1. Lock background scrolling
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    // 2. Set initial focus into modal
+    const focusTimer = window.setTimeout(() => {
+      if (closeButtonRef.current) {
+        closeButtonRef.current.focus();
+      } else if (dialogRef.current) {
+        dialogRef.current.focus();
+      }
+    }, 50);
+
+    // 3. Handle Keyboard: Escape to close and Tab/Shift-Tab focus trap
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        handleDismiss();
+        return;
+      }
+
+      if (e.key === "Tab" && dialogRef.current) {
+        const focusableElements = dialogRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusableElements.length === 0) return;
+
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === firstElement) {
+            e.preventDefault();
+            lastElement.focus();
+          }
+        } else {
+          if (document.activeElement === lastElement) {
+            e.preventDefault();
+            firstElement.focus();
+          }
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.clearTimeout(focusTimer);
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [visible, handleDismiss]);
 
   if (!visible) return null;
 
@@ -72,37 +142,52 @@ export function SubscriptionPopup({ lang, dict }: SubscriptionPopupProps) {
       role="dialog"
       aria-modal="true"
       aria-labelledby="sub-popup-title"
-      className="fixed inset-x-0 bottom-0 sm:inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-3 sm:p-4"
+      aria-describedby="sub-popup-desc"
+      onClick={(e) => {
+        // Dismiss if clicking directly on the overlay backdrop
+        if (e.target === e.currentTarget) {
+          handleDismiss();
+        }
+      }}
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs p-3 sm:p-4 animate-in fade-in duration-200"
     >
-      <div className="relative w-full max-w-md rounded-lg border-2 border-[#174F73] bg-white p-5 sm:p-6 shadow-xl">
+      <div
+        ref={dialogRef}
+        tabIndex={-1}
+        className="relative w-full max-w-md max-h-[90vh] overflow-y-auto rounded-lg border-2 border-[#016BB7] bg-white p-5 sm:p-6 shadow-2xl outline-none"
+      >
         <button
+          ref={closeButtonRef}
           type="button"
           onClick={handleDismiss}
-          aria-label="Dismiss subscription promotion"
-          className="absolute right-3.5 top-3.5 rounded-full p-1.5 text-[#292725]/60 hover:bg-[#FAF8F3] hover:text-[#292725] cursor-pointer"
+          aria-label={dict.popup.dismiss}
+          className="absolute right-3 top-3 rounded-full p-2 text-[#292725]/70 hover:bg-[#FAF8F3] hover:text-[#292725] focus:outline-none focus:ring-2 focus:ring-[#016BB7] cursor-pointer"
         >
           <X className="h-4 w-4" />
         </button>
 
-        <div className="inline-flex items-center gap-1.5 rounded-xs bg-[#174F73]/10 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-[#174F73]">
-          <Newspaper className="h-3.5 w-3.5 text-[#C59B4B]" />
+        <div className="inline-flex items-center gap-1.5 rounded-xs bg-[#016BB7]/10 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-[#016BB7]">
+          <Newspaper className="h-3.5 w-3.5 text-[#016BB7]" />
           <span>{dict.popup.badge}</span>
         </div>
 
         <h2
           id="sub-popup-title"
-          className="mt-2.5 text-lg sm:text-xl font-extrabold text-[#292725] leading-snug pr-6"
+          className="mt-2.5 text-lg sm:text-xl font-extrabold text-[#292725] leading-snug pr-8"
         >
           {dict.popup.title}
         </h2>
 
-        <p className="mt-2 text-xs sm:text-sm text-[#292725]/80 leading-relaxed">
+        <p
+          id="sub-popup-desc"
+          className="mt-2 text-xs sm:text-sm text-[#292725]/80 leading-relaxed"
+        >
           {dict.popup.description}
         </p>
 
         <ul className="mt-3 space-y-1.5 text-xs text-[#292725]/85">
           <li className="flex items-center gap-2">
-            <CheckCircle2 className="h-3.5 w-3.5 text-[#174F73] shrink-0" />
+            <CheckCircle2 className="h-3.5 w-3.5 text-[#016BB7] shrink-0" />
             <span>
               {lang === "gu"
                 ? "દરરોજ સવારે સંપૂર્ણ પ્રિન્ટ અખબાર ડિજિટલ સ્વરૂપે"
@@ -110,7 +195,7 @@ export function SubscriptionPopup({ lang, dict }: SubscriptionPopupProps) {
             </span>
           </li>
           <li className="flex items-center gap-2">
-            <CheckCircle2 className="h-3.5 w-3.5 text-[#174F73] shrink-0" />
+            <CheckCircle2 className="h-3.5 w-3.5 text-[#016BB7] shrink-0" />
             <span>
               {lang === "gu"
                 ? "સંપૂર્ણ અગ્રલેખ અને વિશેષ અહેવાલોનું એક્સેસ"
@@ -123,16 +208,16 @@ export function SubscriptionPopup({ lang, dict }: SubscriptionPopupProps) {
           <Link
             href={`/${lang}/epaper`}
             onClick={handleDismiss}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-md bg-[#174F73] px-4 py-2.5 text-xs sm:text-sm font-bold text-white hover:bg-[#103A55] transition-colors"
+            className="w-full inline-flex items-center justify-center gap-2 rounded-md bg-[#016BB7] px-4 py-2.5 text-xs sm:text-sm font-bold text-white hover:bg-[#016BB7]/90 active:bg-[#015a99] focus:outline-none focus:ring-2 focus:ring-[#016BB7] transition-colors"
           >
-            <Newspaper className="h-4 w-4 text-[#C59B4B]" />
+            <Newspaper className="h-4 w-4 text-white" />
             <span>{dict.popup.cta}</span>
           </Link>
 
           <button
             type="button"
             onClick={handleDismiss}
-            className="w-full rounded-md border border-[#292725]/20 bg-[#FAF8F3] px-4 py-2 text-xs font-semibold text-[#292725]/80 hover:text-[#292725] transition-colors cursor-pointer"
+            className="w-full rounded-md border border-[#292725]/20 bg-[#FAF8F3] px-4 py-2 text-xs font-semibold text-[#292725]/80 hover:text-[#292725] focus:outline-none focus:ring-2 focus:ring-[#016BB7] transition-colors cursor-pointer"
           >
             {dict.popup.dismiss}
           </button>

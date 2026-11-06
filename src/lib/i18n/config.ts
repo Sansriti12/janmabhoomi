@@ -1,8 +1,8 @@
 export type Locale = "en" | "gu";
 
 export const i18nConfig = {
-  defaultLocale: "en" as Locale,
-  locales: ["en", "gu"] as const,
+  defaultLocale: "gu" as Locale,
+  locales: ["gu", "en"] as const,
 };
 
 export function isValidLocale(lang: string): lang is Locale {

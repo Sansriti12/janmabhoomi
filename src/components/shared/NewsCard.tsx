@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { BookOpen, Clock } from "lucide-react";
 import { NewsArticle, getLocalizedText } from "@/lib/data/types";
 import { Locale } from "@/lib/i18n/config";
@@ -23,42 +24,40 @@ export function NewsCard({
   const location = getLocalizedText(article.location, lang);
 
   return (
-    <article className="group flex flex-col justify-between rounded-md border border-[#292725]/12 bg-white transition-colors hover:border-[#174F73]/40 overflow-hidden">
+    <article className="group flex-1 flex flex-col justify-between rounded-xl border border-[#016BB7]/15 bg-white transition-all hover:border-[#016BB7]/50 hover:shadow-md overflow-hidden">
       <div>
         <Link
           href={`/${lang}/article/${article.slug}`}
-          className="block relative aspect-16/10 w-full overflow-hidden bg-[#292725]/5"
+          className="block relative aspect-16/10 w-full overflow-hidden bg-[#F0F6FA]"
         >
-          <img
+          <Image
             src={article.imageUrl}
             alt={title}
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-            loading="lazy"
+            fill
+            sizes="(max-width: 640px) 85vw, (max-width: 1024px) 33vw, 20vw"
+            className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
           />
-          <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
-            <span className="rounded-xs bg-[#174F73] px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-white">
+          <div className="absolute top-2 left-2 z-10 flex items-center gap-1.5">
+            <span className="rounded-sm bg-[#016BB7] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-2xs">
               {categoryLabel}
-            </span>
-            <span className="rounded-xs bg-black/65 px-1.5 py-0.5 text-[10px] font-medium text-white/90">
-              DEMO
             </span>
           </div>
         </Link>
 
-        <div className="p-4">
-          <div className="mb-1.5 flex items-center gap-2 text-xs text-[#292725]/60">
-            <span className="font-medium text-[#174F73]">{location}</span>
+        <div className="p-3.5">
+          <div className="mb-1.5 flex items-center gap-1.5 text-[11px] text-[#1F2937]/65">
+            <span className="font-semibold text-[#016BB7]">{location}</span>
             <span>•</span>
             <span className="inline-flex items-center gap-1">
-              <Clock className="h-3 w-3" />
+              <Clock className="h-3 w-3 text-[#016BB7]" />
               {article.readTimeMinutes} {lang === "gu" ? "મિનિટ" : "min"}
             </span>
           </div>
 
           <Link href={`/${lang}/article/${article.slug}`}>
             <h3
-              className={`font-bold text-[#292725] group-hover:text-[#174F73] transition-colors leading-snug ${
-                compact ? "text-base line-clamp-2" : "text-lg line-clamp-3"
+              className={`font-bold text-[#1F2937] group-hover:text-[#016BB7] transition-colors leading-snug line-clamp-2 ${
+                compact ? "text-sm sm:text-base min-h-[2.75rem]" : "text-base sm:text-lg min-h-[3rem]"
               }`}
             >
               {title}
@@ -66,30 +65,30 @@ export function NewsCard({
           </Link>
 
           {!compact && (
-            <p className="mt-2 text-sm text-[#292725]/75 line-clamp-2 leading-relaxed">
+            <p className="mt-2 text-xs sm:text-sm text-[#1F2937]/75 line-clamp-2 leading-relaxed">
               {summary}
             </p>
           )}
         </div>
       </div>
 
-      <div className="px-4 py-2.5 border-t border-[#292725]/8 bg-[#FAF8F3]/60 flex items-center justify-between text-xs">
+      <div className="px-3.5 py-2.5 border-t border-[#016BB7]/10 bg-[#F0F6FA]/50 flex items-center justify-between text-xs">
         <Link
           href={`/${lang}/article/${article.slug}`}
-          className="font-semibold text-[#174F73] hover:underline"
+          className="font-bold text-[#016BB7] hover:text-[#016BB7]/80 transition-colors"
         >
-          {lang === "gu" ? "પૂર્વાવલોકન વાંચો →" : "Read Preview →"}
+          {lang === "gu" ? "સંક્ષિપ્ત વાંચો →" : "Read Preview →"}
         </Link>
         <Link
-          href={`/${lang}/epaper?page=${article.epaperPageNumber}`}
-          className="inline-flex items-center gap-1 font-medium text-[#292725]/70 hover:text-[#174F73]"
+          href={`/${lang}/epaper?page=${article.epaperPageNumber || 1}`}
+          className="inline-flex items-center gap-1 font-semibold text-[#1F2937]/75 hover:text-[#016BB7] transition-colors"
           title={readInEpaperLabel}
         >
-          <BookOpen className="h-3.5 w-3.5 text-[#C59B4B]" />
+          <BookOpen className="h-3.5 w-3.5 text-[#016BB7]" />
           <span>
             {lang === "gu"
-              ? `ઈ-પેપર પાનું ${article.epaperPageNumber}`
-              : `E-Paper p.${article.epaperPageNumber}`}
+              ? `પાનું ${article.epaperPageNumber || 1}`
+              : `p.${article.epaperPageNumber || 1}`}
           </span>
         </Link>
       </div>

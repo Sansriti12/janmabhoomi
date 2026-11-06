@@ -29,12 +29,12 @@ export function EditorialSection({
       aria-labelledby="editorial-section-heading"
       className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 border-t border-[#292725]/10"
     >
-      <div className="rounded-md border border-[#C59B4B]/45 bg-[#FAF8F3] p-5 sm:p-7">
+      <div className="rounded-md border border-[#016BB7]/45 bg-[#FAF8F3] p-5 sm:p-7">
         {/* Header Bar with retained Gujarati identity અગ્રલેખ */}
-        <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-[#174F73] pb-3.5">
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-[#016BB7] pb-3.5">
           <div className="flex flex-wrap items-center gap-3">
-            <span className="font-gujarati inline-flex items-center gap-1.5 rounded bg-[#174F73] px-3 py-1 text-base sm:text-lg font-extrabold text-white tracking-wide">
-              <Feather className="h-4 w-4 text-[#C59B4B]" />
+            <span className="font-gujarati inline-flex items-center gap-1.5 rounded bg-[#016BB7] px-3 py-1 text-base sm:text-lg font-extrabold text-white tracking-wide">
+              <Feather className="h-4 w-4 text-[#016BB7]" />
               <span>અગ્રલેખ</span>
             </span>
             <div>
@@ -50,7 +50,7 @@ export function EditorialSection({
 
           <Link
             href={`/${lang}/editorial/archive`}
-            className="inline-flex items-center gap-1.5 rounded border border-[#174F73] bg-white px-3.5 py-2 text-xs sm:text-sm font-bold text-[#174F73] hover:bg-[#174F73] hover:text-white transition-colors shrink-0"
+            className="inline-flex items-center gap-1.5 rounded border border-[#016BB7] bg-white px-3.5 py-2 text-xs sm:text-sm font-bold text-[#016BB7] hover:bg-[#016BB7] hover:text-white transition-colors shrink-0"
           >
             <Archive className="h-4 w-4" />
             <span>{dict.home.editorialArchiveCta}</span>
@@ -63,10 +63,10 @@ export function EditorialSection({
             <div>
               <div className="flex items-center justify-between gap-2 mb-3">
                 <div className="flex items-center gap-2">
-                  <span className="rounded-xs bg-[#C59B4B]/20 border border-[#C59B4B] px-2.5 py-0.5 text-xs font-bold text-[#292725]">
+                  <span className="rounded-xs bg-[#016BB7]/20 border border-[#016BB7] px-2.5 py-0.5 text-xs font-bold text-[#292725]">
                     {dict.home.todaysEditorial}
                   </span>
-                  <span className="font-gujarati text-xs font-bold text-[#174F73]">
+                  <span className="font-gujarati text-xs font-bold text-[#016BB7]">
                     • {todaysEditorial.tag}
                   </span>
                 </div>
@@ -79,7 +79,7 @@ export function EditorialSection({
                 href={`/${lang}/editorial`}
                 className="group block"
               >
-                <h3 className="text-xl sm:text-2xl font-extrabold text-[#292725] group-hover:text-[#174F73] leading-snug transition-colors">
+                <h3 className="text-xl sm:text-2xl font-extrabold text-[#292725] group-hover:text-[#016BB7] leading-snug transition-colors">
                   {getLocalizedText(todaysEditorial.title, lang)}
                 </h3>
               </Link>
@@ -88,7 +88,7 @@ export function EditorialSection({
                 {getLocalizedText(todaysEditorial.excerpt, lang)}
               </p>
 
-              <div className="mt-3 pl-3.5 border-l-2 border-[#C59B4B] text-xs sm:text-sm text-[#292725]/75 space-y-2">
+              <div className="mt-3 pl-3.5 border-l-2 border-[#016BB7] text-xs sm:text-sm text-[#292725]/75 space-y-2">
                 {todaysEditorial.teaserParagraphs[lang]?.map((p, idx) => (
                   <p key={idx}>{p}</p>
                 ))}
@@ -108,15 +108,15 @@ export function EditorialSection({
               <div className="flex items-center gap-3">
                 <Link
                   href={`/${lang}/editorial`}
-                  className="font-bold text-[#174F73] hover:underline"
+                  className="font-bold text-[#016BB7] hover:underline"
                 >
                   {dict.home.readPreview} →
                 </Link>
                 <Link
                   href={`/${lang}/epaper?page=${todaysEditorial.epaperPageNumber}`}
-                  className="inline-flex items-center gap-1.5 rounded bg-[#174F73] px-3 py-1.5 font-semibold text-white hover:bg-[#103A55]"
+                  className="inline-flex items-center gap-1.5 rounded bg-[#016BB7] px-3 py-1.5 font-semibold text-white hover:bg-[#016BB7]/90"
                 >
-                  <BookOpen className="h-3.5 w-3.5 text-[#C59B4B]" />
+                  <BookOpen className="h-3.5 w-3.5 text-[#016BB7]" />
                   <span>{dict.home.readInEpaper}</span>
                 </Link>
               </div>
@@ -126,7 +126,7 @@ export function EditorialSection({
           {/* Right (5 Cols): PREVIOUS EDITORIALS & OPINIONS */}
           <div className="lg:col-span-5 flex flex-col justify-between rounded-md border border-[#292725]/15 bg-white p-5">
             <div>
-              <h3 className="text-sm font-extrabold uppercase tracking-wider text-[#174F73] pb-2.5 mb-3.5 border-b border-[#292725]/12">
+              <h3 className="text-sm font-extrabold uppercase tracking-wider text-[#016BB7] pb-2.5 mb-3.5 border-b border-[#292725]/12">
                 {dict.home.previousEditorials}
               </h3>
 
@@ -134,7 +134,7 @@ export function EditorialSection({
                 {previousEditorials.map((item) => (
                   <article key={item.id} className="py-3.5 first:pt-0 last:pb-0">
                     <div className="flex items-center justify-between text-[11px] mb-1">
-                      <span className="font-gujarati font-bold text-[#174F73]">
+                      <span className="font-gujarati font-bold text-[#016BB7]">
                         {item.tag} • {getLocalizedText(item.authorRole, lang)}
                       </span>
                       <span className="text-[#292725]/55">
@@ -146,7 +146,7 @@ export function EditorialSection({
                       href={`/${lang}/editorial/archive`}
                       className="group block"
                     >
-                      <h4 className="text-base font-bold text-[#292725] group-hover:text-[#174F73] leading-snug transition-colors">
+                      <h4 className="text-base font-bold text-[#292725] group-hover:text-[#016BB7] leading-snug transition-colors">
                         {getLocalizedText(item.title, lang)}
                       </h4>
                     </Link>
@@ -162,13 +162,13 @@ export function EditorialSection({
             <div className="mt-4 pt-3 border-t border-[#292725]/10 flex items-center justify-between">
               <Link
                 href={`/${lang}/editorial`}
-                className="text-xs font-bold text-[#174F73] hover:underline"
+                className="text-xs font-bold text-[#016BB7] hover:underline"
               >
                 {dict.nav.editorial} (અગ્રલેખ)
               </Link>
               <Link
                 href={`/${lang}/editorial/archive`}
-                className="inline-flex items-center gap-1 text-xs font-bold text-[#174F73] hover:underline"
+                className="inline-flex items-center gap-1 text-xs font-bold text-[#016BB7] hover:underline"
               >
                 <span>{dict.home.editorialArchiveCta}</span>
                 <ArrowRight className="h-3.5 w-3.5" />

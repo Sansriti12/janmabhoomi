@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import Link from "next/link";
 import { NewsArticle, getLocalizedText } from "@/lib/data/types";
 import { Locale } from "@/lib/i18n/config";
@@ -14,6 +16,8 @@ export function BreakingNewsTicker({
   lang,
   label,
 }: BreakingNewsTickerProps) {
+  const [isPaused, setIsPaused] = useState(false);
+
   if (!articles.length) return null;
 
   // Duplicate list for seamless continuous marquee loop
@@ -31,20 +35,27 @@ export function BreakingNewsTicker({
           <span>{label}</span>
         </div>
 
-        {/* Scrolling Headlines */}
-        <div className="relative flex-1 overflow-hidden">
-          <div className="animate-ticker flex items-center gap-8 text-sm">
+        {/* Scrolling Headlines with touch-pause and hover-pause support */}
+        <div
+          className="relative flex-1 overflow-hidden"
+          onTouchStart={() => setIsPaused(true)}
+          onTouchEnd={() => setIsPaused(false)}
+        >
+          <div
+            className="animate-ticker flex items-center gap-8 text-sm"
+            style={{ animationPlayState: isPaused ? "paused" : undefined }}
+          >
             {tickerItems.map((article, idx) => (
               <Link
                 key={`${article.id}-${idx}`}
                 href={`/${lang}/article/${article.slug}`}
-                className="inline-flex items-center gap-2.5 text-[#292725] hover:text-[#174F73] font-medium whitespace-nowrap transition-colors"
+                className="inline-flex items-center gap-2.5 text-[#292725] hover:text-[#016BB7] font-medium whitespace-nowrap transition-colors"
               >
-                <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-[#FAF8F3] border border-[#292725]/15 text-[#174F73]">
+                <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-[#FAF8F3] border border-[#292725]/15 text-[#016BB7]">
                   {getLocalizedText(article.categoryLabel, lang)}
                 </span>
                 <span>{getLocalizedText(article.title, lang)}</span>
-                <span className="text-[#C59B4B] font-bold">•</span>
+                <span className="text-[#016BB7] font-bold">•</span>
               </Link>
             ))}
           </div>
