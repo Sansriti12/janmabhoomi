@@ -338,13 +338,92 @@ class MockNewsDataProvider implements INewsDataProvider {
 import { ApiNewsDataProvider } from "./apiProvider";
 
 /**
+ * ResilientNewsDataProvider
+ * Attempts production Fastify API first. If unreachable or network error occurs,
+ * gracefully falls back to mock dataset so server-side rendering and static generation
+ * never crash with 500 errors on deployment platforms like Vercel.
+ */
+export class ResilientNewsDataProvider implements INewsDataProvider {
+  private api = new ApiNewsDataProvider();
+  private mock = new MockNewsDataProvider();
+
+  private async withFallback<T>(apiFn: () => Promise<T>, mockFn: () => Promise<T>): Promise<T> {
+    try {
+      return await apiFn();
+    } catch (err) {
+      console.warn("[ResilientNewsDataProvider] API unreachable, falling back to mock dataset:", err);
+      return await mockFn();
+    }
+  }
+
+  getBreakingNews(pubId?: string) {
+    return this.withFallback(() => this.api.getBreakingNews(pubId), () => this.mock.getBreakingNews(pubId));
+  }
+  getHomepageHeroData(pubId?: string) {
+    return this.withFallback(() => this.api.getHomepageHeroData(pubId), () => this.mock.getHomepageHeroData(pubId));
+  }
+  getArticlesByCategory(cat: CategorySlug, limit?: number, pubId?: string) {
+    return this.withFallback(() => this.api.getArticlesByCategory(cat, limit, pubId), () => this.mock.getArticlesByCategory(cat, limit, pubId));
+  }
+  getLatestArticles(limit?: number, pubId?: string) {
+    return this.withFallback(() => this.api.getLatestArticles(limit, pubId), () => this.mock.getLatestArticles(limit, pubId));
+  }
+  getArticleBySlug(slug: string, pubId?: string) {
+    return this.withFallback(() => this.api.getArticleBySlug(slug), () => this.mock.getArticleBySlug(slug, pubId));
+  }
+  searchArticles(query: string, pubId?: string) {
+    return this.withFallback(() => this.api.searchArticles(query, pubId), () => this.mock.searchArticles(query, pubId));
+  }
+  filterArticles(params: ArticleFilterParams) {
+    return this.withFallback(() => this.api.filterArticles(params), () => this.mock.filterArticles(params));
+  }
+  getCategoryMetadata(cat: string) {
+    return this.withFallback(() => this.api.getCategoryMetadata(cat), () => this.mock.getCategoryMetadata(cat));
+  }
+  getEditorials(pubId?: string) {
+    return this.withFallback(() => this.api.getEditorials(pubId), () => this.mock.getEditorials(pubId));
+  }
+  getEditorialBySlug(slug: string) {
+    return this.withFallback(() => this.api.getEditorialBySlug(slug), () => this.mock.getEditorialBySlug(slug));
+  }
+  getSpecialCoverageAndEvents(pubId?: string) {
+    return this.withFallback(() => this.api.getSpecialCoverageAndEvents(), () => this.mock.getSpecialCoverageAndEvents(pubId));
+  }
+  getDailyPanchang() {
+    return this.withFallback(() => this.api.getDailyPanchang(), () => this.mock.getDailyPanchang());
+  }
+  getPanchangByCity(city: "mumbai" | "ahmedabad" | "rajkot") {
+    return this.withFallback(() => this.api.getPanchangByCity(city), () => this.mock.getPanchangByCity(city));
+  }
+  getAllCityPanchang() {
+    return this.withFallback(() => this.api.getAllCityPanchang(), () => this.mock.getAllCityPanchang());
+  }
+  getSisterPublications() {
+    return this.withFallback(() => this.api.getSisterPublications(), () => this.mock.getSisterPublications());
+  }
+  getAdvertisementSlot(slot: string, pubId?: string) {
+    return this.withFallback(() => this.api.getAdvertisementSlot(slot), () => this.mock.getAdvertisementSlot(slot, pubId));
+  }
+  getEPaperEditions(pubId?: string) {
+    return this.withFallback(() => this.api.getEPaperEditions(), () => this.mock.getEPaperEditions(pubId));
+  }
+  getEPaperEditionByDate(date: string, pubId?: string) {
+    return this.withFallback(() => this.api.getEPaperEditionByDate(), () => this.mock.getEPaperEditionByDate(date, pubId));
+  }
+  getHomepageConfig() {
+    return this.withFallback(() => this.api.getHomepageConfig(), () => this.mock.getHomepageConfig());
+  }
+}
+
+/**
  * Singleton News Data Provider
- * When NEXT_PUBLIC_USE_API === "true", routes to the Fastify production backend.
- * Falls back to MockNewsDataProvider explicitly for offline development.
+ * When NEXT_PUBLIC_USE_API === "true", routes to the Fastify production backend with
+ * automatic resilient fallback to MockNewsDataProvider if unreachable.
+ * Uses MockNewsDataProvider directly when NEXT_PUBLIC_USE_API is not set to true.
  */
 export const newsDataProvider: INewsDataProvider =
   process.env.NEXT_PUBLIC_USE_API === "true"
-    ? new ApiNewsDataProvider()
+    ? new ResilientNewsDataProvider()
     : new MockNewsDataProvider();
 
 export { getAllPublications, getPublicationBySlug };
