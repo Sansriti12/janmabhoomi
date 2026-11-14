@@ -17,6 +17,7 @@ import { getDictionary } from "@/lib/i18n/dictionaries";
 import { newsDataProvider } from "@/lib/data/provider";
 import { getLocalizedText } from "@/lib/data/types";
 import { DemoBadge } from "@/components/shared/DemoBadge";
+import { PublicEpaperReader } from "@/components/epaper/PublicEpaperReader";
 
 export async function generateMetadata({
   params,
@@ -192,7 +193,12 @@ export default async function EpaperLandingPage({
         </div>
       </div>
 
-      {/* 2. Selected Page Active Preview Inspector */}
+      {/* 2. Interactive Public E-Paper Reader with Hotspots & Free Preview Gates */}
+      <section aria-label="Interactive E-Paper Reader">
+        <PublicEpaperReader lang={locale} />
+      </section>
+
+      {/* 3. Selected Page Active Preview Inspector */}
       <section
         aria-labelledby="active-page-inspector-heading"
         className="rounded-md border border-[#016BB7]/25 bg-gradient-to-r from-[#FAF8F3] to-white p-5 border-l-4 border-l-[#016BB7]"

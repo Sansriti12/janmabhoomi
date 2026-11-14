@@ -34,7 +34,8 @@
     "religionCulture": "Religion & Culture",
     "specialCoverage": "Special Coverage",
     "events": "Events",
-    "panchang": "Panchang"
+    "panchang": "Panchang",
+    "archiveEnquiry": "Archive Enquiry"
   },
   "home": {
     "breakingNews": "BREAKING NEWS",
@@ -94,6 +95,54 @@
     "otherPublications": "Other Publications",
     "privacyPolicy": "Privacy Policy",
     "termsConditions": "Terms & Conditions",
+    "archiveEnquiry": "Archived Information Enquiry",
     "copyright": "Janmabhoomi Group / Saurashtra Trust. All rights reserved."
+  },
+  "archiveEnquiry": {
+    "pageTitle": "Archived Information Enquiry",
+    "badge": "HISTORICAL ARCHIVE & RECORDS DESK",
+    "introHeading": "Request Archived Newspaper Information & Historic Articles",
+    "introText": "Looking for an old newspaper article, historical news or archived publication? Submit your enquiry with the relevant details. Our team will review your request and contact you regarding the availability of the information.",
+    "archiveNotice": "Historical archives are available across our publications. Availability of specific editions, articles and documents will be verified by our archive team after receiving your enquiry.",
+    "backendPendingTitle": "Online Submission Integration Notice",
+    "backendPendingMessage": "Online archive enquiry submission is currently undergoing central backend integration. For immediate research assistance or urgent archive requests, please contact the Saurashtra Trust Archive Section at Janmabhoomi Bhavan, Fort, Mumbai (Email: archives@janmabhoomi.in).",
+    "formHeading": "Archived Information Request Form",
+    "fullName": "Full Name",
+    "fullNamePlaceholder": "Enter your full name",
+    "contactNumber": "Contact Number (Mobile)",
+    "contactNumberPlaceholder": "10-digit mobile number (e.g. 9820012345)",
+    "emailAddress": "Email Address",
+    "emailPlaceholder": "name@example.com",
+    "publication": "Publication",
+    "selectPublication": "Select Publication",
+    "year": "Year of Archived Information",
+    "selectYear": "Select Year",
+    "yearNote": "Archive coverage varies across publications and years (1934 – 2026).",
+    "infoType": "Type of Information Required",
+    "selectInfoType": "Select Type of Information",
+    "types": {
+      "article": "Newspaper Article",
+      "historical": "Historical News",
+      "advertisement": "Advertisement / Notice",
+      "obituary": "Obituary / Condolence Notice",
+      "magazine": "Magazine / Publication",
+      "other": "Other"
+    },
+    "additionalDetails": "Additional Details (Optional)",
+    "detailsPlaceholder": "Describe the article, person, event, date, location, or other identifying details to assist our research team...",
+    "preferredContact": "Preferred Contact Method",
+    "contactMethods": {
+      "phone": "Phone",
+      "email": "Email",
+      "either": "Either (Phone or Email)"
+    },
+    "consent": "I agree that Janmabhoomi Group may contact me regarding this enquiry.",
+    "submitButton": "Submit Enquiry",
+    "submitting": "Submitting Enquiry...",
+    "refNumberPrefix": "Enquiry Reference Number",
+    "successTitle": "Enquiry Submitted Successfully",
+    "successMessage": "Your enquiry has been submitted successfully. Our team will review your request and contact you.",
+    "errorTitle": "Submission Failed",
+    "errorMessage": "Unable to submit your enquiry at this time. Please check your details and try again."
   }
 }

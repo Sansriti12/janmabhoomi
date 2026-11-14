@@ -11,6 +11,9 @@
     "typecheck": "tsc --noEmit",
     "test:health": "tsx src/test-health.ts",
     "test:db": "tsx src/test-db.ts",
+    "test:phase2": "tsx src/test-phase2.ts",
+    "test:phase3": "tsx src/test-epaper-phase3.ts",
+    "test:live-db": "tsx src/test-live-db.ts",
     "prisma:generate": "prisma generate",
     "prisma:validate": "prisma validate",
     "prisma:seed": "tsx prisma/seed.ts"
@@ -18,9 +21,14 @@
   "dependencies": {
     "@fastify/cors": "^10.0.2",
     "@fastify/helmet": "^13.0.1",
+    "@fastify/multipart": "^10.1.8",
     "@prisma/client": "^6.4.1",
     "dotenv": "^16.4.7",
     "fastify": "^5.2.1",
+    "fastify-raw-body": "^6.0.3",
+    "pdf-lib": "^1.17.1",
+    "pdf-to-img": "^7.0.2",
+    "razorpay": "^2.9.8",
     "zod": "^3.24.2"
   },
   "devDependencies": {

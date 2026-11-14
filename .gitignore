@@ -31,6 +31,7 @@ desktop.ini
 # Testing and coverage
 coverage/
 
-# Temporary files
+# Temporary and build files
 *.log
 *.tmp
+*.tsbuildinfo

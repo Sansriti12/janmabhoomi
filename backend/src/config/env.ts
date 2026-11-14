@@ -21,6 +21,31 @@ const envSchema = z.object({
   DATABASE_URL: z
     .string()
     .default("postgresql://postgres:postgres@localhost:5432/janmabhoomi_dev?schema=public"),
+  EPAPER_STORAGE_DIR: z
+    .string()
+    .default("storage/epaper"),
+  MAX_PDF_UPLOAD_SIZE_MB: z
+    .string()
+    .default("100")
+    .transform((val) => parseInt(val, 10))
+    .refine((val) => !isNaN(val) && val > 0 && val <= 500, {
+      message: "MAX_PDF_UPLOAD_SIZE_MB must be between 1 and 500",
+    }),
+  RAZORPAY_KEY_ID: z
+    .string()
+    .default("rzp_test_placeholder_key_id"),
+  RAZORPAY_KEY_SECRET: z
+    .string()
+    .default("rzp_test_placeholder_key_secret"),
+  RAZORPAY_WEBHOOK_SECRET: z
+    .string()
+    .default("rzp_test_placeholder_webhook_secret"),
+  RAZORPAY_MODE: z
+    .enum(["test", "live"])
+    .default("test"),
+  SUBSCRIBER_JWT_SECRET: z
+    .string()
+    .default("janmabhoomi_subscriber_session_secret_2026"),
 });
 
 export type Env = z.infer<typeof envSchema>;

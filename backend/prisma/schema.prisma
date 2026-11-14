@@ -55,6 +55,7 @@ model Publication {
   subscriptionPlans       SubscriptionPlan[]
   advertisements          Advertisement[]
   userRoles               UserRole[]
+  archiveEnquiries        ArchiveEnquiry[]
 
   @@map("publications")
 }
@@ -71,7 +72,10 @@ model Category {
   descriptionEn   String?   @map("description_en") @db.Text
   descriptionGu   String?   @map("description_gu") @db.Text
   parentId        String?   @map("parent_id") @db.VarChar(50)
+  isActive        Boolean   @default(true) @map("is_active")
+  displayOrder    Int       @default(0) @map("display_order")
   createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at")
 
   parent          Category? @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
   children        Category[] @relation("CategoryHierarchy")
@@ -158,6 +162,9 @@ model Article {
   categoryId              String        @map("category_id") @db.VarChar(50)
   authorId                String?       @map("author_id") @db.Uuid
   status                  ArticleStatus @default(DRAFT)
+  primaryLanguage         String        @default("gu") @map("primary_language") @db.VarChar(10)
+  sourceVersion           Int           @default(1) @map("source_version")
+  sourceHash              String?       @map("source_hash") @db.VarChar(64)
   isBreaking              Boolean       @default(false) @map("is_breaking")
   isLeadStory             Boolean       @default(false) @map("is_lead_story")
   isSubLead               Boolean       @default(false) @map("is_sub_lead")
@@ -172,12 +179,16 @@ model Article {
   scheduledFor            DateTime?     @map("scheduled_for")
   viewCount               BigInt        @default(0) @map("view_count")
   createdBy               String?       @map("created_by") @db.Uuid
+  publishedBy             String?       @map("published_by") @db.Uuid
+  updatedBy               String?       @map("updated_by") @db.Uuid
   createdAt               DateTime      @default(now()) @map("created_at")
   updatedAt               DateTime      @updatedAt @map("updated_at")
 
   publication             Publication   @relation(fields: [publicationId], references: [id])
   category                Category      @relation(fields: [categoryId], references: [id])
   author                  Author?       @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  creator                 User?         @relation("ArticleCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+  publisher               User?         @relation("ArticlePublisher", fields: [publishedBy], references: [id], onDelete: SetNull)
   translations            ArticleTranslation[]
   tags                    ArticleTag[]
   hotspots                EPaperHotspot[]
@@ -189,25 +200,43 @@ model Article {
 }
 
 model ArticleTranslation {
-  id                  String    @id @default(uuid()) @db.Uuid
-  articleId           String    @map("article_id") @db.Uuid
-  language            String    @db.VarChar(10) // 'gu' or 'en'
-  slug                String    @db.VarChar(255)
-  headline            String    @db.VarChar(300)
-  summary             String    @db.Text
-  teaserParagraphs    Json      @map("teaser_paragraphs") // String array of public teaser paragraphs
-  contentHtml         String    @map("content_html") @db.Text
-  metaTitle           String?   @map("meta_title") @db.VarChar(200)
-  metaDescription     String?   @map("meta_description") @db.VarChar(300)
-  readTimeMinutes     Int       @default(3) @map("read_time_minutes")
-  createdAt           DateTime  @default(now()) @map("created_at")
-  updatedAt           DateTime  @updatedAt @map("updated_at")
+  id                          String    @id @default(uuid()) @db.Uuid
+  articleId                   String    @map("article_id") @db.Uuid
+  language                    String    @db.VarChar(10) // 'gu' or 'en'
+  slug                        String    @db.VarChar(255)
+  headline                    String    @db.VarChar(300)
+  summary                     String    @db.Text
+  teaserParagraphs            Json      @map("teaser_paragraphs") // String array of public teaser paragraphs
+  contentHtml                 String    @map("content_html") @db.Text
+  metaTitle                   String?   @map("meta_title") @db.VarChar(200)
+  metaDescription             String?   @map("meta_description") @db.VarChar(300)
+  readTimeMinutes             Int       @default(3) @map("read_time_minutes")
+  translationStatus           String    @default("COMPLETED") @map("translation_status") @db.VarChar(30) // PENDING, PROCESSING, COMPLETED, NEEDS_ATTENTION, OUTDATED, FAILED
+  translationQualityWarnings  Json?     @map("translation_quality_warnings")
+  sourceVersionAtTranslation  Int?      @map("source_version_at_translation")
+  sourceHashAtTranslation     String?   @map("source_hash_at_translation") @db.VarChar(64)
+  previousContentHtml         String?   @map("previous_content_html") @db.Text
+  previousHeadline            String?   @map("previous_headline") @db.VarChar(300)
+  previousSummary             String?   @map("previous_summary") @db.Text
+  aiProvider                  String?   @map("ai_provider") @db.VarChar(50)
+  aiModel                     String?   @map("ai_model") @db.VarChar(50)
+  translatedAt                DateTime? @map("translated_at")
+  translationError            String?   @map("translation_error") @db.Text
+  retryCount                  Int       @default(0) @map("retry_count")
+  tokensUsed                  Int?      @map("tokens_used")
+  estimatedCostUsd            Decimal?  @map("estimated_cost_usd") @db.Decimal(10, 6)
+  isManuallyEdited            Boolean   @default(false) @map("is_manually_edited")
+  lastEditedBy                String?   @map("last_edited_by") @db.Uuid
+  createdAt                   DateTime  @default(now()) @map("created_at")
+  updatedAt                   DateTime  @updatedAt @map("updated_at")
 
-  article             Article   @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  article                     Article   @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  lastEditor                  User?     @relation(fields: [lastEditedBy], references: [id], onDelete: SetNull)
 
   @@unique([articleId, language])
   @@unique([slug, language])
   @@index([slug, language])
+  @@index([translationStatus])
   @@map("article_translations")
 }
 
@@ -269,56 +298,73 @@ model PanchangDaily {
 }
 
 // ============================================================================
-// 7. EPAPER DIGITAL EDITIONS & HOTSPOTS (SUPPORTS NEWSPAPERS & MAGAZINES)
+// 7. EPAPER DIGITAL EDITIONS & HOTSPOTS
 // ============================================================================
 
 enum EPaperStatus {
+  DRAFT
+  UPLOADED
   PROCESSING
   READY
+  PUBLISHED
   FAILED
   ARCHIVED
 }
 
 model EPaperEdition {
-  id                  String        @id @default(uuid()) @db.Uuid
-  publicationId       String        @map("publication_id") @db.VarChar(50)
-  editionDate         DateTime      @map("edition_date") @db.Date
-  editionCity         String        @map("edition_city") @db.VarChar(50)
-  editionNameEn       String        @map("edition_name_en") @db.VarChar(150)
-  editionNameGu       String        @map("edition_name_gu") @db.VarChar(150)
-  volumeYear          Int?          @map("volume_year") // Supports magazine volume/year (e.g. for Kavita)
-  issueNumber         Int?          @map("issue_number") // Supports magazine issue number
-  coverImageUrl       String?       @map("cover_image_url") @db.VarChar(500)
-  totalPageCount      Int           @default(0) @map("total_page_count")
-  pdfSourceStorageKey String        @map("pdf_source_storage_key") @db.VarChar(500)
-  status              EPaperStatus  @default(PROCESSING)
-  isSampleData        Boolean       @default(false) @map("is_sample_data")
-  publishedAt         DateTime?     @map("published_at")
-  createdAt           DateTime      @default(now()) @map("created_at")
+  id                    String        @id @default(uuid()) @db.Uuid
+  publicationId         String        @map("publication_id") @db.VarChar(50)
+  editionDate           DateTime      @map("edition_date") @db.Date
+  editionCity           String        @map("edition_city") @db.VarChar(50)
+  editionNameEn         String        @map("edition_name_en") @db.VarChar(150)
+  editionNameGu         String        @map("edition_name_gu") @db.VarChar(150)
+  volumeYear            Int?          @map("volume_year")
+  issueNumber           Int?          @map("issue_number")
+  quarter               String?       @db.VarChar(10) // 'Q1', 'Q2', 'Q3', 'Q4' for Kavita
+  coverImageUrl         String?       @map("cover_image_url") @db.VarChar(500)
+  totalPageCount        Int           @default(0) @map("total_page_count")
+  fileSizeBytes         BigInt?       @map("file_size_bytes")
+  pdfSourceStorageKey   String?       @map("pdf_source_storage_key") @db.VarChar(500)
+  storageDirectory      String?       @map("storage_directory") @db.VarChar(500)
+  status                EPaperStatus  @default(DRAFT)
+  freePreviewPageLimit  Int?          @map("free_preview_page_limit")
+  processingError       String?       @map("processing_error") @db.Text
+  isSampleData          Boolean       @default(false) @map("is_sample_data")
+  publishedAt           DateTime?     @map("published_at")
+  createdAt             DateTime      @default(now()) @map("created_at")
+  updatedAt             DateTime      @updatedAt @map("updated_at")
 
-  publication         Publication   @relation(fields: [publicationId], references: [id])
-  pages               EPaperPage[]
+  publication           Publication   @relation(fields: [publicationId], references: [id])
+  pages                 EPaperPage[]
 
   @@unique([publicationId, editionDate, editionCity])
+  @@index([publicationId, editionDate])
+  @@index([status])
   @@map("epaper_editions")
 }
 
 model EPaperPage {
-  id                  String          @id @default(uuid()) @db.Uuid
-  editionId           String          @map("edition_id") @db.Uuid
-  pageNumber          Int             @map("page_number")
-  labelEn             String          @map("label_en") @db.VarChar(100)
-  labelGu             String          @map("label_gu") @db.VarChar(100)
-  imageHighresKey     String          @map("image_highres_key") @db.VarChar(500)
-  imageThumbnailKey   String          @map("image_thumbnail_key") @db.VarChar(500)
-  widthPx             Int             @map("width_px")
-  heightPx            Int             @map("height_px")
-  createdAt           DateTime        @default(now()) @map("created_at")
+  id                    String          @id @default(uuid()) @db.Uuid
+  editionId             String          @map("edition_id") @db.Uuid
+  pageNumber            Int             @map("page_number")
+  labelEn               String          @map("label_en") @db.VarChar(100)
+  labelGu               String          @map("label_gu") @db.VarChar(100)
+  imageHighresKey       String          @map("image_highres_key") @db.VarChar(500)
+  imageThumbnailKey     String          @map("image_thumbnail_key") @db.VarChar(500)
+  widthPx               Int             @map("width_px")
+  heightPx              Int             @map("height_px")
+  isFreePreview         Boolean         @default(false) @map("is_free_preview")
+  isSupplement          Boolean         @default(false) @map("is_supplement")
+  supplementName        String?         @map("supplement_name") @db.VarChar(100)
+  supplementIssueNumber Int?            @map("supplement_issue_number")
+  sectionDisplayOrder   Int             @default(0) @map("section_display_order")
+  createdAt             DateTime        @default(now()) @map("created_at")
 
-  edition             EPaperEdition   @relation(fields: [editionId], references: [id], onDelete: Cascade)
-  hotspots            EPaperHotspot[]
+  edition               EPaperEdition   @relation(fields: [editionId], references: [id], onDelete: Cascade)
+  hotspots              EPaperHotspot[]
 
   @@unique([editionId, pageNumber])
+  @@index([editionId])
   @@map("epaper_pages")
 }
 
@@ -331,16 +377,19 @@ model EPaperHotspot {
   widthPercent    Decimal     @map("width_percent") @db.Decimal(5, 2)
   heightPercent   Decimal     @map("height_percent") @db.Decimal(5, 2)
   headlineText    String?     @map("headline_text") @db.VarChar(300)
+  externalUrl     String?     @map("external_url") @db.VarChar(1000)
+  targetType      String      @default("article") @map("target_type") @db.VarChar(20)
   createdAt       DateTime    @default(now()) @map("created_at")
 
   page            EPaperPage  @relation(fields: [pageId], references: [id], onDelete: Cascade)
   article         Article?    @relation(fields: [articleId], references: [id], onDelete: SetNull)
 
+  @@index([pageId])
   @@map("epaper_hotspots")
 }
 
 // ============================================================================
-// 8. USERS, ROLES & PERSISTENT SESSIONS
+// 8. STAFF USERS, ROLES & PERSISTENT SESSIONS (NEWSROOM DESK)
 // ============================================================================
 
 enum UserStatus {
@@ -363,6 +412,11 @@ model User {
   roles               UserRole[]
   sessions            StaffSession[]
   auditLogs           AuditLog[]
+  assignedEnquiries   ArchiveEnquiry[]
+  createdArticles     Article[]          @relation("ArticleCreator")
+  publishedArticles   Article[]          @relation("ArticlePublisher")
+  editedTranslations  ArticleTranslation[]
+  uploadedMedia       MediaAsset[]
 
   @@map("users")
 }
@@ -429,7 +483,53 @@ model UserRole {
 }
 
 // ============================================================================
-// 9. SUBSCRIPTIONS & PAYMENT TRANSACTIONS (CONFIGURABLE)
+// 9. PUBLIC SUBSCRIBERS & SESSIONS (ISOLATED FROM NEWSROOM STAFF)
+// ============================================================================
+
+enum SubscriberStatus {
+  ACTIVE
+  BLOCKED
+  UNVERIFIED
+}
+
+model Subscriber {
+  id                String            @id @default(uuid()) @db.Uuid
+  email             String            @unique @db.VarChar(255)
+  mobileNumber      String?           @unique @map("mobile_number") @db.VarChar(20)
+  fullName          String            @map("full_name") @db.VarChar(150)
+  passwordHash      String?           @map("password_hash") @db.VarChar(255)
+  status            SubscriberStatus  @default(ACTIVE)
+  isEmailVerified   Boolean           @default(false) @map("is_email_verified")
+  isMobileVerified  Boolean           @default(false) @map("is_mobile_verified")
+  lastLoginAt       DateTime?         @map("last_login_at")
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
+
+  subscriptions     UserSubscription[]
+  orders            RazorpayOrder[]
+  transactions      PaymentTransaction[]
+  sessions          SubscriberSession[]
+
+  @@map("subscribers")
+}
+
+model SubscriberSession {
+  id            String      @id @default(uuid()) @db.Uuid
+  subscriberId  String      @map("subscriber_id") @db.Uuid
+  tokenHash     String      @unique @map("token_hash") @db.VarChar(255)
+  ipAddress     String?     @map("ip_address") @db.VarChar(50)
+  userAgent     String?     @map("user_agent") @db.Text
+  expiresAt     DateTime    @map("expires_at")
+  createdAt     DateTime    @default(now()) @map("created_at")
+
+  subscriber    Subscriber  @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+
+  @@index([subscriberId])
+  @@map("subscriber_sessions")
+}
+
+// ============================================================================
+// 10. SUBSCRIPTIONS & CONFIGURABLE PLANS
 // ============================================================================
 
 enum BillingInterval {
@@ -440,7 +540,7 @@ enum BillingInterval {
 }
 
 model SubscriptionPlan {
-  id                String            @id @db.VarChar(50)
+  id                String            @id @db.VarChar(50) // 'jnb_monthly', etc.
   publicationId     String            @map("publication_id") @db.VarChar(50)
   nameEn            String            @map("name_en") @db.VarChar(100)
   nameGu            String            @map("name_gu") @db.VarChar(100)
@@ -456,7 +556,7 @@ model SubscriptionPlan {
 
   publication       Publication       @relation(fields: [publicationId], references: [id])
   subscriptions     UserSubscription[]
-  transactions      PaymentTransaction[]
+  orders            RazorpayOrder[]
 
   @@map("subscription_plans")
 }
@@ -469,50 +569,169 @@ enum SubscriptionStatus {
 
 model UserSubscription {
   id              String              @id @default(uuid()) @db.Uuid
-  userId          String              @map("user_id") @db.Uuid
+  subscriberId    String              @map("subscriber_id") @db.Uuid
   planId          String              @map("plan_id") @db.VarChar(50)
   status          SubscriptionStatus  @default(ACTIVE)
   startsAt        DateTime            @map("starts_at")
   expiresAt       DateTime            @map("expires_at")
+  autoRenew       Boolean             @default(false) @map("auto_renew")
   createdAt       DateTime            @default(now()) @map("created_at")
   updatedAt       DateTime            @updatedAt @map("updated_at")
 
+  subscriber      Subscriber          @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
   plan            SubscriptionPlan    @relation(fields: [planId], references: [id])
 
-  @@index([userId, status, expiresAt])
+  @@index([subscriberId, status, expiresAt])
   @@map("user_subscriptions")
 }
 
+// ============================================================================
+// 11. RAZORPAY ORDERS, TRANSACTIONS & WEBHOOK AUDIT
+// ============================================================================
+
+enum PaymentSource {
+  WEBSITE
+  ANDROID_APP
+  IOS_APP
+  MANUAL_ADMIN
+}
+
+enum OrderStatus {
+  CREATED
+  ATTEMPTED
+  PAID
+  FAILED
+}
+
+model RazorpayOrder {
+  id                String            @id @default(uuid()) @db.Uuid
+  razorpayOrderId   String            @unique @map("razorpay_order_id") @db.VarChar(100)
+  subscriberId      String            @map("subscriber_id") @db.Uuid
+  planId            String            @map("plan_id") @db.VarChar(50)
+  amountPaise       Int               @map("amount_paise") // 7500 = ₹75.00
+  currency          String            @default("INR") @db.VarChar(10)
+  receipt           String            @unique @db.VarChar(100)
+  status            OrderStatus       @default(CREATED)
+  source            PaymentSource     @default(WEBSITE)
+  notes             Json              @default("{}")
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
+
+  subscriber        Subscriber        @relation(fields: [subscriberId], references: [id])
+  plan              SubscriptionPlan  @relation(fields: [planId], references: [id])
+  transactions      PaymentTransaction[]
+
+  @@map("razorpay_orders")
+}
+
 enum PaymentStatus {
-  INITIATED
-  SUCCESS
-  FAILURE
+  AUTHORIZED
+  CAPTURED
+  FAILED
   REFUNDED
 }
 
 model PaymentTransaction {
-  id                      String            @id @default(uuid()) @db.Uuid
-  transactionReference    String            @unique @map("transaction_reference") @db.VarChar(100)
-  userId                  String            @map("user_id") @db.Uuid
-  planId                  String            @map("plan_id") @db.VarChar(50)
-  gateway                 String            @default("payu_sandbox") @db.VarChar(30)
-  gatewayTransactionId    String?           @map("gateway_transaction_id") @db.VarChar(150)
-  amount                  Decimal           @db.Decimal(10, 2)
-  currency                String            @default("INR") @db.VarChar(10)
-  status                  PaymentStatus     @default(INITIATED)
-  requestHash             String            @map("request_hash") @db.VarChar(255)
-  responseHash            String?           @map("response_hash") @db.VarChar(255)
-  rawWebhookPayload       Json?             @map("raw_webhook_payload")
-  paidAt                  DateTime?         @map("paid_at")
-  createdAt               DateTime          @default(now()) @map("created_at")
+  id                    String            @id @default(uuid()) @db.Uuid
+  orderDbId             String            @map("order_db_id") @db.Uuid
+  subscriberId          String            @map("subscriber_id") @db.Uuid
+  razorpayOrderId       String            @map("razorpay_order_id") @db.VarChar(100)
+  razorpayPaymentId     String            @unique @map("razorpay_payment_id") @db.VarChar(100)
+  razorpaySignature     String?           @map("razorpay_signature") @db.VarChar(255)
+  amountPaise           Int               @map("amount_paise")
+  currency              String            @default("INR") @db.VarChar(10)
+  status                PaymentStatus     @default(CAPTURED)
+  method                String?           @db.VarChar(50) // 'upi', 'card', 'netbanking'
+  bank                  String?           @db.VarChar(50)
+  wallet                String?           @db.VarChar(50)
+  vpa                   String?           @db.VarChar(100)
+  cardId                String?           @map("card_id") @db.VarChar(100)
+  source                PaymentSource     @default(WEBSITE)
+  errorCode             String?           @map("error_code") @db.VarChar(100)
+  errorDescription      String?           @map("error_description") @db.Text
+  rawWebhookPayload     Json?             @map("raw_webhook_payload")
+  capturedAt            DateTime?         @map("captured_at")
+  createdAt             DateTime          @default(now()) @map("created_at")
 
-  plan                    SubscriptionPlan  @relation(fields: [planId], references: [id])
+  order                 RazorpayOrder     @relation(fields: [orderDbId], references: [id])
+  subscriber            Subscriber        @relation(fields: [subscriberId], references: [id])
 
+  @@index([razorpayOrderId])
+  @@index([subscriberId])
   @@map("payment_transactions")
 }
 
+model RazorpayWebhookLog {
+  id                String      @id @default(uuid()) @db.Uuid
+  eventId           String      @unique @map("event_id") @db.VarChar(100)
+  eventType         String      @map("event_type") @db.VarChar(100)
+  razorpayOrderId   String?     @map("razorpay_order_id") @db.VarChar(100)
+  razorpayPaymentId String?     @map("razorpay_payment_id") @db.VarChar(100)
+  rawPayload        Json        @map("raw_payload")
+  isProcessed       Boolean     @default(false) @map("is_processed")
+  processError      String?     @map("process_error") @db.Text
+  receivedAt        DateTime    @default(now()) @map("received_at")
+
+  @@index([eventId])
+  @@map("razorpay_webhook_logs")
+}
+
 // ============================================================================
-// 10. ADVERTISEMENTS & BANNER PLACEMENTS
+// 12. ARCHIVE & CONTACT ENQUIRIES
+// ============================================================================
+
+enum EnquiryStatus {
+  PENDING
+  IN_REVIEW
+  RESEARCHING
+  CONTACTED
+  COMPLETED
+  REJECTED
+}
+
+model ArchiveEnquiry {
+  id                  String        @id @default(uuid()) @db.Uuid
+  referenceNumber     String        @unique @map("reference_number") @db.VarChar(50) // 'AR-2026-XXXX'
+  fullName            String        @map("full_name") @db.VarChar(150)
+  contactNumber       String        @map("contact_number") @db.VarChar(20)
+  email               String        @db.VarChar(255)
+  publicationId       String        @map("publication_id") @db.VarChar(50)
+  yearRequested       Int           @map("year_requested")
+  infoType            String        @map("info_type") @db.VarChar(100)
+  additionalDetails   String?       @map("additional_details") @db.Text
+  preferredContact    String        @default("either") @map("preferred_contact") @db.VarChar(20)
+  consentGiven        Boolean       @default(true) @map("consent_given")
+  status              EnquiryStatus @default(PENDING)
+  staffNotes          String?       @map("staff_notes") @db.Text
+  assignedStaffId     String?       @map("assigned_staff_id") @db.Uuid
+  resolvedAt          DateTime?     @map("resolved_at")
+  createdAt           DateTime      @default(now()) @map("created_at")
+  updatedAt           DateTime      @updatedAt @map("updated_at")
+
+  publication         Publication   @relation(fields: [publicationId], references: [id])
+  assignedStaff       User?         @relation(fields: [assignedStaffId], references: [id], onDelete: SetNull)
+
+  @@index([referenceNumber])
+  @@index([status])
+  @@index([publicationId, yearRequested])
+  @@map("archive_enquiries")
+}
+
+model ContactEnquiry {
+  id              String        @id @default(uuid()) @db.Uuid
+  fullName        String        @map("full_name") @db.VarChar(150)
+  email           String        @db.VarChar(255)
+  mobileNumber    String?       @map("mobile_number") @db.VarChar(20)
+  subject         String        @db.VarChar(255)
+  message         String        @db.Text
+  status          EnquiryStatus @default(PENDING)
+  createdAt       DateTime      @default(now()) @map("created_at")
+
+  @@map("contact_enquiries")
+}
+
+// ============================================================================
+// 13. ADVERTISEMENTS & COMMERCIAL BANNERS
 // ============================================================================
 
 enum AdPlacementPosition {
@@ -544,7 +763,7 @@ model Advertisement {
 }
 
 // ============================================================================
-// 11. AUDIT LOGS
+// 14. IMMUTABLE AUDIT LOGS
 // ============================================================================
 
 model AuditLog {
@@ -565,3 +784,33 @@ model AuditLog {
   @@index([createdAt(sort: Desc)])
   @@map("audit_logs")
 }
+
+// ============================================================================
+// 15. MEDIA LIBRARY & CENTRAL ASSET MANAGEMENT
+// ============================================================================
+
+model MediaAsset {
+  id                String    @id @default(uuid()) @db.Uuid
+  originalFilename  String    @map("original_filename") @db.VarChar(255)
+  storageKey        String    @unique @map("storage_key") @db.VarChar(500)
+  publicUrl         String    @map("public_url") @db.VarChar(500)
+  mimeType          String    @map("mime_type") @db.VarChar(100)
+  fileSizeBytes     BigInt    @map("file_size_bytes")
+  widthPx           Int?      @map("width_px")
+  heightPx          Int?      @map("height_px")
+  captionEn         String?   @map("caption_en") @db.VarChar(500)
+  captionGu         String?   @map("caption_gu") @db.VarChar(500)
+  altTextEn         String?   @map("alt_text_en") @db.VarChar(255)
+  altTextGu         String?   @map("alt_text_gu") @db.VarChar(255)
+  photographer      String?   @db.VarChar(150)
+  tags              Json      @default("[]")
+  uploadedBy        String?   @map("uploaded_by") @db.Uuid
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  uploader          User?     @relation(fields: [uploadedBy], references: [id], onDelete: SetNull)
+
+  @@index([createdAt(sort: Desc)])
+  @@map("media_assets")
+}
+

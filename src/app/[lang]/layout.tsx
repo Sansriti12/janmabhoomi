@@ -8,6 +8,8 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { SubscriptionPopup } from "@/components/layout/SubscriptionPopup";
 import { HtmlLangSetter } from "@/components/shared/HtmlLangSetter";
+import { SubscriberAuthProvider } from "@/lib/context/SubscriberAuthContext";
+import { SubscriberAuthModal } from "@/components/auth/SubscriberAuthModal";
 
 export async function generateMetadata({
   params,
@@ -72,16 +74,19 @@ export default async function LocaleLayout({
         {lang === "gu" ? "મુખ્ય સામગ્રી પર જાઓ" : "Skip to main content"}
       </a>
 
-      <Header
-        lang={lang}
-        dict={dict}
-        searchableArticles={latestArticles}
-      />
-      <main id="main-content" tabIndex={-1} className="flex-1 outline-none">
-        {children}
-      </main>
-      <Footer lang={lang} dict={dict} />
-      <SubscriptionPopup lang={lang} dict={dict} />
+      <SubscriberAuthProvider>
+        <Header
+          lang={lang}
+          dict={dict}
+          searchableArticles={latestArticles}
+        />
+        <main id="main-content" tabIndex={-1} className="flex-1 outline-none">
+          {children}
+        </main>
+        <Footer lang={lang} dict={dict} />
+        <SubscriptionPopup lang={lang} dict={dict} />
+        <SubscriberAuthModal lang={lang} />
+      </SubscriberAuthProvider>
     </div>
   );
 }

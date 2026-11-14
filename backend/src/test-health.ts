@@ -2,14 +2,22 @@ import { buildApp } from "./app.js";
 import { env } from "./config/env.js";
 
 async function verifyBackend(): Promise<void> {
-  console.log("--- JANMABHOOMI BACKEND TASK 1 VERIFICATION ---");
+  console.log("=== JANMABHOOMI BACKEND PHASE 1 HEALTH & LIFECYCLE VERIFICATION ===");
   console.log(`Environment: ${env.NODE_ENV}`);
   console.log(`Configured Host: ${env.HOST}, Port: ${env.PORT}`);
 
   const app = buildApp();
+  await app.ready();
 
-  // Test 1: Fastify Inject GET /health
-  console.log("\n[Test 1] Testing /health via Fastify inject...");
+  // Test 1: Verify app.prisma decoration
+  console.log("\n[Test 1] Testing Prisma client decoration on Fastify instance...");
+  if (!app.prisma) {
+    throw new Error("app.prisma is not decorated on FastifyInstance");
+  }
+  console.log("✓ app.prisma successfully decorated on FastifyInstance.");
+
+  // Test 2: Fastify Inject GET /health
+  console.log("\n[Test 2] Testing /health via Fastify inject...");
   const injectHealth = await app.inject({
     method: "GET",
     url: "/health",
@@ -26,8 +34,8 @@ async function verifyBackend(): Promise<void> {
     throw new Error("Invalid health check payload contents");
   }
 
-  // Test 2: Fastify Inject GET /
-  console.log("\n[Test 2] Testing / (Root info) via Fastify inject...");
+  // Test 3: Fastify Inject GET /
+  console.log("\n[Test 3] Testing / (Root info) via Fastify inject...");
   const injectRoot = await app.inject({
     method: "GET",
     url: "/",
@@ -39,8 +47,17 @@ async function verifyBackend(): Promise<void> {
   console.log("✓ / injected response status:", injectRoot.statusCode);
   console.log("✓ / payload:", JSON.stringify(rootJson, null, 2));
 
-  // Test 3: Real HTTP Listen & Network Fetch
-  console.log(`\n[Test 3] Binding to network http://${env.HOST}:${env.PORT}...`);
+  // Test 4: Fastify Inject GET /health/db
+  console.log("\n[Test 4] Testing /health/db endpoint...");
+  const injectDb = await app.inject({
+    method: "GET",
+    url: "/health/db",
+  });
+  console.log("✓ /health/db response status:", injectDb.statusCode);
+  console.log("✓ /health/db payload:", injectDb.body);
+
+  // Test 5: Real HTTP Listen & Network Fetch
+  console.log(`\n[Test 5] Binding to network http://${env.HOST}:${env.PORT}...`);
   const address = await app.listen({ port: env.PORT, host: env.HOST });
   console.log(`✓ Server successfully listening at ${address}`);
 
@@ -53,8 +70,8 @@ async function verifyBackend(): Promise<void> {
     throw new Error("Real HTTP fetch failed validation");
   }
 
-  // Test 4: 404 Route handling
-  console.log("\n[Test 4] Testing 404 handling...");
+  // Test 6: 404 Route handling
+  console.log("\n[Test 6] Testing 404 handling...");
   const res404 = await fetch(`http://${env.HOST}:${env.PORT}/non-existent-route`);
   console.log(`✓ 404 route returned status: ${res404.status}`);
   if (res404.status !== 404) {
@@ -62,10 +79,10 @@ async function verifyBackend(): Promise<void> {
   }
 
   // Clean shutdown
-  console.log("\n[Teardown] Closing server cleanly...");
+  console.log("\n[Teardown] Closing server cleanly (invoking Prisma disconnect hook)...");
   await app.close();
-  console.log("✓ Server closed cleanly.");
-  console.log("\n--- ALL TASK 1 HEALTH & BACKEND CHECKS PASSED ---");
+  console.log("✓ Server closed cleanly with Prisma disconnect executed.");
+  console.log("\n=== ALL PHASE 1 HEALTH & BACKEND CHECKS PASSED ===");
 }
 
 verifyBackend().catch((err) => {

@@ -1,5 +1,6 @@
 import React from "react";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { MessageSquare, Building2, Send, CheckCircle2 } from "lucide-react";
 import {
   FacebookIcon,
@@ -116,6 +117,25 @@ export default async function ContactPage({
                   ? "ઈ-પેપર વાંચવા અથવા સબ્સ્ક્રિપ્શન સંબંધિત સહાયતા માટે વેબસાઇટ પર ઉપલબ્ધ E-PAPER બટનનો ઉપયોગ કરો."
                   : "To read daily digital editions or for subscription support, access the E-PAPER button from the main header."}
               </p>
+            </div>
+
+            <div className="rounded-xl border border-[#016BB7]/30 bg-white p-5 text-xs space-y-2.5 shadow-2xs">
+              <p className="font-bold text-[#016BB7] uppercase tracking-wider">
+                {isGu ? "જૂના અખબાર / આર્કાઇવ પૂછપરછ?" : "Looking for Old Newspapers / Archives?"}
+              </p>
+              <p className="text-[#1F2937]/80 leading-relaxed">
+                {isGu
+                  ? "૧૯૩૪થી આજ સુધીના જૂના અખબાર, લેખ કે ઐતિહાસિક સમાચાર માટે અમારી સમર્પિત આર્કાઇવ પૂછપરછ સુવિધાનો ઉપયોગ કરો."
+                  : "Need historical newspaper articles, old notices, or archived editions dating back to 1934? Use our dedicated archive enquiry service."}
+              </p>
+              <div>
+                <Link
+                  href={`/${lang}/archive-enquiry`}
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-[#016BB7] hover:underline"
+                >
+                  <span>{isGu ? "આર્કાઇવ પૂછપરછ ફોર્મ ભરો →" : "Submit Archive Enquiry →"}</span>
+                </Link>
+              </div>
             </div>
           </div>
 

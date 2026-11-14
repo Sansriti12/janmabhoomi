@@ -227,6 +227,11 @@ export function Footer({ lang, dict }: FooterProps) {
                 </Link>
               </li>
               <li>
+                <Link href={`/${lang}/archive-enquiry`} className="hover:text-white transition-colors">
+                  {dict.footer.archiveEnquiry || (isGu ? "આર્કાઇવ પૂછપરછ" : "Archive Enquiry")}
+                </Link>
+              </li>
+              <li>
                 <Link href={`/${lang}/terms-conditions`} className="hover:text-white transition-colors">
                   {dict.footer.termsConditions}
                 </Link>

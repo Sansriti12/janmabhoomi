@@ -335,5 +335,16 @@ class MockNewsDataProvider implements INewsDataProvider {
   }
 }
 
-export const newsDataProvider: INewsDataProvider = new MockNewsDataProvider();
+import { ApiNewsDataProvider } from "./apiProvider";
+
+/**
+ * Singleton News Data Provider
+ * When NEXT_PUBLIC_USE_API === "true", routes to the Fastify production backend.
+ * Falls back to MockNewsDataProvider explicitly for offline development.
+ */
+export const newsDataProvider: INewsDataProvider =
+  process.env.NEXT_PUBLIC_USE_API === "true"
+    ? new ApiNewsDataProvider()
+    : new MockNewsDataProvider();
+
 export { getAllPublications, getPublicationBySlug };

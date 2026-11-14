@@ -11,7 +11,9 @@ import {
   Newspaper,
   ArrowRight,
   ExternalLink,
+  User,
 } from "lucide-react";
+import { useSubscriberAuth } from "@/lib/context/SubscriberAuthContext";
 import {
   FacebookIcon,
   TwitterIcon,
@@ -32,6 +34,7 @@ interface HeaderProps {
 
 export function Header({ lang, dict, searchableArticles }: HeaderProps) {
   const pathname = usePathname();
+  const { isAuthenticated, subscriber, openAuthModal } = useSubscriberAuth();
   const [formattedDate, setFormattedDate] = useState<string>("");
   const [moreOpen, setMoreOpen] = useState(false);
   const [publicationsOpen, setPublicationsOpen] = useState(false);
@@ -151,6 +154,7 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
     { label: dict.nav.events, href: `/${lang}/events` },
     { label: dict.nav.panchang, href: `/${lang}/panchang` },
     { label: dict.nav.maran, href: `/${lang}/category/maran` },
+    { label: dict.nav.archiveEnquiry, href: `/${lang}/archive-enquiry` },
   ];
 
   const isActive = (href: string, exact?: boolean) => {
@@ -307,6 +311,34 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
               <Newspaper className="h-4 w-4 hidden md:inline" />
               <span>{dict.header.epaperCta}</span>
             </Link>
+
+            {/* Subscriber Actions: Account or Subscribe / Login */}
+            {isAuthenticated ? (
+              <Link
+                href={`/${lang}/account`}
+                className="hidden sm:inline-flex items-center gap-1.5 rounded-lg border border-[#016BB7]/30 hover:border-[#016BB7] hover:bg-blue-50/50 px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-[#016BB7] transition-colors"
+              >
+                <User className="h-3.5 w-3.5" />
+                <span>{lang === "gu" ? "મારું ખાતું" : "My Account"}</span>
+              </Link>
+            ) : (
+              <div className="hidden sm:flex items-center gap-1">
+                <Link
+                  href={`/${lang}/subscribe`}
+                  className="inline-flex items-center gap-1 rounded-lg border border-[#016BB7]/30 hover:border-[#016BB7] hover:bg-blue-50/50 px-2.5 py-1.5 text-xs font-semibold text-[#016BB7] transition-colors"
+                >
+                  <span>{lang === "gu" ? "સબ્સ્ક્રાઇબ" : "Subscribe"}</span>
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => openAuthModal("login")}
+                  className="inline-flex items-center gap-1 rounded-lg text-gray-700 hover:text-[#016BB7] px-2 py-1.5 text-xs font-semibold transition-colors"
+                >
+                  <User className="h-3.5 w-3.5" />
+                  <span>{lang === "gu" ? "લૉગિન" : "Sign In"}</span>
+                </button>
+              </div>
+            )}
 
             {/* Gujarati | EN Language Switcher */}
             <div
