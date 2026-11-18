@@ -97,7 +97,7 @@ export class EpaperPdfProcessor {
       }
 
       // Fetch edition and publication configuration for free preview threshold
-      let freePreviewLimit = 2;
+      let freePreviewLimit = 1;
       try {
         const edition = await this.prisma.ePaperEdition.findUnique({
           where: { id: editionId },
@@ -107,10 +107,10 @@ export class EpaperPdfProcessor {
           freePreviewLimit =
             edition.freePreviewPageLimit ??
             edition.publication.epaperFreePreviewPages ??
-            2;
+            1;
         }
       } catch {
-        freePreviewLimit = 2;
+        freePreviewLimit = 1;
       }
 
       // Delete existing pages for idempotency

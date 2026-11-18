@@ -1,7 +1,7 @@
 import { FastifyPluginAsync } from "fastify";
 import fs from "node:fs/promises";
 import { z } from "zod";
-import { requireAdminRole, verifyStaffAuth } from "../services/staffAuthService.js";
+import { requireAdminRole, requireEditorOrAdminRole, verifyStaffAuth } from "../services/staffAuthService.js";
 import { MediaService } from "../services/mediaService.js";
 
 const updateMediaSchema = z.object({
@@ -17,36 +17,60 @@ export const adminMediaRoutes: FastifyPluginAsync = async (app) => {
   const mediaService = new MediaService(app.prisma);
 
   // ==========================================================================
-  // PUBLIC IMAGE SERVING ENDPOINT
+  // PUBLIC IMAGE & VIDEO SERVING ENDPOINTS
   // ==========================================================================
-  app.get("/serve/:storageKey", async (req, reply) => {
-    const { storageKey } = req.params as { storageKey: string };
-
+  const handleServe = async (storageKey: string, reply: any) => {
     try {
       const asset = await app.prisma.mediaAsset.findUnique({
         where: { storageKey },
       });
 
-      if (!asset) {
-        return reply.status(404).send({ success: false, error: "Image not found" });
-      }
-
       const filePath = mediaService.getFilePath(storageKey);
       const fileBuffer = await fs.readFile(filePath);
 
-      reply.header("Content-Type", asset.mimeType);
+      let mimeType = asset?.mimeType;
+      if (!mimeType) {
+        if (storageKey.endsWith(".png")) mimeType = "image/png";
+        else if (storageKey.endsWith(".webp")) mimeType = "image/webp";
+        else if (storageKey.endsWith(".mp4")) mimeType = "video/mp4";
+        else if (storageKey.endsWith(".webm")) mimeType = "video/webm";
+        else mimeType = "image/jpeg";
+      }
+
+      reply.header("Content-Type", mimeType);
+      reply.header("Cross-Origin-Resource-Policy", "cross-origin");
+      reply.header("Access-Control-Allow-Origin", "*");
       reply.header("Cache-Control", "public, max-age=86400, stale-while-revalidate=604800");
       return reply.send(fileBuffer);
     } catch {
       return reply.status(404).send({ success: false, error: "File not accessible" });
     }
+  };
+
+  app.get("/serve/:storageKey", async (req, reply) => {
+    const { storageKey } = req.params as { storageKey: string };
+    return handleServe(storageKey, reply);
+  });
+
+  app.get("/file/:storageKey", async (req, reply) => {
+    const { storageKey } = req.params as { storageKey: string };
+    return handleServe(storageKey, reply);
+  });
+
+  app.get("/:storageKey", async (req, reply) => {
+    const { storageKey } = req.params as { storageKey: string };
+    // Skip if it doesn't look like a file key (has extension)
+    if (!storageKey.includes(".")) {
+      return reply.callNotFound();
+    }
+    return handleServe(storageKey, reply);
   });
 
   // ==========================================================================
   // ADMIN AUTHENTICATED MEDIA MANAGEMENT ENDPOINTS
   // ==========================================================================
   app.register(async (adminScope) => {
-    adminScope.addHook("preHandler", requireAdminRole);
+    adminScope.addHook("preHandler", requireEditorOrAdminRole);
 
     /**
      * GET /api/v1/admin/media
@@ -141,6 +165,23 @@ export const adminMediaRoutes: FastifyPluginAsync = async (app) => {
       const altTextGu = typeof fields?.altTextGu?.value === "string" ? fields.altTextGu.value : undefined;
       const photographer = typeof fields?.photographer?.value === "string" ? fields.photographer.value : undefined;
 
+      let tags: string[] = [];
+      if (fields?.tags?.value) {
+        try {
+          const raw = fields.tags.value;
+          if (typeof raw === "string") {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) {
+              tags = parsed.map((t: any) => String(t));
+            } else {
+              tags = [String(parsed)];
+            }
+          }
+        } catch {
+          tags = String(fields.tags.value).split(",").map((s) => s.trim()).filter(Boolean);
+        }
+      }
+
       try {
         const asset = await mediaService.uploadMedia({
           filename,
@@ -151,6 +192,7 @@ export const adminMediaRoutes: FastifyPluginAsync = async (app) => {
           altTextEn,
           altTextGu,
           photographer,
+          tags,
           uploadedBy: req.staffUser!.id,
         });
 
@@ -209,9 +251,9 @@ export const adminMediaRoutes: FastifyPluginAsync = async (app) => {
 
     /**
      * DELETE /api/v1/admin/media/:id
-     * Deletes media asset from disk and database.
+     * Deletes media asset from disk and database (Admin only).
      */
-    adminScope.delete("/:id", async (req, reply) => {
+    adminScope.delete("/:id", { preHandler: requireAdminRole }, async (req, reply) => {
       const { id } = req.params as { id: string };
 
       try {

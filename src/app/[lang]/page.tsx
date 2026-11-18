@@ -6,6 +6,7 @@ import { CategorySlug, NewsArticle } from "@/lib/data/types";
 import { BreakingNewsTicker } from "@/components/home/BreakingNewsTicker";
 import { LeadStoryHero } from "@/components/home/LeadStoryHero";
 import { AdPlacement } from "@/components/home/AdPlacement";
+import { PanchangWidget } from "@/components/home/PanchangWidget";
 import { LatestEventsSection } from "@/components/home/LatestEventsSection";
 import { CategoryCarousel, CategoryCardItem } from "@/components/home/CategoryCarousel";
 
@@ -31,6 +32,7 @@ export default async function HomePage({
     editorialArticles,
     maranArticles,
     specialCoverageData,
+    dailyPanchang,
   ] = await Promise.all([
     newsDataProvider.getBreakingNews(),
     newsDataProvider.getHomepageHeroData(),
@@ -43,39 +45,18 @@ export default async function HomePage({
     newsDataProvider.getArticlesByCategory("editorial", 1),
     newsDataProvider.getArticlesByCategory("maran", 1),
     newsDataProvider.getSpecialCoverageAndEvents(),
+    newsDataProvider.getDailyPanchang(),
   ]);
 
   // Lead stories for the hero carousel (main lead + sub-leads)
   const leadStories = [heroData.leadStory, ...heroData.subLeadStories];
-
-  // Map special coverage to article contract for category carousel
-  const specialCoverageArticle: NewsArticle | undefined = specialCoverageData.featuredCoverage
-    ? {
-        id: specialCoverageData.featuredCoverage.id,
-        slug: specialCoverageData.featuredCoverage.id,
-        category: "special-coverage" as CategorySlug,
-        categoryLabel: { en: "Special Coverage", gu: "વિશેષ કવરેજ" },
-        title: specialCoverageData.featuredCoverage.title,
-        summary: specialCoverageData.featuredCoverage.description,
-        teaserParagraphs: { en: [], gu: [] },
-        imageUrl: specialCoverageData.featuredCoverage.imageUrl,
-        imageCaption: { en: "Special Coverage", gu: "વિશેષ કવરેજ" },
-        author: { en: "Janmabhoomi Bureau", gu: "જન્મભૂમિ બ્યુરો" },
-        location: specialCoverageData.featuredCoverage.location,
-        publishedAt: "2026-11-03T09:00:00+05:30",
-        readTimeMinutes: 5,
-        epaperPageNumber: 1,
-        epaperEdition: { en: "Mumbai Main Edition", gu: "મુંબઈ મુખ્ય આવૃત્તિ" },
-        isDemonstrationData: true,
-      }
-    : undefined;
 
   const eventArticle: NewsArticle | undefined = specialCoverageData.events?.[0]
     ? {
         id: specialCoverageData.events[0].id,
         slug: specialCoverageData.events[0].id,
         category: "events" as CategorySlug,
-        categoryLabel: { en: "Events", gu: "કાર્યક્રમો" },
+        categoryLabel: { en: "Events & Forums", gu: "કાર્યક્રમો અને સંવાદ" },
         title: specialCoverageData.events[0].title,
         summary: specialCoverageData.events[0].description,
         teaserParagraphs: { en: [], gu: [] },
@@ -91,9 +72,8 @@ export default async function HomePage({
       }
     : undefined;
 
-  // The 12 Category Desks configured into 2 groups of 6 for the 10-second rotating carousel
+  // The 8 Active Category Desks for the rotating carousel
   const categoryCarouselItems: CategoryCardItem[] = [
-    // GROUP 1 (Items 1 to 6)
     {
       slug: "national",
       name: { en: "National", gu: "રાષ્ટ્રીય" },
@@ -136,8 +116,6 @@ export default async function HomePage({
       href: `/${locale}/editorial`,
       article: editorialArticles[0],
     },
-
-    // GROUP 2 (Items 7 to 12)
     {
       slug: "maran",
       name: { en: "Maran (Obituaries)", gu: "મરણ નોંધ અને બેસણું" },
@@ -146,50 +124,9 @@ export default async function HomePage({
       article: maranArticles[0],
     },
     {
-      slug: "international",
-      name: { en: "International", gu: "આંતરરાષ્ટ્રીય" },
-      ctaText: { en: "Explore World News", gu: "આંતરરાષ્ટ્રીય સમાચાર જુઓ" },
-      href: `/${locale}/category/international`,
-      emptyStateText: {
-        en: "Global diplomatic dispatches and diaspora reports published daily in print E-Paper.",
-        gu: "વૈશ્વિક રાજદ્વારી અને વિદેશ કવરેજના સમાચારો દૈનિક ઈ-પેપરમાં ઉપલબ્ધ.",
-      },
-    },
-    {
-      slug: "education",
-      name: { en: "Education & Youth", gu: "શિક્ષણ અને યુવા" },
-      ctaText: { en: "Explore Education News", gu: "શિક્ષણ સમાચાર જુઓ" },
-      href: `/${locale}/category/education`,
-      emptyStateText: {
-        en: "Board exam dossiers, university circulars, and youth career supplements in daily edition.",
-        gu: "યુનિવર્સિટી, બોર્ડ પરીક્ષાઓ અને નવી શિક્ષણ નીતિ અંગેના સમાચાર દૈનિક અખબારમાં.",
-      },
-    },
-    {
-      slug: "religion-culture",
-      name: { en: "Religion & Culture", gu: "ધર્મ અને સંસ્કૃતિ" },
-      ctaText: { en: "Explore Culture News", gu: "ધર્મ-સંસ્કૃતિ સમાચાર જુઓ" },
-      href: `/${locale}/category/religion-culture`,
-      emptyStateText: {
-        en: "Sacred heritage, festival almanac features, and cultural retrospectives.",
-        gu: "ભારતીય સંસ્કૃતિ, તહેવારો, આધ્યાત્મિક ચિંતન અને વારસાના લેખો દૈનિક અખબારમાં.",
-      },
-    },
-    {
-      slug: "special-coverage",
-      name: { en: "Special Coverage", gu: "વિશેષ કવરેજ" },
-      ctaText: { en: "Explore Special Coverage", gu: "વિશેષ કવરેજ જુઓ" },
-      href: `/${locale}/category/special-coverage`,
-      article: specialCoverageArticle,
-      emptyStateText: {
-        en: "In-depth investigative reports curated by the Janmabhoomi editorial desk.",
-        gu: "જન્મભૂમિ સંપાદકીય ટીમ દ્વારા તૈયાર કરાયેલ ગ્રાઉન્ડ રિપોર્ટ્સ.",
-      },
-    },
-    {
       slug: "events",
-      name: { en: "Events & Forums", gu: "કાર્યક્રમો અને સંવાદ" },
-      ctaText: { en: "Explore Events & Forums", gu: "કાર્યક્રમો જુઓ" },
+      name: { en: "Conclaves & Forums", gu: "વિશેષ આયોજનો અને સંવાદ" },
+      ctaText: { en: "Explore Forums & Events", gu: "સંવાદ અને આયોજનો જુઓ" },
       href: `/${locale}/events`,
       article: eventArticle,
       emptyStateText: {
@@ -216,20 +153,28 @@ export default async function HomePage({
         dict={dict}
       />
 
-      {/* SECTION 3 – Advertisement Placement */}
+      {/* SECTION 3 – Traditional Daily Panchang Section (Positioned before Advertisement) */}
+      <PanchangWidget
+        panchang={dailyPanchang}
+        lang={locale}
+        dict={dict}
+        showChoghadiya={true}
+      />
+
+      {/* SECTION 4 – Advertisement Placement */}
       <AdPlacement
         slot={primaryAd}
         lang={locale}
         label={dict.home.advertisementLabel}
       />
 
-      {/* SECTION 4 – Latest Events Section */}
+      {/* SECTION 5 – Conclaves & Civic Dialogue Forums (formerly Latest Events) */}
       <LatestEventsSection
         events={specialCoverageData.events}
         lang={locale}
       />
 
-      {/* SECTION 5 – Compact Category Carousel (6 Cards on Desktop with 10s Rotation) */}
+      {/* SECTION 6 – Category News Carousel */}
       <CategoryCarousel
         categories={categoryCarouselItems}
         lang={locale}

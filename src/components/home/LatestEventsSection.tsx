@@ -29,7 +29,7 @@ export function LatestEventsSection({ events, lang }: LatestEventsSectionProps) 
   return (
     <section
       aria-labelledby="latest-events-heading"
-      className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4"
+      className="mx-auto max-w-7xl 2xl:max-w-[1440px] px-4 sm:px-6 lg:px-8 py-4"
     >
       {/* Section Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2.5 border-b-2 border-[#016BB7] pb-3 mb-6">
@@ -40,13 +40,13 @@ export function LatestEventsSection({ events, lang }: LatestEventsSectionProps) 
               id="latest-events-heading"
               className="text-xl sm:text-2xl font-extrabold text-[#1F2937] tracking-tight"
             >
-              {isGu ? "તાજેતરના કાર્યક્રમો" : "Latest Events"}
+              {isGu ? "વિશેષ આયોજનો અને નાગરિક સંવાદ" : "Featured Conclaves & Forums"}
             </h2>
           </div>
           <p className="mt-1 text-xs sm:text-sm text-[#1F2937]/70 font-medium">
             {isGu
-              ? "સૌરાષ્ટ્ર ટ્રસ્ટ અને જન્મભૂમિ દ્વારા આયોજિત સંવાદ, સાહિત્ય પરિષદ અને જાહેર કાર્યક્રમો"
-              : "Conclaves, forums, and civic events organised by Saurashtra Trust & Janmabhoomi"}
+              ? "સૌરાષ્ટ્ર ટ્રસ્ટ અને જન્મભૂમિ દ્વારા આયોજિત વાર્ષિક પરિષદો, વિચાર મંચ અને નાગરિક સંવાદ"
+              : "Annual conclaves, civic dialogue forums, and cultural assemblies hosted by Saurashtra Trust & Janmabhoomi"}
           </p>
         </div>
 
@@ -54,7 +54,7 @@ export function LatestEventsSection({ events, lang }: LatestEventsSectionProps) 
           href={`/${lang}/events`}
           className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#016BB7] hover:underline transition-all shrink-0 group"
         >
-          <span>{isGu ? "બધા કાર્યક્રમો જુઓ" : "View All Events"}</span>
+          <span>{isGu ? "બધા મંચ અને આયોજનો જુઓ" : "View All Forums & Events"}</span>
           <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
         </Link>
       </div>

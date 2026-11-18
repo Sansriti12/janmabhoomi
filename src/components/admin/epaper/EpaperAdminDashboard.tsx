@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useStaffAuth } from "@/lib/context/StaffAuthContext";
 import {
   Newspaper,
   Upload,
@@ -51,10 +52,24 @@ export interface EditionSummary {
 const ALL_PUBLICATIONS = [
   { id: "pub-janmabhoomi", name: "Janmabhoomi (જન્મભૂમિ)", code: "JB" },
   { id: "pub-pravasi", name: "Janmabhoomi Pravasi (પ્રવાસી)", code: "JP" },
+  { id: "pub-purti", name: "Janmabhoomi Purti (પૂર્તિ)", code: "PURTI" },
 ];
 
 export function EpaperAdminDashboard({ lang }: { lang: string }) {
   const isGu = lang === "gu";
+  const { token } = useStaffAuth();
+
+  const getAuthHeaders = (extra?: Record<string, string>): Record<string, string> => {
+    const headers: Record<string, string> = {
+      "x-staff-role": "EDITOR",
+      ...extra,
+    };
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+    return headers;
+  };
+
   const [editions, setEditions] = useState<EditionSummary[]>([]);
   const [selectedPublication, setSelectedPublication] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
@@ -68,16 +83,18 @@ export function EpaperAdminDashboard({ lang }: { lang: string }) {
   const [newDate, setNewDate] = useState(new Date().toISOString().split("T")[0]);
   const [newCity, setNewCity] = useState("Mumbai");
   const [newNameEn, setNewNameEn] = useState("Janmabhoomi Daily Evening Edition");
-  const [newNameGu, setNewNameGu] = useState("જન્મભૂમિ દૈનિક સાંધ્ય આવૃત્તિ");
-  const [newQuarter, setNewQuarter] = useState<string>("Q1");
   const [newIssueNumber, setNewIssueNumber] = useState<number>(1);
   const [newFreePreviewLimit, setNewFreePreviewLimit] = useState<number>(2);
+  const [newEditionFile, setNewEditionFile] = useState<File | null>(null);
 
   // Upload Modal State
   const [uploadTargetEdition, setUploadTargetEdition] = useState<EditionSummary | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
+  const [fileValidationError, setFileValidationError] = useState<string | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const pdfFileInputRef = React.useRef<HTMLInputElement | null>(null);
 
   // Hotspot Editor Modal State
   const [activeEditorEdition, setActiveEditorEdition] = useState<any | null>(null);
@@ -95,7 +112,7 @@ export function EpaperAdminDashboard({ lang }: { lang: string }) {
       if (searchQuery) url += `search=${encodeURIComponent(searchQuery)}&`;
 
       const res = await fetch(url, {
-        headers: { "x-staff-role": "EDITOR" },
+        headers: getAuthHeaders(),
       });
       const data = await res.json();
 
@@ -120,34 +137,49 @@ export function EpaperAdminDashboard({ lang }: { lang: string }) {
   const handleCreateEdition = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setErrorMessage(null);
 
     const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
     try {
       const res = await fetch(`${baseUrl}/api/v1/epaper/admin/editions`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-staff-role": "EDITOR",
-        },
+        headers: getAuthHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({
           publicationId: newPubId,
           editionDate: newDate,
           editionCity: newCity,
           editionNameEn: newNameEn,
-          editionNameGu: newNameGu,
-          quarter: newPubId === "pub-kavita" ? newQuarter : undefined,
+          editionNameGu: newNameEn,
           issueNumber: newIssueNumber,
           freePreviewPageLimit: newFreePreviewLimit,
         }),
       });
 
       const data = await res.json();
-      if (res.ok && data.success) {
-        setIsNewModalOpen(false);
-        fetchEditions();
-      } else {
-        setErrorMessage(data.error || "Failed to create edition.");
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to create e-paper edition.");
       }
+
+      const createdId = data.edition?.id || data.data?.id;
+
+      // If PDF file was selected directly in the modal, upload it immediately!
+      if (newEditionFile && createdId) {
+        const formData = new FormData();
+        formData.append("file", newEditionFile);
+        const upRes = await fetch(`${baseUrl}/api/v1/epaper/admin/editions/${createdId}/upload`, {
+          method: "POST",
+          headers: getAuthHeaders(),
+          body: formData,
+        });
+        const upData = await upRes.json();
+        if (!upRes.ok || !upData.success) {
+          setErrorMessage("Edition created, but PDF upload failed: " + (upData.error || "Unknown error"));
+        }
+      }
+
+      setIsNewModalOpen(false);
+      setNewEditionFile(null);
+      fetchEditions();
     } catch (err: unknown) {
       setErrorMessage(err instanceof Error ? err.message : "Error creating edition");
     } finally {
@@ -170,9 +202,7 @@ export function EpaperAdminDashboard({ lang }: { lang: string }) {
     try {
       const res = await fetch(`${baseUrl}/api/v1/epaper/admin/editions/${uploadTargetEdition.id}/upload`, {
         method: "POST",
-        headers: {
-          "x-staff-role": "EDITOR",
-        },
+        headers: getAuthHeaders(),
         body: formData,
       });
 
@@ -201,7 +231,7 @@ export function EpaperAdminDashboard({ lang }: { lang: string }) {
     try {
       const res = await fetch(`${baseUrl}/api/v1/epaper/admin/editions/${edition.id}/status`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json", "x-staff-role": "EDITOR" },
+        headers: getAuthHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({ status: nextStatus }),
       });
       if (res.ok) fetchEditions();
@@ -220,7 +250,7 @@ export function EpaperAdminDashboard({ lang }: { lang: string }) {
     try {
       const res = await fetch(`${baseUrl}/api/v1/epaper/admin/editions/${id}`, {
         method: "DELETE",
-        headers: { "x-staff-role": "ADMIN" },
+        headers: getAuthHeaders({ "x-staff-role": "ADMIN" }),
       });
       if (res.ok) fetchEditions();
     } catch {
@@ -232,7 +262,7 @@ export function EpaperAdminDashboard({ lang }: { lang: string }) {
     const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
     try {
       const res = await fetch(`${baseUrl}/api/v1/epaper/admin/editions/${edition.id}/editor`, {
-        headers: { "x-staff-role": "EDITOR" },
+        headers: getAuthHeaders(),
       });
       const data = await res.json();
       if (res.ok && data.success) {
@@ -293,8 +323,8 @@ export function EpaperAdminDashboard({ lang }: { lang: string }) {
           </h1>
           <p className="text-xs text-neutral-600 mt-1">
             {isGu
-              ? "તમામ ૮ પ્રકાશનોની આવૃત્તિઓનું સંચાલન, પીડીએફ પ્રોસેસિંગ, હોટસ્પોટ લિંક્સ અને સબ્સ્ક્રાઇબર એક્સેસ નિયંત્રણ."
-              : "Manage 8 publications, ingest PDF pages, configure interactive hotspots, and manage subscriber gates."}
+              ? "જન્મભૂમિ અને જન્મભૂમિ પ્રવાસી અખબાર આવૃત્તિઓ, પૂર્તિ સામયિકો, પીડીએફ પ્રોસેસિંગ અને હોટસ્પોટ્સનું સંચાલન."
+              : "Manage Janmabhoomi & Janmabhoomi Pravasi broadsheet editions, Purti supplements, PDF pages, and interactive hotspots."}
           </p>
         </div>
 
@@ -313,7 +343,7 @@ export function EpaperAdminDashboard({ lang }: { lang: string }) {
             className="inline-flex items-center gap-2 rounded-lg bg-[#016BB7] px-4 py-2 text-xs font-bold text-white hover:bg-[#016BB7]/90 transition-colors shadow-xs"
           >
             <Plus className="h-4 w-4" />
-            <span>{isGu ? "નવી આવૃત્તિ ઉમેરો" : "New Edition"}</span>
+            <span>{isGu ? "નવું ઇ-પેપર ઉમેરો" : "New E-Paper"}</span>
           </button>
         </div>
       </div>
@@ -329,7 +359,7 @@ export function EpaperAdminDashboard({ lang }: { lang: string }) {
             onChange={(e) => setSelectedPublication(e.target.value)}
             className="w-full text-xs rounded-lg border border-neutral-300 px-3 py-2 bg-white focus:outline-none focus:border-[#016BB7]"
           >
-            <option value="all">{isGu ? "તમામ પ્રકાશનો (All 8)" : "All 8 Publications"}</option>
+            <option value="all">{isGu ? "તમામ પ્રકાશનો" : "All Publications"}</option>
             {ALL_PUBLICATIONS.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.name}
@@ -410,8 +440,13 @@ export function EpaperAdminDashboard({ lang }: { lang: string }) {
                   return (
                     <tr key={ed.id} className="hover:bg-neutral-50 transition-colors">
                       <td className="px-4 py-3">
-                        <div className="font-bold text-neutral-900">
-                          {isGu ? ed.editionNameGu : ed.editionNameEn}
+                        <div className="font-bold text-neutral-900 flex items-center gap-1.5">
+                          <span>{isGu ? ed.editionNameGu : ed.editionNameEn}</span>
+                          {(ed.editionNameEn?.toLowerCase().includes("purti") || ed.editionNameGu?.includes("પૂર્તિ")) && (
+                            <span className="px-1.5 py-0.2 rounded bg-purple-50 text-purple-700 font-semibold border border-purple-200 text-[9px]">
+                              Purti / પૂર્તિ
+                            </span>
+                          )}
                         </div>
                         <div className="text-[10px] text-neutral-500">
                           {ed.publication?.nameEn || ed.publicationId} • {ed.quarter ? `Quarter: ${ed.quarter}` : `Issue: ${ed.issueNumber || 1}`}
@@ -440,7 +475,7 @@ export function EpaperAdminDashboard({ lang }: { lang: string }) {
                         </span>
                       </td>
                       <td className="px-4 py-3 text-right space-x-1">
-                        {/* Upload PDF Action */}
+                        {/* Upload / Replace PDF Action */}
                         <button
                           type="button"
                           onClick={() => {
@@ -450,7 +485,15 @@ export function EpaperAdminDashboard({ lang }: { lang: string }) {
                             setErrorMessage(null);
                           }}
                           className="p-1.5 rounded hover:bg-neutral-100 text-neutral-700 hover:text-[#016BB7] transition-colors"
-                          title="Upload PDF"
+                          title={
+                            ed.totalPageCount > 0 || ed.status !== "DRAFT"
+                              ? isGu
+                                ? "પીડીએફ બદલો / ફરી અપલોડ કરો (Replace PDF)"
+                                : "Re-upload / Replace PDF"
+                              : isGu
+                              ? "પીડીએફ અપલોડ કરો"
+                              : "Upload PDF"
+                          }
                         >
                           <Upload className="h-4 w-4" />
                         </button>
@@ -503,7 +546,7 @@ export function EpaperAdminDashboard({ lang }: { lang: string }) {
           <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl space-y-4">
             <div className="flex items-center justify-between border-b pb-3">
               <h3 className="text-base font-bold text-neutral-800">
-                {isGu ? "નવી ઈ-પેપર આવૃત્તિ બનાવો" : "Create New E-Paper Edition"}
+                {isGu ? "નવું ઇ-પેપર બનાવો" : "Create New E-Paper"}
               </h3>
               <button
                 type="button"
@@ -514,24 +557,25 @@ export function EpaperAdminDashboard({ lang }: { lang: string }) {
               </button>
             </div>
 
-            <form onSubmit={handleCreateEdition} className="space-y-3 text-xs">
+            <form onSubmit={handleCreateEdition} className="space-y-3.5 text-xs">
               <div>
                 <label className="block font-bold text-neutral-700 mb-1">
-                  {isGu ? "પ્રકાશન (૮ પ્રકાશનોમાંથી પસંદ કરો)" : "Publication"}
+                  {isGu ? "પ્રકાશન (સમાચારપત્ર / પૂર્તિ) *" : "Publication *"}
                 </label>
                 <select
                   value={newPubId}
                   onChange={(e) => {
-                    setNewPubId(e.target.value);
-                    if (e.target.value === "pub-kavita") {
-                      setNewNameEn("Kavita Quarterly Poetry Journal");
-                      setNewNameGu("કવિતા ત્રિમાસિક કાવ્ય સામયિક");
-                    } else if (e.target.value === "pub-panchang") {
-                      setNewNameEn("Janmabhoomi Panchang Almanac");
-                      setNewNameGu("જન્મભૂમિ પંચાંગ અને ગ્રહમાન");
+                    const pub = e.target.value;
+                    setNewPubId(pub);
+                    if (pub === "pub-purti") {
+                      setNewNameEn("Janmabhoomi Purti Supplement");
+                    } else if (pub === "pub-pravasi") {
+                      setNewNameEn("Janmabhoomi Pravasi Weekly Edition");
+                    } else {
+                      setNewNameEn("Janmabhoomi Daily Evening Edition");
                     }
                   }}
-                  className="w-full rounded border border-neutral-300 px-3 py-2 bg-white"
+                  className="w-full rounded-lg border border-neutral-300 px-3 py-2 bg-white text-slate-800 font-medium"
                 >
                   {ALL_PUBLICATIONS.map((p) => (
                     <option key={p.id} value={p.id}>
@@ -544,83 +588,66 @@ export function EpaperAdminDashboard({ lang }: { lang: string }) {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block font-bold text-neutral-700 mb-1">
-                    {isGu ? "તારીખ" : "Edition Date"}
+                    {isGu ? "તારીખ *" : "Edition Date *"}
                   </label>
                   <input
                     type="date"
                     required
                     value={newDate}
                     onChange={(e) => setNewDate(e.target.value)}
-                    className="w-full rounded border border-neutral-300 px-3 py-2"
+                    className="w-full rounded-lg border border-neutral-300 px-3 py-2 bg-white"
                   />
                 </div>
                 <div>
                   <label className="block font-bold text-neutral-700 mb-1">
-                    {isGu ? "શહેર" : "City"}
+                    {isGu ? "શહેર *" : "City *"}
                   </label>
                   <input
                     type="text"
                     required
                     value={newCity}
                     onChange={(e) => setNewCity(e.target.value)}
-                    className="w-full rounded border border-neutral-300 px-3 py-2"
+                    className="w-full rounded-lg border border-neutral-300 px-3 py-2 bg-white"
                   />
                 </div>
               </div>
 
-              {/* Kavita Specific Fields */}
-              {newPubId === "pub-kavita" && (
-                <div className="grid grid-cols-2 gap-3 p-3 bg-amber-50 rounded border border-amber-200">
-                  <div>
-                    <label className="block font-bold text-amber-900 mb-1">Quarter</label>
-                    <select
-                      value={newQuarter}
-                      onChange={(e) => setNewQuarter(e.target.value)}
-                      className="w-full rounded border border-amber-300 px-3 py-2 bg-white"
-                    >
-                      <option value="Q1">Q1 (Jan - Mar)</option>
-                      <option value="Q2">Q2 (Apr - Jun)</option>
-                      <option value="Q3">Q3 (Jul - Sep)</option>
-                      <option value="Q4">Q4 (Oct - Dec)</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block font-bold text-amber-900 mb-1">Issue Number</label>
-                    <input
-                      type="number"
-                      min={1}
-                      value={newIssueNumber}
-                      onChange={(e) => setNewIssueNumber(parseInt(e.target.value, 10))}
-                      className="w-full rounded border border-amber-300 px-3 py-2 bg-white"
-                    />
-                  </div>
-                </div>
-              )}
-
               <div>
                 <label className="block font-bold text-neutral-700 mb-1">
-                  {isGu ? "આવૃત્તિનું નામ (અંગ્રેજી)" : "Edition Name (English)"}
+                  {isGu ? "આવૃત્તિનું નામ (Edition Title) *" : "Edition Title *"}
                 </label>
                 <input
                   type="text"
                   required
                   value={newNameEn}
                   onChange={(e) => setNewNameEn(e.target.value)}
-                  className="w-full rounded border border-neutral-300 px-3 py-2"
+                  className="w-full rounded-lg border border-neutral-300 px-3 py-2 bg-white text-slate-900"
                 />
               </div>
 
               <div>
                 <label className="block font-bold text-neutral-700 mb-1">
-                  {isGu ? "આવૃત્તિનું નામ (ગુજરાતી)" : "Edition Name (Gujarati)"}
+                  {isGu
+                    ? "અખબાર PDF ફાઇલ (વૈકલ્પિક — પછી પણ અપલોડ કરી શકાય છે)"
+                    : "Newspaper PDF File (Optional — can also be uploaded later)"}
                 </label>
                 <input
-                  type="text"
-                  required
-                  value={newNameGu}
-                  onChange={(e) => setNewNameGu(e.target.value)}
-                  className="w-full rounded border border-neutral-300 px-3 py-2"
+                  type="file"
+                  accept="application/pdf"
+                  onChange={(e) => setNewEditionFile(e.target.files?.[0] || null)}
+                  className="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-[#016BB7] hover:file:bg-blue-100 border border-slate-300 rounded-lg px-2 py-1.5 bg-white cursor-pointer"
                 />
+                {newEditionFile ? (
+                  <p className="text-[11px] text-emerald-600 font-medium mt-1">
+                    ✓ {newEditionFile.name} ({(newEditionFile.size / (1024 * 1024)).toFixed(2)} MB)
+                  </p>
+                ) : (
+                  <p className="text-[10px] text-neutral-400 mt-0.5">
+                    {isGu
+                      ? "જો તમારી પાસે PDF તૈયાર હોય તો અત્યારે જ પસંદ કરો, અથવા આવૃત્તિ બનાવ્યા પછી ગમે ત્યારે અપલોડ કરી શકો છો (Max 100 MB)."
+                      : "Select the PDF now for instant processing, or leave blank to upload later (Max 100 MB)."}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -633,7 +660,7 @@ export function EpaperAdminDashboard({ lang }: { lang: string }) {
                   max={20}
                   value={newFreePreviewLimit}
                   onChange={(e) => setNewFreePreviewLimit(parseInt(e.target.value, 10))}
-                  className="w-full rounded border border-neutral-300 px-3 py-2"
+                  className="w-full rounded-lg border border-neutral-300 px-3 py-2 bg-white"
                 />
                 <p className="text-[10px] text-neutral-500 mt-0.5">
                   {isGu ? "પ્રથમ કેટલા પાના જાહેરમાં વાંચવા મળશે. ત્યારપછી સબ્સ્ક્રિપ્શન જરૂરી રહેશે." : "Number of pages available without login. Remaining pages require an active subscription."}
@@ -651,9 +678,9 @@ export function EpaperAdminDashboard({ lang }: { lang: string }) {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="px-4 py-2 rounded bg-[#016BB7] text-white font-bold hover:bg-[#016BB7]/90"
+                  className="px-4 py-2 rounded bg-[#016BB7] text-white font-bold hover:bg-[#016BB7]/90 cursor-pointer"
                 >
-                  {isLoading ? (isGu ? "બનાવી રહ્યું છે..." : "Creating...") : (isGu ? "આવૃત્તિ સાચવો" : "Create Edition")}
+                  {isLoading ? (isGu ? "બનાવી રહ્યું છે..." : "Creating...") : (isGu ? "ઇ-પેપર બનાવો" : "Create E-Paper")}
                 </button>
               </div>
             </form>
@@ -668,11 +695,24 @@ export function EpaperAdminDashboard({ lang }: { lang: string }) {
             <div className="flex items-center justify-between border-b pb-3">
               <div>
                 <h3 className="text-base font-bold text-neutral-800">
-                  {isGu ? "પીડીએફ ફાઇલ અપલોડ કરો" : "Upload Edition PDF"}
+                  {uploadTargetEdition.totalPageCount > 0
+                    ? isGu
+                      ? "પીડીએફ બદલો / ફરી અપલોડ કરો"
+                      : "Replace / Re-upload Edition PDF"
+                    : isGu
+                    ? "પીડીએફ ફાઇલ અપલોડ કરો"
+                    : "Upload Edition PDF"}
                 </h3>
                 <p className="text-[11px] text-neutral-500">
                   {uploadTargetEdition.editionNameEn} ({uploadTargetEdition.editionDate.split("T")[0]})
                 </p>
+                {uploadTargetEdition.totalPageCount > 0 && (
+                  <p className="text-[11px] text-amber-700 font-medium mt-0.5">
+                    {isGu
+                      ? `(હાલમાં ${uploadTargetEdition.totalPageCount} પાના પ્રોસેસ થયેલા છે. નવી PDF અપલોડ કરવાથી જૂના પાના બદલાઈ જશે)`
+                      : `(Currently has ${uploadTargetEdition.totalPageCount} pages. Uploading a new PDF will replace existing pages)`}
+                  </p>
+                )}
               </div>
               <button
                 type="button"
@@ -698,37 +738,157 @@ export function EpaperAdminDashboard({ lang }: { lang: string }) {
             )}
 
             <form onSubmit={handleUploadSubmit} className="space-y-4">
-              <div className="border-2 border-dashed border-[#016BB7]/40 rounded-xl p-6 text-center bg-neutral-50 hover:bg-neutral-100 transition-colors">
-                <Upload className="h-8 w-8 mx-auto text-[#016BB7] mb-2" />
-                <p className="text-xs font-semibold text-neutral-700">
-                  {isGu ? "બ્રોડશીટ પીડીએફ ફાઇલ પસંદ કરો" : "Select or drag broadsheet PDF file"}
+              {/* File Dropzone */}
+              <div
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setIsDragOver(true);
+                }}
+                onDragLeave={() => setIsDragOver(false)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setIsDragOver(false);
+                  const file = e.dataTransfer.files?.[0];
+                  if (!file) return;
+                  if (!file.name.toLowerCase().endsWith(".pdf") && file.type !== "application/pdf") {
+                    setFileValidationError(
+                      isGu
+                        ? "અમાન્ય ફાઇલ પ્રકાર. કૃપા કરીને પીડીએફ (.pdf) ફાઇલ પસંદ કરો."
+                        : "Invalid file type. Please upload a PDF file (.pdf)."
+                    );
+                    return;
+                  }
+                  if (file.size > 100 * 1024 * 1024) {
+                    setFileValidationError(
+                      isGu
+                        ? "ફાઇલનું કદ ૧૦૦ MB કરતાં વધુ છે. કૃપા કરીને ૧૦૦ MB થી નાની ફાઇલ પસંદ કરો."
+                        : "File size exceeds 100 MB limit."
+                    );
+                    return;
+                  }
+                  setFileValidationError(null);
+                  setSelectedFile(file);
+                }}
+                className={`border-2 border-dashed rounded-xl p-6 text-center transition-all ${
+                  isDragOver
+                    ? "border-[#016BB7] bg-blue-50/50 scale-[1.01]"
+                    : "border-slate-300 hover:border-[#016BB7] bg-slate-50 hover:bg-slate-100"
+                }`}
+              >
+                <Upload className="h-9 w-9 mx-auto text-[#016BB7] mb-2" />
+                <p className="text-xs font-bold text-slate-800">
+                  {isGu ? "બ્રોડશીટ પીડીએફ અહીં ડ્રેગ કરો અથવા બ્રાઉઝ કરો" : "Drag and drop broadsheet PDF or browse files"}
                 </p>
-                <p className="text-[10px] text-neutral-400 mt-1">
-                  MIME: application/pdf (Max 100 MB)
+                <p className="text-[11px] text-slate-400 mt-1">
+                  MIME: application/pdf (Max limit: 100 MB)
                 </p>
+
+                {/* Hidden native file input */}
                 <input
+                  ref={pdfFileInputRef}
                   type="file"
                   accept=".pdf,application/pdf"
-                  required
-                  onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-                  className="mt-3 block w-full text-xs text-neutral-500 file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-[#016BB7] file:text-white hover:file:bg-[#016BB7]/90"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    if (!file.name.toLowerCase().endsWith(".pdf") && file.type !== "application/pdf") {
+                      setFileValidationError(
+                        isGu
+                          ? "અમાન્ય ફાઇલ પ્રકાર. કૃપા કરીને પીડીએફ (.pdf) ફાઇલ પસંદ કરો."
+                          : "Invalid file type. Please upload a PDF file (.pdf)."
+                      );
+                      return;
+                    }
+                    if (file.size > 100 * 1024 * 1024) {
+                      setFileValidationError(
+                        isGu ? "ફાઇલનું કદ ૧૦૦ MB કરતાં વધુ છે." : "File size exceeds 100 MB limit."
+                      );
+                      return;
+                    }
+                    setFileValidationError(null);
+                    setSelectedFile(file);
+                  }}
                 />
+
+                {/* Prominent Browse Files / Choose PDF Button */}
+                <button
+                  type="button"
+                  onClick={() => pdfFileInputRef.current?.click()}
+                  className="mt-3 px-4 py-2 rounded-lg bg-[#016BB7] text-white text-xs font-semibold hover:bg-[#015896] transition-colors shadow-2xs cursor-pointer inline-flex items-center gap-1.5"
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                  <span>{isGu ? "પીડીએફ ફાઇલ પસંદ કરો (Choose PDF)" : "Choose PDF / Browse Files"}</span>
+                </button>
               </div>
 
+              {fileValidationError && (
+                <div className="p-2.5 bg-rose-50 border border-rose-200 rounded-lg text-rose-800 text-xs flex items-center gap-1.5">
+                  <AlertTriangle className="h-4 w-4 shrink-0 text-rose-600" />
+                  <span>{fileValidationError}</span>
+                </div>
+              )}
+
               {selectedFile && (
-                <div className="text-xs bg-neutral-100 p-2.5 rounded text-neutral-700 flex justify-between">
-                  <span className="truncate max-w-[200px]">{selectedFile.name}</span>
-                  <span className="font-mono text-neutral-500">
-                    {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
-                  </span>
+                <div className="bg-slate-50 border border-slate-200 p-3 rounded-lg flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2 overflow-hidden">
+                    <FileText className="h-5 w-5 text-[#016BB7] shrink-0" />
+                    <div className="overflow-hidden">
+                      <p className="font-semibold text-slate-800 truncate">{selectedFile.name}</p>
+                      <p className="font-mono text-[11px] text-slate-500">
+                        {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB • application/pdf
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      disabled={isUploading}
+                      onClick={() => pdfFileInputRef.current?.click()}
+                      className="px-2 py-1 rounded border border-slate-300 text-slate-700 text-[11px] font-medium hover:bg-slate-100 disabled:opacity-50"
+                    >
+                      {isGu ? "બદલો" : "Replace"}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={isUploading}
+                      onClick={() => {
+                        setSelectedFile(null);
+                        if (pdfFileInputRef.current) pdfFileInputRef.current.value = "";
+                      }}
+                      className="text-rose-600 hover:text-rose-800 p-1"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Progress Indicator */}
+              {isUploading && (
+                <div className="space-y-1.5 p-3 rounded-lg bg-blue-50 border border-blue-200 text-xs text-[#016BB7]">
+                  <div className="flex items-center justify-between font-semibold">
+                    <span>{isGu ? "પ્રોસેસિંગ અને પાના રેન્ડર થઈ રહ્યા છે..." : "Uploading & processing pages..."}</span>
+                    <span className="font-mono animate-pulse">Rasterizing PDF...</span>
+                  </div>
+                  <div className="w-full h-2 bg-blue-200 rounded-full overflow-hidden">
+                    <div className="h-full bg-[#016BB7] rounded-full animate-pulse"></div>
+                  </div>
+                  <p className="text-[10px] text-slate-500 mt-1">
+                    {isGu
+                      ? "મોટી બ્રોડશીટ પીડીએફ પ્રોસેસ થવામાં થોડી સેકન્ડ્સ લાગી શકે છે."
+                      : "Large broadsheets may take a few moments to generate high-resolution page spreads."}
+                  </p>
                 </div>
               )}
 
               <div className="flex justify-end gap-2 pt-2 border-t">
                 <button
                   type="button"
+                  disabled={isUploading}
                   onClick={() => setUploadTargetEdition(null)}
-                  className="px-4 py-2 rounded text-neutral-600 text-xs hover:bg-neutral-100"
+                  className="px-4 py-2 rounded text-neutral-600 text-xs hover:bg-neutral-100 disabled:opacity-50"
                 >
                   {isGu ? "રદ કરો" : "Cancel"}
                 </button>
@@ -738,7 +898,19 @@ export function EpaperAdminDashboard({ lang }: { lang: string }) {
                   className="px-4 py-2 rounded bg-[#016BB7] text-white text-xs font-bold hover:bg-[#016BB7]/90 disabled:opacity-50 flex items-center gap-2"
                 >
                   <Upload className="h-3.5 w-3.5" />
-                  <span>{isUploading ? (isGu ? "પ્રોસેસ થઈ રહ્યું છે..." : "Processing Pages...") : (isGu ? "અપલોડ શરૂ કરો" : "Start Processing")}</span>
+                  <span>
+                    {isUploading
+                      ? isGu
+                        ? "પ્રોસેસ થઈ રહ્યું છે..."
+                        : "Processing Pages..."
+                      : uploadTargetEdition.totalPageCount > 0
+                      ? isGu
+                        ? "પીડીએફ બદલો અને પ્રોસેસ કરો"
+                        : "Replace & Process PDF"
+                      : isGu
+                      ? "અપલોડ શરૂ કરો"
+                      : "Start Processing"}
+                  </span>
                 </button>
               </div>
             </form>

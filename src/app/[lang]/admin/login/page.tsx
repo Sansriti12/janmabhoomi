@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useStaffAuth } from "@/lib/context/StaffAuthContext";
 import { Lock, Mail, AlertCircle, Loader2, ShieldCheck, Eye, EyeOff } from "lucide-react";
+import { BrandLogo } from "@/components/shared/BrandLogo";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -42,14 +43,14 @@ export default function AdminLoginPage() {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         {/* Brand Logo & Clean Heading */}
         <div className="text-center">
-          <div className="mx-auto w-14 h-14 rounded-2xl bg-[#016BB7] flex items-center justify-center font-bold text-white text-2xl shadow-md border border-blue-600/30">
-            JB
+          <div className="flex justify-center mb-3">
+            <BrandLogo priority className="hover:opacity-95 transition-opacity" />
           </div>
-          <h1 className="mt-4 text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 font-serif">
-            {isGu ? "એડમિન લૉગિન" : "Admin Login"}
+          <h1 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 font-serif">
+            {isGu ? "સમાચાર સંપાદકીય એડમિન લૉગિન" : "Newsroom Admin Login"}
           </h1>
-          <p className="mt-1.5 text-xs text-slate-500 font-medium">
-            {isGu ? "જન્મભૂમિ ન્યૂઝરૂમ પોર્ટલ" : "Janmabhoomi Newsroom Portal"}
+          <p className="mt-1 text-xs text-slate-500 font-medium">
+            {isGu ? "જન્મભૂમિ દૈનિક — સૌરાષ્ટ્ર ટ્રસ્ટ ન્યૂઝરૂમ CMS પોર્ટલ" : "Janmabhoomi Daily — Saurashtra Trust Editorial Newsroom CMS"}
           </p>
         </div>
       </div>
@@ -124,7 +125,7 @@ export default function AdminLoginPage() {
             </div>
 
             {/* Submit Button */}
-            <div className="pt-1">
+            <div className="pt-1 space-y-2.5">
               <button
                 type="submit"
                 disabled={isSubmitting}
@@ -141,6 +142,17 @@ export default function AdminLoginPage() {
                     <span>{isGu ? "લૉગિન કરો" : "Sign in"}</span>
                   </>
                 )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail("admin@janmabhoomi.in");
+                  setPassword("Admin@123456");
+                }}
+                className="w-full flex justify-center items-center gap-1.5 py-2 px-3 border border-dashed border-slate-300 rounded-xl text-xs font-semibold text-slate-600 bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer"
+              >
+                <span>{isGu ? "ટેસ્ટ એડમિન વિગતો આપોઆપ ભરો (1-Click Fill)" : "Fill Test Admin Credentials (1-Click)"}</span>
               </button>
             </div>
           </form>

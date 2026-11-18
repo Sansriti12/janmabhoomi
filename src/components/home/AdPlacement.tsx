@@ -17,7 +17,7 @@ export function AdPlacement({ slot, lang, label }: AdPlacementProps) {
   return (
     <section
       aria-label={label}
-      className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 my-4"
+      className="mx-auto max-w-7xl 2xl:max-w-[1440px] px-4 sm:px-6 lg:px-8 my-4"
     >
       <div className="rounded-md border border-[#016BB7]/20 bg-white px-5 py-4">
         <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-widest text-[#292725]/50 mb-2">

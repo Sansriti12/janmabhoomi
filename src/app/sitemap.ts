@@ -17,10 +17,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "sports",
     "entertainment",
     "maran",
-    "international",
-    "education",
-    "religion-culture",
-    "special-coverage",
   ];
 
   const articles = await newsDataProvider.getLatestArticles(50);

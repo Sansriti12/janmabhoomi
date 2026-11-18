@@ -46,12 +46,11 @@ export function PanchangWidget({
   dict,
   showChoghadiya = false,
 }: PanchangWidgetProps) {
-  const [selectedCity, setSelectedCity] = useState<CityKey>("mumbai");
   const [activeChoghadiyaTab, setActiveChoghadiyaTab] = useState<"day" | "night">("day");
 
-  // Determine active panchang data according to selected city
+  // Mumbai-first Panchang per user specification
   const activeData: PanchangData =
-    (cityPanchangMap && cityPanchangMap[selectedCity]) ||
+    (cityPanchangMap && (cityPanchangMap.mumbai || cityPanchangMap[CITIES[0].key])) ||
     panchang ||
     initialPanchang!;
 
@@ -60,63 +59,62 @@ export function PanchangWidget({
   return (
     <section
       aria-labelledby="panchang-heading"
-      className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6"
+      className="mx-auto max-w-7xl 2xl:max-w-[1440px] px-4 sm:px-6 lg:px-8 py-4 sm:py-6 notranslate"
+      translate="no"
+      suppressHydrationWarning
     >
-      <div className="rounded-md border border-[#016BB7]/50 bg-white p-5 sm:p-6 shadow-xs">
-        {/* Top Header & Disclaimers */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-[#292725]/12">
-          <div className="flex flex-wrap items-center gap-2.5">
-            <Compass className="h-5 w-5 text-[#016BB7]" />
-            <h2
-              id="panchang-heading"
-              className="text-lg sm:text-xl font-extrabold text-[#016BB7]"
-            >
-              {dict.home.panchangTitle} (પંચાંગ)
-            </h2>
-            <span className="text-xs font-semibold text-[#016BB7] bg-[#016BB7]/10 px-2.5 py-0.5 rounded-xs">
-              {getLocalizedText(activeData.vikramSamvat, lang)}
-            </span>
+      <div className="rounded-xl border-2 border-[#016BB7]/30 bg-linear-to-b from-white to-[#F0F6FA]/50 p-5 sm:p-7 shadow-xs" suppressHydrationWarning>
+        {/* Top Header & Tagline */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b-2 border-[#016BB7]/20">
+          <div>
+            <div className="flex flex-wrap items-center gap-2.5">
+              <span className="h-6 w-1.5 bg-[#016BB7] rounded-full" />
+              <Compass className="h-5 w-5 text-[#016BB7]" />
+              <h2
+                id="panchang-heading"
+                className="text-lg sm:text-2xl font-extrabold text-[#1F2937] tracking-tight font-gujarati"
+              >
+                {lang === "gu"
+                  ? "જન્મભૂમિ દૈનિક પંચાંગ"
+                  : "Janmabhoomi Daily Panchang"}
+              </h2>
+            </div>
+            <p className="mt-1.5 text-xs sm:text-sm text-[#1F2937]/75 font-medium font-gujarati">
+              {lang === "gu"
+                ? "દૈનિક તિથિ, શુભ મુહૂર્ત, ચોઘડિયા અને સૂર્યોદય-સૂર્યાસ્ત સમય"
+                : "Authentic daily tithi, auspicious timings, choghadiya and solar schedule"}
+            </p>
           </div>
 
-          {/* Demonstration Notice Badge */}
-          <div className="inline-flex items-center gap-1.5 rounded bg-[#B83232]/10 border border-[#B83232]/30 px-2.5 py-1 text-[11px] font-bold text-[#B83232]">
-            <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
-            <span>{dict.home.panchangSampleBadge}</span>
+          <div className="flex items-center gap-3 shrink-0">
+            {/* Daily Timings Badge */}
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#016BB7]/10 border border-[#016BB7]/25 px-3 py-1 text-xs font-bold text-[#016BB7]">
+              <span className="h-2 w-2 rounded-full bg-[#016BB7] animate-pulse" />
+              <span>{lang === "gu" ? "દૈનિક સમય" : "Daily Timings"}</span>
+            </span>
+
+            <Link
+              href={`/${lang}/panchang`}
+              className="hidden sm:inline-flex items-center gap-1 text-xs sm:text-sm font-bold text-[#016BB7] hover:underline"
+            >
+              <span>{lang === "gu" ? "સંપૂર્ણ પંચાંગ જુઓ" : "View Full Panchang"}</span>
+              <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
         </div>
 
-        {/* City Selector Pill Bar */}
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-[#016BB7] shrink-0" />
-            <span className="text-xs font-bold uppercase tracking-wider text-[#292725]/75">
-              {lang === "gu" ? "આવૃત્તિ શહેર પસંદ કરો:" : "Select City Edition:"}
-            </span>
-            <div className="flex items-center gap-1.5">
-              {CITIES.map((city) => (
-                <button
-                  key={city.key}
-                  type="button"
-                  onClick={() => setSelectedCity(city.key)}
-                  className={`rounded px-2.5 py-1 text-xs font-bold transition-all cursor-pointer ${
-                    selectedCity === city.key
-                      ? "bg-[#016BB7] text-white shadow-xs"
-                      : "bg-[#FAF8F3] border border-[#292725]/15 text-[#292725]/80 hover:border-[#016BB7] hover:text-[#016BB7]"
-                  }`}
-                >
-                  {lang === "gu" ? city.gu : city.en}
-                </button>
-              ))}
-            </div>
+        {/* Mumbai Edition Label */}
+        <div className="mt-3.5 flex items-center justify-between gap-3">
+          <div className="inline-flex items-center gap-1.5 rounded-lg bg-[#016BB7]/10 border border-[#016BB7]/25 px-3 py-1 text-xs font-bold text-[#016BB7]">
+            <MapPin className="h-3.5 w-3.5 text-[#016BB7] shrink-0" />
+            <span>{lang === "gu" ? "મુંબઈ આવૃત્તિ" : "Mumbai Edition"}</span>
           </div>
 
-          <div className="text-xs font-semibold text-[#016BB7]">
-            {activeData.editionCity
-              ? getLocalizedText(activeData.editionCity, lang)
-              : lang === "gu"
-              ? `${selectedCity === "mumbai" ? "મુંબઈ" : selectedCity === "ahmedabad" ? "અમદાવાદ" : "રાજકોટ"} આવૃત્તિ`
-              : `${selectedCity.charAt(0).toUpperCase() + selectedCity.slice(1)} Edition`}
-          </div>
+          {activeData.displayDate && (
+            <span className="text-xs font-semibold text-slate-500">
+              {getLocalizedText(activeData.displayDate, lang)}
+            </span>
+          )}
         </div>
 
         {/* 6-Cell Daily Astronomical Grid */}

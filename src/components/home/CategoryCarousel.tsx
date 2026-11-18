@@ -38,22 +38,22 @@ export function CategoryCarousel({ categories, lang, dict }: CategoryCarouselPro
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const mobileScrollRef = useRef<HTMLDivElement>(null);
 
-  // Group 0 = first 6 categories, Group 1 = next 6 categories
-  const groupSize = 6;
+  // Group 0 = first 4 categories, Group 1 = next 4 categories (perfect 4 + 4 split of 8 categories)
+  const groupSize = 4;
   const totalGroups = Math.ceil(categories.length / groupSize) || 2;
   const currentGroupCategories = categories.slice(
     currentGroup * groupSize,
     currentGroup * groupSize + groupSize
   );
 
-  // Reliable 10-second automatic transition (Group 1 -> Group 2 -> Group 1 -> Group 2...)
+  // 5-second automatic transition between balanced groups
   const startTimer = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current);
     if (totalGroups <= 1) return;
 
     timerRef.current = setInterval(() => {
       setCurrentGroup((prev) => (prev + 1) % totalGroups);
-    }, 10000);
+    }, 5000);
   }, [totalGroups]);
 
   useEffect(() => {
@@ -81,7 +81,7 @@ export function CategoryCarousel({ categories, lang, dict }: CategoryCarouselPro
   return (
     <section
       aria-labelledby="category-carousel-heading"
-      className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 border-t border-[#016BB7]/15"
+      className="mx-auto max-w-7xl 2xl:max-w-[1440px] px-4 sm:px-6 lg:px-8 py-6 border-t border-[#016BB7]/15"
       onKeyDown={handleKeyDown}
       tabIndex={0}
     >
@@ -123,8 +123,8 @@ export function CategoryCarousel({ categories, lang, dict }: CategoryCarouselPro
         </div>
       </div>
 
-      {/* DESKTOP VIEW: Exactly 6 Category Cards in One Horizontal Row (lg and up) */}
-      <div className="hidden lg:grid grid-cols-6 gap-3.5 transition-opacity duration-300">
+      {/* DESKTOP & TABLET VIEW: Perfectly balanced 4 Category Cards per Slide (4 + 4 split) */}
+      <div className="hidden sm:grid grid-cols-2 lg:grid-cols-4 gap-4 transition-opacity duration-300">
         {currentGroupCategories.map((item) => {
           const categoryName = getLocalizedText(item.name, lang);
           const ctaLabel = getLocalizedText(item.ctaText, lang);

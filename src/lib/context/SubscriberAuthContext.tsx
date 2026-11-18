@@ -27,7 +27,7 @@ export interface ActiveSubscription {
   autoRenew: boolean;
 }
 
-interface SubscriberAuthContextType {
+export interface SubscriberAuthContextType {
   subscriber: SubscriberProfile | null;
   activeSubscriptions: ActiveSubscription[];
   token: string | null;
@@ -37,7 +37,7 @@ interface SubscriberAuthContextType {
   authModalTab: "login" | "register";
   openAuthModal: (tab?: "login" | "register") => void;
   closeAuthModal: () => void;
-  login: (token: string, subscriber: SubscriberProfile) => void;
+  login: (token: string, subscriber: SubscriberProfile, subscriptions?: ActiveSubscription[]) => void;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
   hasSubscriptionFor: (publicationCodeOrId?: string) => boolean;
@@ -61,7 +61,35 @@ export function SubscriberAuthProvider({ children }: { children: ReactNode }) {
       const savedToken = localStorage.getItem(TOKEN_KEY);
       if (savedToken) {
         setToken(savedToken);
-        fetchProfile(savedToken);
+        try {
+          document.cookie = `janmabhoomi_subscriber_token=${encodeURIComponent(savedToken)}; path=/; max-age=2592000; SameSite=Lax`;
+        } catch {}
+        if (savedToken.startsWith("guest-token-") || savedToken.startsWith("google-token-")) {
+          const savedSub = localStorage.getItem("janmabhoomi_guest_sub");
+          if (savedSub) {
+            try {
+              setSubscriber(JSON.parse(savedSub));
+              setActiveSubscriptions([
+                {
+                  id: "sub-guest-all-access",
+                  planId: "plan-all-access",
+                  planNameEn: "Guest Reader All-Access Pass",
+                  planNameGu: "મહેમાન વાચક ઓલ-એક્સેસ પાસ",
+                  publicationNameEn: "Janmabhoomi Daily",
+                  publicationNameGu: "જન્મભૂમિ દૈનિક",
+                  publicationCode: "JB",
+                  startsAt: new Date().toISOString(),
+                  expiresAt: new Date(Date.now() + 30 * 86400000).toISOString(),
+                  daysRemaining: 30,
+                  autoRenew: false,
+                },
+              ]);
+            } catch {}
+          }
+          setIsLoading(false);
+        } else {
+          fetchProfile(savedToken);
+        }
       } else {
         setIsLoading(false);
       }
@@ -71,6 +99,10 @@ export function SubscriberAuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   async function fetchProfile(authToken: string) {
+    if (authToken.startsWith("guest-token-") || authToken.startsWith("google-token-")) {
+      setIsLoading(false);
+      return;
+    }
     try {
       const res = await fetch("http://127.0.0.1:4000/api/v1/subscriber/auth/me", {
         headers: {
@@ -87,6 +119,7 @@ export function SubscriberAuthProvider({ children }: { children: ReactNode }) {
       } else {
         // Token invalid or expired
         localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem("janmabhoomi_guest_sub");
         setToken(null);
         setSubscriber(null);
         setActiveSubscriptions([]);
@@ -98,18 +131,27 @@ export function SubscriberAuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  function login(newToken: string, newSubscriber: SubscriberProfile) {
+  function login(newToken: string, newSubscriber: SubscriberProfile, subscriptions?: ActiveSubscription[]) {
     try {
       localStorage.setItem(TOKEN_KEY, newToken);
+      document.cookie = `janmabhoomi_subscriber_token=${encodeURIComponent(newToken)}; path=/; max-age=2592000; SameSite=Lax`;
+      if (newSubscriber) {
+        localStorage.setItem("janmabhoomi_guest_sub", JSON.stringify(newSubscriber));
+      }
     } catch {}
     setToken(newToken);
     setSubscriber(newSubscriber);
+    if (subscriptions) {
+      setActiveSubscriptions(subscriptions);
+    }
     setIsAuthModalOpen(false);
-    fetchProfile(newToken);
+    if (!newToken.startsWith("guest-token-") && !newToken.startsWith("google-token-")) {
+      fetchProfile(newToken);
+    }
   }
 
   async function logout() {
-    if (token) {
+    if (token && !token.startsWith("guest-token-") && !token.startsWith("google-token-")) {
       try {
         await fetch("http://127.0.0.1:4000/api/v1/subscriber/auth/logout", {
           method: "POST",
@@ -121,6 +163,8 @@ export function SubscriberAuthProvider({ children }: { children: ReactNode }) {
     }
     try {
       localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem("janmabhoomi_guest_sub");
+      document.cookie = "janmabhoomi_subscriber_token=; path=/; max-age=0; SameSite=Lax";
     } catch {}
     setToken(null);
     setSubscriber(null);

@@ -63,34 +63,6 @@ export const CATEGORY_METADATA: Record<
       gu: "જન્મભૂમિમાં પ્રકાશિત થતી અવસાન નોંધ, બેસણું અને શ્રદ્ધાંજલિ વિભાગ.",
     },
   },
-  international: {
-    title: { en: "International", gu: "આંતરરાષ્ટ્રીય" },
-    description: {
-      en: "Global diplomacy, diaspora affairs, and world news.",
-      gu: "વૈશ્વિક રાજદ્વારી, વિદેશમાં વસતા ભારતીયો અને આંતરરાષ્ટ્રીય સમાચાર.",
-    },
-  },
-  education: {
-    title: { en: "Education & Youth", gu: "શિક્ષણ અને યુવા" },
-    description: {
-      en: "University updates, board examinations, and academic policy reforms.",
-      gu: "યુનિવર્સિટી, બોર્ડ પરીક્ષાઓ અને નવી શિક્ષણ નીતિ અંગેના સમાચાર.",
-    },
-  },
-  "religion-culture": {
-    title: { en: "Religion & Culture", gu: "ધર્મ અને સંસ્કૃતિ" },
-    description: {
-      en: "Heritage preservation, festivals, philosophical discourses, and cultural traditions.",
-      gu: "ભારતીય સંસ્કૃતિ, તહેવારો, આધ્યાત્મિક ચિંતન અને વારસો.",
-    },
-  },
-  "special-coverage": {
-    title: { en: "Special Coverage", gu: "વિશેષ કવરેજ" },
-    description: {
-      en: "Multi-part investigative series and special editorial dossiers.",
-      gu: "વિશેષ સંશોધનાત્મક અહેવાલો અને ગ્રાઉન્ડ રિપોર્ટિંગ શ્રેણી.",
-    },
-  },
   events: {
     title: { en: "Events & Forums", gu: "કાર્યક્રમો અને સંવાદ" },
     description: {

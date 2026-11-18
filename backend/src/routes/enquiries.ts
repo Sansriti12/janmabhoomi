@@ -1,5 +1,6 @@
 import { FastifyInstance, FastifyPluginAsync } from "fastify";
 import { z } from "zod";
+import { verifyStaffAuth } from "../services/staffAuthService.js";
 
 // Zod schema for public archive enquiry submission
 const archiveEnquirySchema = z.object({
@@ -231,6 +232,159 @@ export const enquiriesRoutes: FastifyPluginAsync = async (app: FastifyInstance) 
       app.log.error(err, "Failed to save contact enquiry");
       reply.status(500);
       return { success: false, error: "Failed to submit contact message to database." };
+    }
+  });
+
+  /**
+   * GET /api/v1/enquiries/archive
+   * Staff/Admin list of archive research enquiries with search & filters.
+   */
+  app.get("/archive", { preHandler: verifyStaffAuth }, async (request, reply) => {
+    const query = request.query as {
+      search?: string;
+      status?: string;
+      publicationId?: string;
+      page?: string;
+      limit?: string;
+    };
+
+    const page = Math.max(1, parseInt(query.page || "1", 10));
+    const limit = Math.min(100, Math.max(1, parseInt(query.limit || "20", 10)));
+    const skip = (page - 1) * limit;
+
+    const where: any = {};
+    if (query.status) where.status = query.status;
+    if (query.publicationId) where.publicationId = query.publicationId;
+    if (query.search) {
+      where.OR = [
+        { referenceNumber: { contains: query.search, mode: "insensitive" } },
+        { fullName: { contains: query.search, mode: "insensitive" } },
+        { email: { contains: query.search, mode: "insensitive" } },
+        { contactNumber: { contains: query.search, mode: "insensitive" } },
+      ];
+    }
+
+    try {
+      const [total, items] = await Promise.all([
+        app.prisma.archiveEnquiry.count({ where }),
+        app.prisma.archiveEnquiry.findMany({
+          where,
+          orderBy: { createdAt: "desc" },
+          skip,
+          take: limit,
+        }),
+      ]);
+
+      return reply.send({
+        success: true,
+        data: items,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
+      });
+    } catch (err: any) {
+      app.log.error(err, "Failed to fetch archive enquiries");
+      return reply.status(500).send({ success: false, error: "Failed to retrieve archive enquiries." });
+    }
+  });
+
+  /**
+   * PATCH /api/v1/enquiries/archive/:id/status
+   * Update status of an archive enquiry.
+   */
+  app.patch("/archive/:id/status", { preHandler: verifyStaffAuth }, async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const body = request.body as { status: string; resolutionNotes?: string };
+
+    try {
+      const updated = await app.prisma.archiveEnquiry.update({
+        where: { id },
+        data: {
+          status: body.status as any,
+          staffNotes: body.resolutionNotes ?? undefined,
+        },
+      });
+      return reply.send({ success: true, data: updated });
+    } catch (err: any) {
+      return reply.status(400).send({ success: false, error: err.message || "Failed to update enquiry status." });
+    }
+  });
+
+  /**
+   * GET /api/v1/enquiries/contact
+   * Staff/Admin list of general contact & reader messages.
+   */
+  app.get("/contact", { preHandler: verifyStaffAuth }, async (request, reply) => {
+    const query = request.query as {
+      search?: string;
+      status?: string;
+      page?: string;
+      limit?: string;
+    };
+
+    const page = Math.max(1, parseInt(query.page || "1", 10));
+    const limit = Math.min(100, Math.max(1, parseInt(query.limit || "20", 10)));
+    const skip = (page - 1) * limit;
+
+    const where: any = {};
+    if (query.status) where.status = query.status;
+    if (query.search) {
+      where.OR = [
+        { fullName: { contains: query.search, mode: "insensitive" } },
+        { email: { contains: query.search, mode: "insensitive" } },
+        { subject: { contains: query.search, mode: "insensitive" } },
+        { message: { contains: query.search, mode: "insensitive" } },
+      ];
+    }
+
+    try {
+      const [total, items] = await Promise.all([
+        app.prisma.contactEnquiry.count({ where }),
+        app.prisma.contactEnquiry.findMany({
+          where,
+          orderBy: { createdAt: "desc" },
+          skip,
+          take: limit,
+        }),
+      ]);
+
+      return reply.send({
+        success: true,
+        data: items,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
+      });
+    } catch (err: any) {
+      app.log.error(err, "Failed to fetch contact messages");
+      return reply.status(500).send({ success: false, error: "Failed to retrieve contact messages." });
+    }
+  });
+
+  /**
+   * PATCH /api/v1/enquiries/contact/:id/status
+   * Update status of a contact message.
+   */
+  app.patch("/contact/:id/status", { preHandler: verifyStaffAuth }, async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const body = request.body as { status: string };
+
+    try {
+      const updated = await app.prisma.contactEnquiry.update({
+        where: { id },
+        data: {
+          status: body.status as any,
+        },
+      });
+      return reply.send({ success: true, data: updated });
+    } catch (err: any) {
+      return reply.status(400).send({ success: false, error: err.message || "Failed to update contact status." });
     }
   });
 };

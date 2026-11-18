@@ -41,7 +41,7 @@ export function Footer({ lang, dict }: FooterProps) {
       style={{ backgroundColor: "#016BB7" }}
       className="mt-8 border-t-2 border-[#016BB7] bg-[#016BB7] text-white"
     >
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 sm:py-7">
+      <div className="mx-auto max-w-7xl 2xl:max-w-[1440px] px-4 sm:px-6 lg:px-8 py-6 sm:py-7">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 pb-5 border-b border-white/20">
           {/* Col 1 (4 Cols): Janmabhoomi Brand, Verified Short Intro & Socials */}
           <div className="lg:col-span-4 space-y-2.5">

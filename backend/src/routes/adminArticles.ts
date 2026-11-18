@@ -28,7 +28,7 @@ function generateSlug(title: string): string {
 
 const createArticleSchema = z.object({
   publicationId: z.string().refine((id) => isPermittedPublicationId(id), {
-    message: "Invalid publication. Only Janmabhoomi (pub-janmabhoomi) and Janmabhoomi Pravasi (pub-pravasi) are permitted.",
+    message: "Invalid publication. Only Janmabhoomi (pub-janmabhoomi), Janmabhoomi Pravasi (pub-pravasi), and Janmabhoomi Purti (pub-purti) are permitted.",
   }),
   categoryId: z.string().min(1, "Category is required"),
   authorId: z.string().uuid().optional(),
@@ -40,7 +40,7 @@ const createArticleSchema = z.object({
   isSubLead: z.boolean().default(false),
   isHeadlineBrief: z.boolean().default(false),
   isPaywalled: z.boolean().default(false),
-  featuredImageUrl: z.string().url().max(500).optional().or(z.literal("")),
+  featuredImageUrl: z.string().max(1000).optional().or(z.literal("")),
   imageCaptionGu: z.string().max(500).optional(),
   imageCaptionEn: z.string().max(500).optional(),
   epaperPageNumber: z.number().int().min(1).max(100).optional(),
@@ -60,10 +60,11 @@ const updateArticleSchema = z.object({
   isSubLead: z.boolean().optional(),
   isHeadlineBrief: z.boolean().optional(),
   isPaywalled: z.boolean().optional(),
-  featuredImageUrl: z.string().url().max(500).nullable().optional().or(z.literal("")),
+  featuredImageUrl: z.string().max(1000).nullable().optional().or(z.literal("")),
   imageCaptionGu: z.string().max(500).nullable().optional(),
   imageCaptionEn: z.string().max(500).nullable().optional(),
   epaperPageNumber: z.number().int().min(1).max(100).nullable().optional(),
+  tags: z.array(z.string()).optional(),
   retranslate: z.boolean().default(true),
 });
 

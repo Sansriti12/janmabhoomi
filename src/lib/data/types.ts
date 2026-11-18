@@ -8,10 +8,6 @@ export type CategorySlug =
   | "entertainment"
   | "editorial"
   | "maran"
-  | "international"
-  | "education"
-  | "religion-culture"
-  | "special-coverage"
   | "events";
 
 export interface BilingualText {

@@ -13,7 +13,6 @@ import { paymentRoutes } from "./routes/payments.js";
 import { subscriptionRoutes } from "./routes/subscriptions.js";
 import { adminPaymentRoutes } from "./routes/adminPayments.js";
 import { staffAuthRoutes } from "./routes/staffAuth.js";
-import { adminStaffRoutes } from "./routes/adminStaff.js";
 import { adminDashboardRoutes } from "./routes/adminDashboard.js";
 import { adminArticlesRoutes } from "./routes/adminArticles.js";
 import { adminMediaRoutes } from "./routes/adminMedia.js";
@@ -44,6 +43,7 @@ export function buildApp(): FastifyInstance {
   // Security headers via Helmet
   app.register(helmet, {
     contentSecurityPolicy: env.NODE_ENV === "production",
+    crossOriginResourcePolicy: { policy: "cross-origin" },
   });
 
   // CORS configuration
@@ -89,7 +89,6 @@ export function buildApp(): FastifyInstance {
   app.register(subscriptionRoutes, { prefix: "/api/v1/subscriptions" });
   app.register(adminPaymentRoutes, { prefix: "/api/v1/admin/payments" });
   app.register(staffAuthRoutes, { prefix: "/api/v1/admin/auth" });
-  app.register(adminStaffRoutes, { prefix: "/api/v1/admin/staff" });
   app.register(adminDashboardRoutes, { prefix: "/api/v1/admin" });
   app.register(adminArticlesRoutes, { prefix: "/api/v1/admin/articles" });
   app.register(adminMediaRoutes, { prefix: "/api/v1/media" });

@@ -143,15 +143,7 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
     { label: dict.nav.business, href: `/${lang}/category/business` },
     { label: dict.nav.sports, href: `/${lang}/category/sports` },
     { label: dict.nav.entertainment, href: `/${lang}/category/entertainment` },
-  ];
-
-  const moreNav = [
     { label: dict.nav.editorial, href: `/${lang}/editorial` },
-    { label: dict.nav.international, href: `/${lang}/category/international` },
-    { label: dict.nav.education, href: `/${lang}/category/education` },
-    { label: dict.nav.religionCulture, href: `/${lang}/category/religion-culture` },
-    { label: dict.nav.specialCoverage, href: `/${lang}/category/special-coverage` },
-    { label: dict.nav.events, href: `/${lang}/events` },
     { label: dict.nav.panchang, href: `/${lang}/panchang` },
     { label: dict.nav.maran, href: `/${lang}/category/maran` },
     { label: dict.nav.archiveEnquiry, href: `/${lang}/archive-enquiry` },
@@ -162,8 +154,6 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
     if (exact) return pathname === href;
     return pathname === href || pathname.startsWith(`${href}/`);
   };
-
-  const isMoreActive = moreNav.some((sub) => isActive(sub.href));
 
   const filteredSearchResults = searchQuery.trim()
     ? searchableArticles.filter((article) => {
@@ -184,7 +174,7 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
         style={{ backgroundColor: "#016BB7" }}
         className="bg-[#016BB7] border-b border-white/20 text-white text-xs"
       >
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-8 flex items-center justify-between">
+        <div className="mx-auto max-w-7xl 2xl:max-w-[1440px] px-4 sm:px-6 lg:px-8 h-8 flex items-center justify-between">
           {/* Left: Automatically generated current date & day */}
           <div className="flex items-center gap-2.5 font-medium truncate">
             <span className="font-semibold text-white tracking-wide">{formattedDate || "મંગળવાર, ૩ નવેમ્બર ૨૦૨૬"}</span>
@@ -259,54 +249,37 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
         </div>
       </div>
 
-      {/* ROW 2 – MAIN BRANDING HEADER (Prominently Centering the Official Blue Janmabhoomi Logo) */}
+      {/* ROW 2 – MAIN BRANDING HEADER (Logo placed cleanly on the LEFT per Modern Redesign) */}
       <div className="bg-white overflow-hidden sm:overflow-visible">
-        <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8 py-2 sm:py-3.5 flex items-center justify-between gap-1.5 sm:gap-3">
-          {/* Left: Mobile Hamburger + Optional compact brand mark for small screens */}
-          <div className="flex items-center gap-1 sm:gap-3 shrink-0">
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden inline-flex items-center justify-center rounded-lg p-1.5 sm:p-2 text-[#016BB7] hover:bg-[#F0F6FA] border border-[#016BB7]/25 shrink-0"
-              aria-label="Toggle navigation menu"
-              aria-expanded={mobileMenuOpen}
-            >
-              {mobileMenuOpen ? (
-                <X className="h-5 w-5" />
-              ) : (
-                <Menu className="h-5 w-5" />
-              )}
-            </button>
-          </div>
-
-          {/* Centre: Official Blue Janmabhoomi Logo from Page 1 of PDF */}
-          <div className="flex-1 flex justify-center items-center px-1 min-w-0">
+        <div className="mx-auto max-w-7xl 2xl:max-w-[1440px] px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3.5 flex items-center justify-between gap-4">
+          {/* Left: Official Blue Janmabhoomi Logo */}
+          <div className="flex items-center shrink-0">
             <Link
               href={`/${lang}`}
-              className="group flex flex-col items-center text-center select-none"
+              className="group flex items-center select-none"
               title="Janmabhoomi - જન્મભૂમિ"
             >
               <BrandLogo priority className="hover:opacity-95 transition-opacity" />
             </Link>
           </div>
 
-          {/* Right: Search + Prominent E-PAPER CTA + Gujarati | EN Switcher */}
-          <div className="flex items-center gap-1 sm:gap-3 shrink-0">
+          {/* Right: Search + E-PAPER CTA + Subscribe / Account + Language Switcher + Mobile Menu Button */}
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
             {/* Search Trigger */}
             <button
               type="button"
               onClick={() => setSearchOpen(!searchOpen)}
-              className="inline-flex items-center gap-2 rounded-lg border border-[#016BB7]/25 bg-white px-2 sm:px-3.5 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-[#1F2937]/90 hover:border-[#016BB7] hover:text-[#016BB7] hover:bg-[#F0F6FA]/50 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-[#016BB7]/25 bg-white px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-semibold text-[#1F2937] hover:border-[#016BB7] hover:text-[#016BB7] hover:bg-[#F0F6FA] transition-all cursor-pointer shadow-2xs"
               aria-label={dict.header.searchButton}
             >
               <Search className="h-4 w-4 text-[#016BB7]" />
-              <span className="hidden sm:inline">{dict.header.searchButton}</span>
+              <span className="hidden md:inline font-medium">{dict.header.searchButton}</span>
             </button>
 
             {/* Prominent E-PAPER CTA Button */}
             <Link
               href={`/${lang}/epaper`}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-[#016BB7] hover:bg-[#016BB7]/90 active:bg-[#015a99] px-2.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold tracking-wide text-white transition-colors shadow-xs"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-[#016BB7] hover:bg-[#016BB7]/90 active:bg-[#015a99] px-2 sm:px-3.5 py-1.5 sm:py-2 text-xs sm:text-sm font-bold tracking-wide text-white transition-colors shadow-xs shrink-0"
             >
               <Newspaper className="h-4 w-4 hidden md:inline" />
               <span>{dict.header.epaperCta}</span>
@@ -316,13 +289,13 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
             {isAuthenticated ? (
               <Link
                 href={`/${lang}/account`}
-                className="hidden sm:inline-flex items-center gap-1.5 rounded-lg border border-[#016BB7]/30 hover:border-[#016BB7] hover:bg-blue-50/50 px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-[#016BB7] transition-colors"
+                className="hidden lg:inline-flex items-center gap-1.5 rounded-lg border border-[#016BB7]/30 hover:border-[#016BB7] hover:bg-blue-50/50 px-2.5 py-1.5 text-xs font-semibold text-[#016BB7] transition-colors"
               >
                 <User className="h-3.5 w-3.5" />
                 <span>{lang === "gu" ? "મારું ખાતું" : "My Account"}</span>
               </Link>
             ) : (
-              <div className="hidden sm:flex items-center gap-1">
+              <div className="hidden lg:flex items-center gap-1">
                 <Link
                   href={`/${lang}/subscribe`}
                   className="inline-flex items-center gap-1 rounded-lg border border-[#016BB7]/30 hover:border-[#016BB7] hover:bg-blue-50/50 px-2.5 py-1.5 text-xs font-semibold text-[#016BB7] transition-colors"
@@ -342,12 +315,12 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
 
             {/* Gujarati | EN Language Switcher */}
             <div
-              className="flex items-center gap-0.5 sm:gap-1.5 text-xs sm:text-sm font-bold pl-0.5 sm:pl-1"
+              className="flex items-center gap-0.5 sm:gap-1 text-xs sm:text-sm font-bold pl-0.5 sm:pl-1 shrink-0"
               aria-label="Language switcher"
             >
               <Link
                 href={getSwitchedLocaleHref("gu")}
-                className={`font-gujarati transition-colors px-1 py-0.5 rounded ${
+                className={`font-gujarati transition-colors px-1 py-0.5 rounded text-[11px] sm:text-xs ${
                   lang === "gu"
                     ? "bg-[#016BB7] text-white"
                     : "text-[#016BB7] hover:bg-[#F0F6FA]"
@@ -358,7 +331,7 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
               <span className="text-[#016BB7]/40">/</span>
               <Link
                 href={getSwitchedLocaleHref("en")}
-                className={`transition-colors px-1 py-0.5 rounded ${
+                className={`transition-colors px-1 py-0.5 rounded text-[11px] sm:text-xs ${
                   lang === "en"
                     ? "bg-[#016BB7] text-white"
                     : "text-[#016BB7] hover:bg-[#F0F6FA]"
@@ -367,6 +340,21 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
                 EN
               </Link>
             </div>
+
+            {/* Mobile Hamburger Menu Button on the RIGHT */}
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="lg:hidden inline-flex items-center justify-center rounded-lg p-1.5 sm:p-2 text-[#016BB7] hover:bg-[#F0F6FA] border border-[#016BB7]/25 shrink-0 cursor-pointer"
+              aria-label="Toggle navigation menu"
+              aria-expanded={mobileMenuOpen}
+            >
+              {mobileMenuOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
+            </button>
           </div>
         </div>
       </div>
@@ -383,7 +371,7 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={dict.header.searchPlaceholder}
-                className="w-full rounded-md border border-[#016BB7]/30 bg-white pl-10 pr-10 py-2 text-sm text-[#1F2937] focus:border-[#016BB7] focus:ring-1 focus:ring-[#016BB7] focus:outline-none"
+                className="w-full rounded-md border border-[#016BB7]/30 bg-white pl-10 pr-10 py-2.5 text-sm text-[#1F2937] focus:border-[#016BB7] focus:ring-1 focus:ring-[#016BB7] focus:outline-none shadow-xs"
               />
               <button
                 type="button"
@@ -429,12 +417,12 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
         </div>
       )}
 
-      {/* ROW 3 – DESKTOP CATEGORY NAVIGATION (Clean Text Links with Brand Blue Indicator & Hover) */}
-      <div className="hidden lg:block bg-white border-t border-b border-[#016BB7]/20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      {/* ROW 3 – DESKTOP CATEGORY NAVIGATION (Evenly balanced across full container width) */}
+      <div className="hidden lg:block bg-white border-t border-b border-[#016BB7]/20 shadow-2xs">
+        <div className="mx-auto max-w-7xl 2xl:max-w-[1440px] px-4 sm:px-6 lg:px-8">
           <nav
             aria-label="Main category navigation"
-            className="flex items-center justify-between w-full h-11 text-xs xl:text-sm font-semibold tracking-wide"
+            className="flex items-center justify-between w-full h-11 text-[13px] xl:text-[14px] font-semibold tracking-normal overflow-x-auto scrollbar-none"
           >
             {primaryNav.map((item) => {
               const active = isActive(item.href, item.exact);
@@ -443,29 +431,29 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
                   key={item.href}
                   href={item.href}
                   style={active ? { color: "#016BB7" } : undefined}
-                  className={`relative h-full flex items-center justify-center px-3 xl:px-4 transition-colors duration-150 whitespace-nowrap ${
+                  className={`relative h-full flex items-center justify-center px-1.5 xl:px-2.5 2xl:px-3 transition-colors duration-150 whitespace-nowrap group ${
                     active
                       ? "text-[#016BB7] font-bold"
                       : "text-[#1F2937] hover:text-[#016BB7]"
                   }`}
                 >
-                  <span className="truncate">{item.label}</span>
+                  <span className="group-hover:translate-y-[-0.5px] transition-transform">{item.label}</span>
                   {active && (
-                    <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-[#016BB7]" />
+                    <span className="absolute bottom-0 left-1 right-1 h-0.5 bg-[#016BB7] rounded-full" />
                   )}
                 </Link>
               );
             })}
 
             {/* Publications Dropdown (Group's 7 other products) */}
-            <div className="relative h-full" ref={publicationsRef}>
+            <div className="relative h-full shrink-0" ref={publicationsRef}>
               <button
                 type="button"
                 onClick={() => {
                   setPublicationsOpen(!publicationsOpen);
                   setMoreOpen(false);
                 }}
-                className={`relative group h-full flex items-center justify-center gap-1.5 px-3 xl:px-4 transition-colors duration-150 cursor-pointer whitespace-nowrap ${
+                className={`relative group h-full flex items-center justify-center gap-1.5 px-2.5 xl:px-3.5 transition-colors duration-150 cursor-pointer whitespace-nowrap ${
                   publicationsOpen
                     ? "text-[#016BB7] font-bold"
                     : "text-[#1F2937] hover:text-[#016BB7]"
@@ -526,70 +514,30 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
                 </div>
               )}
             </div>
-
-            {/* More Dropdown */}
-            <div className="relative h-full" ref={moreRef}>
-              <button
-                type="button"
-                onClick={() => {
-                  setMoreOpen(!moreOpen);
-                  setPublicationsOpen(false);
-                }}
-                className={`relative group h-full flex items-center justify-center gap-1.5 px-3 xl:px-4 transition-colors duration-150 cursor-pointer whitespace-nowrap ${
-                  moreOpen || isMoreActive
-                    ? "text-[#016BB7] font-bold"
-                    : "text-[#1F2937] hover:text-[#016BB7]"
-                }`}
-                aria-expanded={moreOpen}
-                aria-haspopup="menu"
-              >
-                <span className="truncate">{dict.nav.more}</span>
-                <ChevronDown
-                  className={`h-3.5 w-3.5 shrink-0 transition-transform duration-200 ${
-                    moreOpen || isMoreActive
-                      ? (moreOpen ? "rotate-180 text-[#016BB7]" : "text-[#016BB7]")
-                      : "text-[#1F2937] group-hover:text-[#016BB7]"
-                  }`}
-                />
-                {(moreOpen || isMoreActive) && (
-                  <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-[#016BB7]" />
-                )}
-              </button>
-
-              {moreOpen && (
-                <div className="absolute right-0 top-full mt-1 w-60 rounded-lg border border-[#016BB7]/20 bg-white py-1.5 shadow-xl z-50 text-left">
-                  {moreNav.map((sub) => (
-                    <Link
-                      key={sub.label + sub.href}
-                      href={sub.href}
-                      onClick={() => setMoreOpen(false)}
-                      className="block px-4 py-2 text-sm text-[#1F2937] hover:bg-[#F0F6FA] hover:text-[#016BB7] font-medium transition-colors"
-                    >
-                      {sub.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
           </nav>
         </div>
       </div>
 
-      {/* MOBILE NAVIGATION DRAWER */}
+      {/* MOBILE NAVIGATION DRAWER (Sliding from Right side) */}
       {mobileMenuOpen && (
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 lg:hidden bg-black/60 backdrop-blur-xs flex"
+          className="fixed inset-0 z-50 lg:hidden bg-black/60 backdrop-blur-xs flex justify-end"
         >
-          <div className="relative w-4/5 max-w-xs bg-white h-full shadow-2xl flex flex-col justify-between overflow-y-auto">
+          <div
+            className="flex-1"
+            onClick={() => setMobileMenuOpen(false)}
+            aria-hidden="true"
+          />
+          <div className="relative w-4/5 max-w-xs bg-white h-full shadow-2xl flex flex-col justify-between overflow-y-auto border-l border-[#016BB7]/20">
             <div>
               <div className="flex items-center justify-between p-4 border-b border-[#016BB7]/15 bg-[#F0F6FA]">
                 <BrandLogo compact />
                 <button
                   type="button"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="rounded-md p-1.5 text-[#1F2937] hover:bg-white border border-[#016BB7]/20"
+                  className="rounded-md p-1.5 text-[#1F2937] hover:bg-white border border-[#016BB7]/20 cursor-pointer"
                   aria-label="Close menu"
                 >
                   <X className="h-5 w-5 text-[#016BB7]" />
@@ -614,22 +562,6 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
                       }`}
                     >
                       {item.label}
-                    </Link>
-                  ))}
-                </div>
-
-                <div className="py-2">
-                  <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-[#016BB7] mb-1">
-                    {lang === "gu" ? "વધુ વિભાગો" : "More Sections"}
-                  </p>
-                  {moreNav.map((sub) => (
-                    <Link
-                      key={sub.label + sub.href}
-                      href={sub.href}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="block rounded-md px-3 py-2 text-sm font-medium text-[#1F2937] hover:bg-[#F0F6FA] hover:text-[#016BB7]"
-                    >
-                      {sub.label}
                     </Link>
                   ))}
                 </div>
@@ -695,11 +627,6 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
               </div>
             </div>
           </div>
-          <div
-            className="flex-1"
-            onClick={() => setMobileMenuOpen(false)}
-            aria-hidden="true"
-          />
         </div>
       )}
     </header>

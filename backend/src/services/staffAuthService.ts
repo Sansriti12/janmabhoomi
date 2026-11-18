@@ -17,6 +17,7 @@ import { FastifyRequest, FastifyReply } from "fastify";
 export const PERMITTED_PUBLICATION_IDS = [
   "pub-janmabhoomi",
   "pub-pravasi",
+  "pub-purti",
 ] as const;
 
 export type PermittedPublicationId = (typeof PERMITTED_PUBLICATION_IDS)[number];

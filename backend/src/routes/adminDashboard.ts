@@ -37,6 +37,7 @@ export const adminDashboardRoutes: FastifyPluginAsync = async (app) => {
       contactEnquiriesCount,
       janmabhoomiCount,
       pravasiCount,
+      purtiCount,
       transCompletedCount,
       transFailedCount,
       transAttentionCount,
@@ -76,6 +77,9 @@ export const adminDashboardRoutes: FastifyPluginAsync = async (app) => {
       }),
       app.prisma.article.count({
         where: { publicationId: "pub-pravasi" },
+      }),
+      app.prisma.article.count({
+        where: { publicationId: "pub-purti" },
       }),
       app.prisma.articleTranslation.count({
         where: {
@@ -193,6 +197,7 @@ export const adminDashboardRoutes: FastifyPluginAsync = async (app) => {
           byPublication: {
             janmabhoomi: janmabhoomiCount,
             pravasi: pravasiCount,
+            purti: purtiCount,
           },
           byCategory: categoryCounts.map((c) => ({
             categoryId: c.categoryId,
@@ -265,7 +270,7 @@ export const adminDashboardRoutes: FastifyPluginAsync = async (app) => {
         success: false,
         error: {
           code: "PUBLICATION_NOT_PERMITTED",
-          message: `Publication '${id}' is outside the scope of the Janmabhoomi Admin Panel. Only Janmabhoomi (pub-janmabhoomi) and Janmabhoomi Pravasi (pub-pravasi) are managed here.`,
+          message: `Publication '${id}' is outside the scope of the Janmabhoomi Admin Panel. Only Janmabhoomi (pub-janmabhoomi), Janmabhoomi Pravasi (pub-pravasi), and Janmabhoomi Purti (pub-purti) are managed here.`,
         },
       });
     }

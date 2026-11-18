@@ -53,7 +53,7 @@ function AdminLayoutInner({
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 flex">
+    <div className="min-h-screen bg-[#F5F7FA] text-slate-800 flex">
       {/* Sidebar */}
       <AdminSidebar
         lang={lang}
@@ -66,7 +66,7 @@ function AdminLayoutInner({
       {/* Main Content Area */}
       <div
         className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${
-          isCollapsed ? "lg:pl-20" : "lg:pl-72"
+          isCollapsed ? "lg:pl-20" : "lg:pl-68"
         }`}
       >
         <AdminHeader
@@ -76,12 +76,19 @@ function AdminLayoutInner({
           onPublicationChange={setSelectedPublication}
         />
 
-        <main className="flex-1 p-4 md:p-6 lg:p-8 max-w-7xl w-full mx-auto">
+        <main className="flex-1 p-4 md:p-6 lg:p-7 max-w-7xl w-full mx-auto">
           {children}
         </main>
 
-        <footer className="py-4 px-6 border-t border-slate-200 text-xs text-slate-500 text-center bg-white">
-          <span>Janmabhoomi Newsroom & Admin Portal • Saurashtra Trust • Scoped to 2 Permitted Newspapers</span>
+        <footer className="py-3.5 px-6 border-t border-slate-200 text-xs text-slate-500 bg-white flex flex-col sm:flex-row items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-slate-700">જન્મભૂમિ ન્યૂઝરૂમ એડમિન પોર્ટલ</span>
+            <span className="text-slate-300">•</span>
+            <span>સૌરાષ્ટ્ર ટ્રસ્ટ (Saurashtra Trust)</span>
+          </div>
+          <div className="text-[11px] text-slate-400">
+            Janmabhoomi • Janmabhoomi Pravasi • Purti • Internal Editorial CMS
+          </div>
         </footer>
       </div>
     </div>

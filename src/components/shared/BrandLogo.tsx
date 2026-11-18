@@ -1,5 +1,4 @@
 import React from "react";
-import Image from "next/image";
 
 interface BrandLogoProps {
   compact?: boolean;
@@ -8,12 +7,12 @@ interface BrandLogoProps {
 }
 
 /**
- * Official Janmabhoomi Logo Component
- * Extracted directly from official ALL LOGO.pdf (Page 1) vector graphics:
- * - Authentic Gujarati "જન્મભૂમિ" bold logotype in official heritage blue (#016BB7)
- * - Sanskrit tagline: "|| જનની જન્મભૂમિશ્ચ સ્વર્ગાધપિ ગરીયસી ||"
+ * Official Janmabhoomi Full Logo Component
+ * Displays the complete official brand identity:
+ * - Janmabhoomi Group Heritage Emblem (Open Book / Pen & Rays)
+ * - Gujarati "જન્મભૂમિ" bold logotype in official heritage blue (#016BB7)
+ * - Sanskrit motto: "॥ जननी जन्मभूमिश्च स्वर्गादपि गरीયસી ॥"
  * - Sub-masthead bar: "સૌરાષ્ટ્ર ટ્રસ્ટ પ્રકાશન"
- * - Perfectly preserved proportions and crisp vector rendering across desktop and mobile
  */
 export function BrandLogo({
   compact = false,
@@ -22,19 +21,17 @@ export function BrandLogo({
 }: BrandLogoProps) {
   return (
     <div
-      className={`relative inline-flex items-center justify-center shrink-0 ${
-        compact ? "h-9 sm:h-12 w-auto" : "h-9 sm:h-16 md:h-20 w-auto"
+      className={`relative inline-flex items-center justify-start shrink-0 ${
+        compact ? "h-8 sm:h-10" : "h-9 sm:h-12 md:h-14"
       } ${className}`}
     >
-      <Image
-        src="/assets/logos/janmabhoomi-logo.svg"
-        alt="જન્મભૂમિ - Janmabhoomi | સૌરાષ્ટ્ર ટ્રસ્ટ પ્રકાશન"
-        width={320}
-        height={85}
-        priority={priority}
+      <img
+        src="/assets/logos/janmabhoomi-full-logo.svg"
+        alt="જન્મભૂમિ - Janmabhoomi Group | સૌરાષ્ટ્ર ટ્રસ્ટ પ્રકાશન"
         className={`w-auto object-contain transition-all duration-200 select-none ${
-          compact ? "h-9 sm:h-12 max-w-[150px]" : "h-9 sm:h-16 md:h-20 max-w-[140px] sm:max-w-[340px] md:max-w-[420px]"
+          compact ? "h-8 sm:h-10" : "h-10 sm:h-12 md:h-14 max-h-[58px]"
         }`}
+        loading={priority ? "eager" : "lazy"}
       />
     </div>
   );

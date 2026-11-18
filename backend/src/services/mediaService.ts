@@ -30,34 +30,39 @@ export class MediaService {
   }
 
   /**
-   * Validates MIME type and extension. Allowed: image/jpeg, image/png, image/webp.
+   * Validates MIME type and extension. Allowed: image/jpeg, image/png, image/webp, video/mp4, video/webm, video/quicktime.
    */
-  private validateImage(mimeType: string, filename: string): string {
+  private validateMedia(mimeType: string, filename: string): { ext: string; isVideo: boolean } {
     const ext = path.extname(filename).toLowerCase();
     const allowedMap: Record<string, string[]> = {
       "image/jpeg": [".jpg", ".jpeg"],
       "image/png": [".png"],
       "image/webp": [".webp"],
+      "video/mp4": [".mp4"],
+      "video/webm": [".webm"],
+      "video/quicktime": [".mov"],
     };
 
     const validExtensions = allowedMap[mimeType.toLowerCase()];
     if (!validExtensions || !validExtensions.includes(ext)) {
       throw new Error(
-        `Invalid file format. Allowed formats: JPEG, PNG, WebP. Received MIME '${mimeType}', extension '${ext}'.`
+        `Invalid file format. Allowed formats: JPEG, PNG, WebP, MP4, WebM, MOV. Received MIME '${mimeType}', extension '${ext}'.`
       );
     }
 
-    return ext;
+    const isVideo = mimeType.toLowerCase().startsWith("video/");
+    return { ext, isVideo };
   }
 
   /**
-   * Saves image to disk and creates a MediaAsset record in PostgreSQL.
+   * Saves image or video to disk and creates a MediaAsset record in PostgreSQL.
    */
   async uploadMedia(input: MediaUploadInput) {
-    const ext = this.validateImage(input.mimeType, input.filename);
+    const { ext, isVideo } = this.validateMedia(input.mimeType, input.filename);
 
-    if (input.buffer.length > 10 * 1024 * 1024) {
-      throw new Error("File size exceeds 10MB limit.");
+    const maxSizeBytes = isVideo ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
+    if (input.buffer.length > maxSizeBytes) {
+      throw new Error(`File size exceeds limit (${isVideo ? "50MB for videos" : "10MB for images"}).`);
     }
 
     const fileId = crypto.randomUUID();

@@ -4,12 +4,9 @@ import type { Metadata } from "next";
 import { isValidLocale, Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { newsDataProvider } from "@/lib/data/provider";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
-import { SubscriptionPopup } from "@/components/layout/SubscriptionPopup";
 import { HtmlLangSetter } from "@/components/shared/HtmlLangSetter";
 import { SubscriberAuthProvider } from "@/lib/context/SubscriberAuthContext";
-import { SubscriberAuthModal } from "@/components/auth/SubscriberAuthModal";
+import { PublicLayoutWrapper } from "@/components/layout/PublicLayoutWrapper";
 
 export async function generateMetadata({
   params,
@@ -23,6 +20,15 @@ export async function generateMetadata({
   return {
     title: dict.meta.siteTitle,
     description: dict.meta.siteDescription,
+    icons: {
+      icon: [
+        { url: "/assets/logos/janmabhoomi-circle-logo.png?v=v4", type: "image/png", sizes: "512x512" },
+        { url: "/favicon.png?v=v4", type: "image/png", sizes: "64x64" },
+        { url: "/favicon.ico?v=v4", sizes: "any" },
+      ],
+      shortcut: "/assets/logos/janmabhoomi-circle-logo.png?v=v4",
+      apple: "/apple-touch-icon.png?v=v4",
+    },
     alternates: {
       languages: {
         en: "/en",
@@ -58,12 +64,6 @@ export default async function LocaleLayout({
           : "font-sans min-h-screen flex flex-col"
       }
     >
-      {/* Immediate synchronous documentElement language synchronization */}
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `document.documentElement.lang="${lang}";document.documentElement.dir="ltr";`,
-        }}
-      />
       <HtmlLangSetter lang={lang} />
 
       {/* Accessible Skip to Main Content Link (WCAG 2.4.1) */}
@@ -75,17 +75,13 @@ export default async function LocaleLayout({
       </a>
 
       <SubscriberAuthProvider>
-        <Header
+        <PublicLayoutWrapper
           lang={lang}
           dict={dict}
           searchableArticles={latestArticles}
-        />
-        <main id="main-content" tabIndex={-1} className="flex-1 outline-none">
+        >
           {children}
-        </main>
-        <Footer lang={lang} dict={dict} />
-        <SubscriptionPopup lang={lang} dict={dict} />
-        <SubscriberAuthModal lang={lang} />
+        </PublicLayoutWrapper>
       </SubscriberAuthProvider>
     </div>
   );

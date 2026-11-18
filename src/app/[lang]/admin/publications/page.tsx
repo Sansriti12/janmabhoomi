@@ -128,7 +128,7 @@ export default function AdminPublicationsPage() {
         <Shield size={18} className="text-[#016BB7] shrink-0 mt-0.5" />
         <div>
           <p className="font-bold text-slate-900">
-            {isGu ? "કડક પ્રકાશન મર્યાદા સક્રિય (૨ સમાચારપત્રો)" : "Centralized Allowlist Enforced (2 Newspapers)"}
+            {isGu ? "કડક પ્રકાશન મર્યાદા સક્રિય (જન્મભૂમિ, પ્રવાસી અને પૂર્તિ)" : "Centralized Allowlist Enforced (Janmabhoomi, Pravasi & Purti)"}
           </p>
           <p className="mt-0.5 text-slate-600 leading-relaxed">
             {isGu
@@ -150,7 +150,7 @@ export default function AdminPublicationsPage() {
           <span>{error}</span>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {publications.map((pub) => {
             const isJanmabhoomi = pub.id === "pub-janmabhoomi";
 

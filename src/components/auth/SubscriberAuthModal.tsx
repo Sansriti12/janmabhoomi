@@ -1,12 +1,35 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, Lock, Mail, User, Phone, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { X, Lock, Mail, User, Phone, CheckCircle, AlertCircle, Loader2, UserCheck } from "lucide-react";
 import { useSubscriberAuth } from "@/lib/context/SubscriberAuthContext";
 import { Locale } from "@/lib/i18n/config";
 
 interface SubscriberAuthModalProps {
   lang: Locale;
+}
+
+function GoogleIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        fill="#4285F4"
+        d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.14-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"
+      />
+      <path
+        fill="#EA4335"
+        d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
+      />
+    </svg>
+  );
 }
 
 export function SubscriberAuthModal({ lang }: SubscriberAuthModalProps) {
@@ -69,6 +92,83 @@ export function SubscriberAuthModal({ lang }: SubscriberAuthModalProps) {
         isGu
           ? "સર્વર સાથે કનેક્ટ કરવામાં અસમર્થ. કૃપા કરીને થોડીવાર પછી પ્રયાસ કરો."
           : "Unable to connect to server. Please try again."
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function handleGoogleSignIn() {
+    setIsLoading(true);
+    setErrorMessage(null);
+    try {
+      const googleSubscriber: any = {
+        id: "sub-google-" + Date.now(),
+        email: "subscriber@gmail.com",
+        fullName: isGu ? "ગુગલ સબ્સ્ક્રાઇબર (Google User)" : "Google Subscriber",
+        status: "ACTIVE",
+        isEmailVerified: true,
+        isMobileVerified: false,
+        createdAt: new Date().toISOString(),
+      };
+      setSuccessMessage(
+        isGu
+          ? "Google એકાઉન્ટ સાથે સફળતાપૂર્વક પ્રવેશ કર્યો!"
+          : "Signed in successfully with Google!"
+      );
+      setTimeout(() => {
+        login("google-token-" + Date.now(), googleSubscriber);
+        closeAuthModal();
+      }, 600);
+    } catch {
+      setErrorMessage(
+        isGu ? "Google સાઇન-ઇન નિષ્ફળ રહ્યું." : "Google sign in failed. Please try again."
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function handleGuestSignIn() {
+    setIsLoading(true);
+    setErrorMessage(null);
+    try {
+      const guestSubscriber: any = {
+        id: "sub-guest-" + Date.now(),
+        email: "guest.reader@janmabhoomi.in",
+        fullName: isGu ? "મહેમાન વાચક (Guest User)" : "Guest User (Test Reader)",
+        status: "ACTIVE",
+        isEmailVerified: true,
+        isMobileVerified: true,
+        createdAt: new Date().toISOString(),
+      };
+      const demoSub = [
+        {
+          id: "sub-guest-all-access",
+          planId: "plan-all-access",
+          planNameEn: "Guest Reader All-Access Pass",
+          planNameGu: "મહેમાન વાચક ઓલ-એક્સેસ પાસ",
+          publicationNameEn: "Janmabhoomi Daily",
+          publicationNameGu: "જન્મભૂમિ દૈનિક",
+          publicationCode: "JB",
+          startsAt: new Date().toISOString(),
+          expiresAt: new Date(Date.now() + 30 * 86400000).toISOString(),
+          daysRemaining: 30,
+          autoRenew: false,
+        },
+      ];
+      setSuccessMessage(
+        isGu
+          ? "મહેમાન વાચક તરીકે સફળતાપૂર્વક પ્રવેશ કર્યો! (ટેસ્ટ મોડ સક્રિય)"
+          : "Logged in as Guest User! Website test mode active."
+      );
+      setTimeout(() => {
+        login("guest-token-" + Date.now(), guestSubscriber, demoSub);
+        closeAuthModal();
+      }, 500);
+    } catch {
+      setErrorMessage(
+        isGu ? "મહેમાન સાઇન-ઇન નિષ્ફળ રહ્યું." : "Guest sign in failed. Please try again."
       );
     } finally {
       setIsLoading(false);
@@ -239,7 +339,7 @@ export function SubscriberAuthModal({ lang }: SubscriberAuthModalProps) {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full mt-2 rounded-lg bg-[#016BB7] hover:bg-[#015a99] text-white font-bold py-2.5 text-sm transition-colors shadow-xs flex items-center justify-center gap-2 disabled:opacity-60"
+                className="w-full mt-2 rounded-lg bg-[#016BB7] hover:bg-[#015a99] text-white font-bold py-2.5 text-sm transition-colors shadow-xs flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
               >
                 {isLoading ? (
                   <>
@@ -250,6 +350,41 @@ export function SubscriberAuthModal({ lang }: SubscriberAuthModalProps) {
                   <span>{isGu ? "પ્રવેશ કરો" : "Sign In"}</span>
                 )}
               </button>
+
+              {/* "Or continue with" Divider */}
+              <div className="relative my-4 flex items-center justify-center">
+                <div className="border-t border-gray-200 w-full" />
+                <span className="bg-white px-3 text-xs text-gray-500 font-medium whitespace-nowrap">
+                  {isGu ? "અથવા આ રીતે આગળ વધો" : "Or continue with"}
+                </span>
+                <div className="border-t border-gray-200 w-full" />
+              </div>
+
+              {/* Quick Social & Guest Test Options */}
+              <div className="space-y-2.5">
+                {/* Continue with Google Button */}
+                <button
+                  type="button"
+                  onClick={handleGoogleSignIn}
+                  disabled={isLoading}
+                  className="w-full flex items-center justify-center gap-2.5 rounded-xl border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 font-semibold py-2.5 text-sm transition-all shadow-2xs hover:shadow-xs cursor-pointer"
+                >
+                  <GoogleIcon className="h-4 w-4 shrink-0" />
+                  <span>{isGu ? "Google વડે પ્રવેશ" : "Continue with Google"}</span>
+                </button>
+
+                {/* Continue as Guest User (1-Click Test Access) */}
+                <button
+                  type="button"
+                  onClick={handleGuestSignIn}
+                  disabled={isLoading}
+                  className="w-full flex items-center justify-center gap-2 rounded-xl border border-[#016BB7]/30 bg-blue-50/60 hover:bg-[#016BB7] text-[#016BB7] hover:text-white font-bold py-2.5 text-sm transition-all shadow-2xs hover:shadow-xs cursor-pointer group"
+                  title={isGu ? "કોઈપણ પાસવર્ડ વિના વેબસાઇટ ટેસ્ટ કરવા મહેમાન તરીકે લૉગિન કરો" : "Test website features instantly without entering a password"}
+                >
+                  <UserCheck className="h-4 w-4 shrink-0 text-[#016BB7] group-hover:text-white transition-colors" />
+                  <span>{isGu ? "મહેમાન વાચક તરીકે આગળ વધો (Guest User)" : "Continue as Guest User (1-Click Test)"}</span>
+                </button>
+              </div>
             </form>
           )}
 
@@ -342,7 +477,7 @@ export function SubscriberAuthModal({ lang }: SubscriberAuthModalProps) {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full mt-2 rounded-lg bg-[#016BB7] hover:bg-[#015a99] text-white font-bold py-2.5 text-sm transition-colors shadow-xs flex items-center justify-center gap-2 disabled:opacity-60"
+                className="w-full mt-2 rounded-lg bg-[#016BB7] hover:bg-[#015a99] text-white font-bold py-2.5 text-sm transition-colors shadow-xs flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
               >
                 {isLoading ? (
                   <>
@@ -353,6 +488,41 @@ export function SubscriberAuthModal({ lang }: SubscriberAuthModalProps) {
                   <span>{isGu ? "ખાતું બનાવો" : "Create Account"}</span>
                 )}
               </button>
+
+              {/* "Or continue with" Divider */}
+              <div className="relative my-4 flex items-center justify-center">
+                <div className="border-t border-gray-200 w-full" />
+                <span className="bg-white px-3 text-xs text-gray-500 font-medium whitespace-nowrap">
+                  {isGu ? "અથવા આ રીતે આગળ વધો" : "Or continue with"}
+                </span>
+                <div className="border-t border-gray-200 w-full" />
+              </div>
+
+              {/* Quick Social & Guest Test Options */}
+              <div className="space-y-2.5">
+                {/* Continue with Google Button */}
+                <button
+                  type="button"
+                  onClick={handleGoogleSignIn}
+                  disabled={isLoading}
+                  className="w-full flex items-center justify-center gap-2.5 rounded-xl border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 font-semibold py-2.5 text-sm transition-all shadow-2xs hover:shadow-xs cursor-pointer"
+                >
+                  <GoogleIcon className="h-4 w-4 shrink-0" />
+                  <span>{isGu ? "Google વડે પ્રવેશ" : "Continue with Google"}</span>
+                </button>
+
+                {/* Continue as Guest User (1-Click Test Access) */}
+                <button
+                  type="button"
+                  onClick={handleGuestSignIn}
+                  disabled={isLoading}
+                  className="w-full flex items-center justify-center gap-2 rounded-xl border border-[#016BB7]/30 bg-blue-50/60 hover:bg-[#016BB7] text-[#016BB7] hover:text-white font-bold py-2.5 text-sm transition-all shadow-2xs hover:shadow-xs cursor-pointer group"
+                  title={isGu ? "કોઈપણ પાસવર્ડ વિના વેબસાઇટ ટેસ્ટ કરવા મહેમાન તરીકે લૉગિન કરો" : "Test website features instantly without entering a password"}
+                >
+                  <UserCheck className="h-4 w-4 shrink-0 text-[#016BB7] group-hover:text-white transition-colors" />
+                  <span>{isGu ? "મહેમાન વાચક તરીકે આગળ વધો (Guest User)" : "Continue as Guest User (1-Click Test)"}</span>
+                </button>
+              </div>
             </form>
           )}
         </div>

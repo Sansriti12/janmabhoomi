@@ -4,13 +4,10 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import {
-  Lock,
-  Newspaper,
   Clock,
   MapPin,
   User,
   ArrowLeft,
-  CheckCircle2,
   Calendar,
 } from "lucide-react";
 import { isValidLocale, Locale } from "@/lib/i18n/config";
@@ -19,8 +16,8 @@ import { newsDataProvider } from "@/lib/data/provider";
 import { getLocalizedText } from "@/lib/data/types";
 import { DemoBadge } from "@/components/shared/DemoBadge";
 import { NewsCard } from "@/components/shared/NewsCard";
-import { ArticleShareBar } from "@/components/shared/ArticleShareBar";
 import { NewsArticleJsonLd } from "@/components/shared/NewsArticleJsonLd";
+import { ArticleBodyWithSubscriberPaywall } from "@/components/article/ArticleBodyWithSubscriberPaywall";
 
 export async function generateMetadata({
   params,
@@ -195,11 +192,6 @@ export default async function ArticlePage({
             </span>
           </div>
 
-          {/* Social Share Bar Top */}
-          <div className="mt-4">
-            <ArticleShareBar title={title} url={articleUrl} lang={locale} />
-          </div>
-
           {/* Lead Image */}
           <figure className="my-6">
             <div className="relative aspect-16/10 w-full overflow-hidden rounded bg-[#292725]/5">
@@ -217,82 +209,13 @@ export default async function ArticlePage({
             </figcaption>
           </figure>
 
-          {/* Public Preview / Teaser Paragraphs */}
-          <div className="space-y-4 text-base sm:text-lg text-[#292725]/90 leading-relaxed">
-            {teaserParagraphs.map((paragraph, index) => (
-              <p key={index}>{paragraph}</p>
-            ))}
-          </div>
-
-          {/* Social Share Bar Bottom */}
-          <div className="mt-6 mb-4">
-            <ArticleShareBar title={title} url={articleUrl} lang={locale} />
-          </div>
-
-          {/* Gradient Fade indicating transition from public preview to E-paper subscriber content */}
-          <div className="relative mt-4 pt-6">
-            <div className="select-none pointer-events-none blur-[3px] opacity-40 space-y-2 text-sm text-[#292725] mb-4">
-              <p>
-                {locale === "gu"
-                  ? `[સબ્સ્ક્રાઇબર ઈ-પેપર અનુસંધાન] આ અહેવાલની સંપૂર્ણ વિગતો, સત્તાવાર આંકડા અને વિશેષ વિશ્લેષણ આજના જન્મભૂમિ પ્રિન્ટ અને ડિજિટલ ઈ-પેપરના પાના નં. ${article.epaperPageNumber} પર ચાલુ...`
-                  : `[Subscriber E-Paper Continuation] Detailed statistical tables, official statements, and full multi-column regional ground reports continue on Page ${article.epaperPageNumber} of today's Janmabhoomi print and digital replica edition...`}
-              </p>
-            </div>
-
-            {/* E-PAPER SUBSCRIPTION GATE */}
-            <div
-              id="epaper-subscription-gate"
-              className="rounded-md border-2 border-[#016BB7] bg-[#FAF8F3] p-6 sm:p-7 shadow-xs"
-            >
-              <div className="inline-flex items-center gap-1.5 rounded-xs bg-[#016BB7] px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-white">
-                <Lock className="h-3.5 w-3.5 text-[#016BB7]" />
-                <span>{dict.paywall.badge}</span>
-              </div>
-
-              <h2 className="mt-3 text-xl sm:text-2xl font-extrabold text-[#016BB7]">
-                {dict.paywall.title}
-              </h2>
-
-              <p className="mt-2 text-xs sm:text-sm text-[#292725]/80 leading-relaxed">
-                {dict.paywall.description}
-              </p>
-
-              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-medium text-[#292725]/85">
-                <span className="inline-flex items-center gap-1.5">
-                  <CheckCircle2 className="h-4 w-4 text-[#016BB7]" />
-                  <span>
-                    {getLocalizedText(article.epaperEdition, locale)} —{" "}
-                    {dict.paywall.editionReference} {article.epaperPageNumber}
-                  </span>
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <CheckCircle2 className="h-4 w-4 text-[#016BB7]" />
-                  <span>
-                    {locale === "gu"
-                      ? "સંપૂર્ણ ૧૬ પાનાનું દૈનિક ઈ-પેપર"
-                      : "Full 16-Page Broadsheet Digital Edition"}
-                  </span>
-                </span>
-              </div>
-
-              <div className="mt-5 flex flex-wrap items-center gap-3">
-                <Link
-                  href={`/${locale}/epaper?page=${article.epaperPageNumber}`}
-                  className="inline-flex items-center gap-2 rounded-md bg-[#016BB7] px-5 py-2.5 text-xs sm:text-sm font-bold text-white hover:bg-[#016BB7]/90 transition-colors"
-                >
-                  <Newspaper className="h-4 w-4 text-[#016BB7]" />
-                  <span>{dict.paywall.primaryCta}</span>
-                </Link>
-
-                <Link
-                  href={`/${locale}/epaper#plans`}
-                  className="inline-flex items-center gap-2 rounded-md border border-[#016BB7] bg-white px-4 py-2.5 text-xs sm:text-sm font-bold text-[#016BB7] hover:bg-[#016BB7]/5 transition-colors"
-                >
-                  <span>{dict.paywall.secondaryCta}</span>
-                </Link>
-              </div>
-            </div>
-          </div>
+          {/* Article Body with Dynamic Subscriber Access & TTS Listen Mode */}
+          <ArticleBodyWithSubscriberPaywall
+            article={article}
+            locale={locale}
+            dict={dict}
+            initialTeaserParagraphs={teaserParagraphs}
+          />
         </article>
 
         {/* Sidebar: Related Category Stories */}

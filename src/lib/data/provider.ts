@@ -405,10 +405,10 @@ export class ResilientNewsDataProvider implements INewsDataProvider {
     return this.withFallback(() => this.api.getAdvertisementSlot(slot), () => this.mock.getAdvertisementSlot(slot, pubId));
   }
   getEPaperEditions(pubId?: string) {
-    return this.withFallback(() => this.api.getEPaperEditions(), () => this.mock.getEPaperEditions(pubId));
+    return this.withFallback(() => this.api.getEPaperEditions(pubId), () => this.mock.getEPaperEditions(pubId));
   }
   getEPaperEditionByDate(date: string, pubId?: string) {
-    return this.withFallback(() => this.api.getEPaperEditionByDate(), () => this.mock.getEPaperEditionByDate(date, pubId));
+    return this.withFallback(() => this.api.getEPaperEditionByDate(date, pubId), () => this.mock.getEPaperEditionByDate(date, pubId));
   }
   getHomepageConfig() {
     return this.withFallback(() => this.api.getHomepageConfig(), () => this.mock.getHomepageConfig());
@@ -417,13 +417,12 @@ export class ResilientNewsDataProvider implements INewsDataProvider {
 
 /**
  * Singleton News Data Provider
- * When NEXT_PUBLIC_USE_API === "true", routes to the Fastify production backend with
- * automatic resilient fallback to MockNewsDataProvider if unreachable.
- * Uses MockNewsDataProvider directly when NEXT_PUBLIC_USE_API is not set to true.
+ * Defaults to ResilientNewsDataProvider (live backend with automatic fallback to MockNewsDataProvider)
+ * unless NEXT_PUBLIC_USE_API is explicitly set to "false".
  */
 export const newsDataProvider: INewsDataProvider =
-  process.env.NEXT_PUBLIC_USE_API === "true"
-    ? new ResilientNewsDataProvider()
-    : new MockNewsDataProvider();
+  process.env.NEXT_PUBLIC_USE_API === "false"
+    ? new MockNewsDataProvider()
+    : new ResilientNewsDataProvider();
 
 export { getAllPublications, getPublicationBySlug };

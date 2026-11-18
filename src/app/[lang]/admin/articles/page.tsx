@@ -73,6 +73,12 @@ export default function ArticlesAdminPage() {
 
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:4000";
 
+  const getMediaUrl = (url: string | null): string => {
+    if (!url) return "";
+    if (url.startsWith("http://") || url.startsWith("https://")) return url;
+    return `${baseUrl}${url.startsWith("/") ? "" : "/"}${url}`;
+  };
+
   const handleExportCsv = async () => {
     if (!token) return;
     setExporting(true);
@@ -139,6 +145,26 @@ export default function ArticlesAdminPage() {
       // Fallback preview articles list when backend is not deployed online
       const previewArticles: ArticleItem[] = [
         {
+          id: "918ccbdf-59ac-419d-8d65-77b330199310",
+          publicationId: "pub-janmabhoomi",
+          publicationName: "Janmabhoomi",
+          category: { id: "city", nameGu: "શહેર", nameEn: "City", slug: "city" },
+          status: "PUBLISHED",
+          headlineGu: "મુંબઈમાં જાહેર પરિવહનને વધુ સુવિધાજનક બનાવવા નવી મેટ્રો સેવા શરૂ",
+          headlineEn: "New Metro Service Launched in Mumbai to Make Public Transport More Convenient",
+          slugGu: "article-37c632",
+          slugEn: "mumbai-metro-service-launched",
+          translationStatus: "COMPLETED",
+          qualityWarnings: [],
+          isBreaking: false,
+          isLeadStory: true,
+          featuredImageUrl: "/api/v1/media/93a0f9d1-dd27-4844-b908-ef5182022e4b.jpg",
+          publishedAt: new Date().toISOString(),
+          scheduledFor: null,
+          createdBy: "System Admin",
+          createdAt: new Date().toISOString(),
+        },
+        {
           id: "bd6a29a0-9678-400d-9a71-a7e4dd1a7399",
           publicationId: "pub-janmabhoomi",
           publicationName: "Janmabhoomi",
@@ -151,7 +177,7 @@ export default function ArticlesAdminPage() {
           translationStatus: "COMPLETED",
           qualityWarnings: [],
           isBreaking: false,
-          isLeadStory: true,
+          isLeadStory: false,
           featuredImageUrl: "https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=1200&q=80",
           publishedAt: new Date().toISOString(),
           scheduledFor: null,
@@ -291,44 +317,44 @@ export default function ArticlesAdminPage() {
   return (
     <div className="space-y-6">
       {/* Header & New Article CTA */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-            {isGu ? "સમાચાર લેખો સંચાલન" : "News Articles Management"}
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight font-serif">
+            {isGu ? "સમાચાર લેખો (Manage News)" : "Manage News Articles"}
           </h1>
-          <p className="text-sm text-slate-600 mt-1">
+          <p className="text-xs text-slate-500 mt-0.5">
             {isGu
-              ? "ગુજરાતી સમાચાર ઉમેરો, આપમેળે અંગ્રેજી અનુવાદ કરો અને પ્રકાશિત કરો."
-              : "Create Gujarati news stories, auto-translate to English, and publish."}
+              ? "ગુજરાતી મૂળ લેખો, સ્વચાલિત અંગ્રેજી અનુવાદ અને પ્રકાશન સ્થિતિ"
+              : "Review, edit, translate and publish news articles for Janmabhoomi & Pravasi."}
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={handleExportCsv}
             disabled={exporting}
-            className="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-lg border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium text-sm shadow-sm transition-colors"
+            className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-md border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium text-xs shadow-2xs transition-colors"
           >
-            <Download className="w-4 h-4 text-slate-500" />
+            <Download className="w-3.5 h-3.5 text-slate-500" />
             <span>{exporting ? (isGu ? "નિકાસ..." : "Exporting...") : (isGu ? "CSV નિકાસ" : "Export CSV")}</span>
           </button>
           <Link
             href={`/${lang}/admin/articles/new`}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#016BB7] hover:bg-[#015896] text-white font-medium text-sm shadow-sm transition-colors"
+            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-md bg-[#016BB7] hover:bg-[#015896] text-white font-semibold text-xs shadow-2xs transition-colors"
           >
-            <Plus className="w-4 h-4" />
-            <span>{isGu ? "નવો લેખ ઉમેરો" : "New Article"}</span>
+            <Plus className="w-3.5 h-3.5" />
+            <span>{isGu ? "નવા સમાચાર ઉમેરો (Add News)" : "Add News"}</span>
           </Link>
         </div>
       </div>
 
       {/* Filter Bar */}
-      <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm space-y-3">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="bg-white rounded-lg border border-slate-200 p-3.5 shadow-2xs space-y-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
           {/* Search */}
           <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3" />
             <input
               type="text"
               placeholder={isGu ? "શીર્ષક અથવા વિષય શોધો..." : "Search headline or topic..."}
@@ -337,7 +363,7 @@ export default function ArticlesAdminPage() {
                 setSearch(e.target.value);
                 setPage(1);
               }}
-              className="w-full pl-9 pr-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#016BB7] focus:border-transparent bg-white text-slate-900"
+              className="w-full pl-8.5 pr-3 py-1.5 text-xs border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#016BB7] focus:border-transparent bg-white text-slate-900"
             />
           </div>
 
@@ -349,11 +375,12 @@ export default function ArticlesAdminPage() {
                 setPublicationFilter(e.target.value);
                 setPage(1);
               }}
-              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#016BB7] focus:border-transparent bg-white text-slate-900"
+              className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#016BB7] focus:border-transparent bg-white text-slate-900"
             >
-              <option value="">{isGu ? "બધા પ્રકાશનો (૨)" : "All Publications (2)"}</option>
+              <option value="">{isGu ? "બધા પ્રકાશનો" : "All Publications"}</option>
               <option value="pub-janmabhoomi">Janmabhoomi — જન્મભૂમિ (દૈનિક)</option>
               <option value="pub-pravasi">Janmabhoomi Pravasi — પ્રવાસી (સાપ્તાહિક)</option>
+              <option value="pub-purti">Janmabhoomi Purti — જન્મભૂમિ પૂર્તિ</option>
             </select>
           </div>
 
@@ -365,180 +392,201 @@ export default function ArticlesAdminPage() {
                 setStatusFilter(e.target.value);
                 setPage(1);
               }}
-              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#016BB7] focus:border-transparent bg-white text-slate-900"
+              className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#016BB7] focus:border-transparent bg-white text-slate-900"
             >
-              <option value="">{isGu ? "બધા સ્થિતિઓ" : "All Publishing Status"}</option>
-              <option value="DRAFT">DRAFT (ડ્રાફ્ટ)</option>
-              <option value="PUBLISHED">PUBLISHED (પ્રકાશિત)</option>
-              <option value="SCHEDULED">SCHEDULED (નિયત સમય)</option>
-              <option value="ARCHIVED">ARCHIVED (સંગ્રહિત)</option>
-            </select>
-          </div>
-
-          {/* Translation Status Filter */}
-          <div>
-            <select
-              value={transStatusFilter}
-              onChange={(e) => {
-                setTransStatusFilter(e.target.value);
-                setPage(1);
-              }}
-              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#016BB7] focus:border-transparent bg-white text-slate-900"
-            >
-              <option value="">{isGu ? "બધા અનુવાદ સ્થિતિ" : "All Translation Status"}</option>
-              <option value="COMPLETED">COMPLETED (પૂર્ણ)</option>
-              <option value="NEEDS_ATTENTION">NEEDS ATTENTION (સમીક્ષા જરૂરી)</option>
-              <option value="OUTDATED">OUTDATED (અપડેટ જરૂરી)</option>
-              <option value="FAILED">FAILED (નિષ્ફળ)</option>
+              <option value="">{isGu ? "બધી સ્થિતિઓ (All Status)" : "All Publishing Status"}</option>
+              <option value="PUBLISHED">Published (પ્રકાશિત)</option>
+              <option value="DRAFT">Draft (ડ્રાફ્ટ)</option>
+              <option value="SCHEDULED">Scheduled (નિયત સમય)</option>
+              <option value="ARCHIVED">Archived (સંગ્રહિત)</option>
             </select>
           </div>
         </div>
       </div>
 
-      {/* Articles Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      {/* Articles Table — Matching Legacy Newsroom Layout */}
+      <div className="bg-white rounded-lg border border-slate-200 shadow-2xs overflow-hidden">
         {loading ? (
           <div className="p-12 text-center text-slate-500">
-            <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-[#016BB7]" />
-            <span>{isGu ? "લેખો લોડ થઈ રહ્યા છે..." : "Loading news articles..."}</span>
+            <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-[#016BB7]" />
+            <span className="text-xs">{isGu ? "લેખો લોડ થઈ રહ્યા છે..." : "Loading news articles..."}</span>
           </div>
         ) : error ? (
           <div className="p-8 text-center text-rose-600 bg-rose-50">
-            <p className="font-semibold">{error}</p>
+            <p className="font-semibold text-xs">{error}</p>
             <button
               onClick={fetchArticles}
-              className="mt-3 px-4 py-1.5 bg-rose-600 text-white rounded-lg text-sm font-medium"
+              className="mt-3 px-3 py-1 bg-rose-600 text-white rounded text-xs font-medium"
             >
               {isGu ? "ફરી પ્રયાસ કરો" : "Retry"}
             </button>
           </div>
         ) : articles.length === 0 ? (
-          <div className="p-16 text-center text-slate-500">
-            <FileText className="w-12 h-12 mx-auto mb-3 text-slate-300" />
-            <h3 className="font-semibold text-slate-800 text-base">
+          <div className="p-12 text-center text-slate-500">
+            <FileText className="w-10 h-10 mx-auto mb-2.5 text-slate-300" />
+            <h3 className="font-semibold text-slate-800 text-sm">
               {isGu ? "કોઈ લેખો મળ્યા નથી" : "No articles found"}
             </h3>
-            <p className="text-sm mt-1 text-slate-500">
+            <p className="text-xs mt-1 text-slate-500">
               {isGu
                 ? "પસંદ કરેલા ફિલ્ટર્સ માટે કોઈ સમાચાર લેખો ઉપલબ્ધ નથી."
                 : "No news articles match the selected filters."}
             </p>
             <Link
               href={`/${lang}/admin/articles/new`}
-              className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#016BB7] text-white text-sm font-medium"
+              className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-[#016BB7] text-white text-xs font-semibold"
             >
-              <Plus className="w-4 h-4" />
-              <span>{isGu ? "નવો લેખ ઉમેરો" : "Create First Article"}</span>
+              <Plus className="w-3.5 h-3.5" />
+              <span>{isGu ? "નવો લેખ ઉમેરો" : "Add News"}</span>
             </Link>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm border-collapse">
+            <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold text-xs tracking-wider uppercase">
-                  <th className="py-3 px-4">{isGu ? "સમાચાર શીર્ષક" : "News Headline"}</th>
-                  <th className="py-3 px-4">{isGu ? "પ્રકાશન" : "Publication"}</th>
-                  <th className="py-3 px-4">{isGu ? "કેટેગરી" : "Category"}</th>
-                  <th className="py-3 px-4">{isGu ? "અનુવાદ" : "Translation"}</th>
-                  <th className="py-3 px-4">{isGu ? "સ્થિતિ" : "Status"}</th>
-                  <th className="py-3 px-4">{isGu ? "તારીખ" : "Date"}</th>
-                  <th className="py-3 px-4 text-right">{isGu ? "ક્રિયાઓ" : "Actions"}</th>
+                <tr className="bg-slate-50 border-b border-slate-200 text-slate-700 font-semibold text-[11px] uppercase tracking-wider">
+                  <th className="py-2.5 px-3 w-10 text-center">#</th>
+                  <th className="py-2.5 px-3 whitespace-nowrap">{isGu ? "તારીખ" : "News Date"}</th>
+                  <th className="py-2.5 px-3 w-16">{isGu ? "તસવીર" : "Header Image"}</th>
+                  <th className="py-2.5 px-4">{isGu ? "સમાચાર શીર્ષક" : "Gujarati Title"}</th>
+                  <th className="py-2.5 px-3">{isGu ? "પ્રકાર" : "Type"}</th>
+                  <th className="py-2.5 px-3">{isGu ? "કેટેગરી" : "Category"}</th>
+                  <th className="py-2.5 px-3">{isGu ? "સ્થિતિ" : "Publish Status"}</th>
+                  <th className="py-2.5 px-3 text-right">{isGu ? "ક્રિયાઓ" : "Actions"}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {articles.map((art) => (
-                  <tr key={art.id} className="hover:bg-slate-50/80 transition-colors">
-                    {/* Headline */}
-                    <td className="py-3.5 px-4 max-w-md">
-                      <div className="flex items-start gap-2">
+                {articles.map((art, index) => (
+                  <tr key={art.id} className="hover:bg-slate-50/70 transition-colors">
+                    {/* Index Number # */}
+                    <td className="py-2.5 px-3 text-center text-slate-500 font-medium">
+                      {(page - 1) * 15 + index + 1}
+                    </td>
+
+                    {/* Date */}
+                    <td className="py-2.5 px-3 whitespace-nowrap text-slate-600 font-medium">
+                      {new Date(art.publishedAt || art.createdAt).toLocaleDateString(
+                        "en-GB",
+                        { day: "2-digit", month: "2-digit", year: "numeric" }
+                      ).replace(/\//g, "-")}
+                    </td>
+
+                    {/* Header Image Thumbnail */}
+                    <td className="py-2.5 px-3">
+                      <div className="w-12 h-9 rounded bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center shrink-0">
+                        {art.featuredImageUrl ? (
+                          <img
+                            src={getMediaUrl(art.featuredImageUrl)}
+                            alt=""
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              const target = e.currentTarget;
+                              if (art.featuredImageUrl && !target.src.includes("127.0.0.1:4000") && !target.src.includes("localhost:4000")) {
+                                target.src = `http://127.0.0.1:4000${art.featuredImageUrl.startsWith("/") ? "" : "/"}${art.featuredImageUrl}`;
+                              } else {
+                                target.style.display = "none";
+                              }
+                            }}
+                          />
+                        ) : (
+                          <span className="text-[9px] text-slate-400 font-medium text-center leading-none">
+                            No Image
+                          </span>
+                        )}
+                      </div>
+                    </td>
+
+                    {/* Gujarati Headline + English Subhead */}
+                    <td className="py-2.5 px-4 max-w-sm">
+                      <div className="flex items-start gap-1.5">
                         {art.isBreaking && (
-                          <span className="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-600 text-white">
+                          <span className="shrink-0 px-1 py-0.2 rounded text-[9px] font-bold bg-rose-600 text-white">
                             BREAKING
                           </span>
                         )}
                         {art.isLeadStory && (
-                          <span className="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-600 text-white">
+                          <span className="shrink-0 px-1 py-0.2 rounded text-[9px] font-bold bg-amber-600 text-white">
                             LEAD
                           </span>
                         )}
                         <div>
-                          <p className="font-semibold text-slate-900 line-clamp-1">{art.headlineGu}</p>
-                          {art.headlineEn && (
-                            <p className="text-xs text-slate-500 line-clamp-1 mt-0.5 italic">
-                              {art.headlineEn}
-                            </p>
-                          )}
+                          <p className="font-semibold text-slate-900 line-clamp-2 leading-snug">
+                            {art.headlineGu}
+                          </p>
                         </div>
                       </div>
                     </td>
 
-                    {/* Publication */}
-                    <td className="py-3.5 px-4 whitespace-nowrap">
-                      <span className="text-xs font-medium text-slate-800">
-                        {art.publicationId === "pub-janmabhoomi" ? "Janmabhoomi" : "Pravasi"}
+                    {/* News Type */}
+                    <td className="py-2.5 px-3 whitespace-nowrap">
+                      <span className="text-slate-700 font-medium">
+                        {art.isBreaking ? "Breaking News" : art.isLeadStory ? "Top Headlines" : "National News"}
                       </span>
                     </td>
 
                     {/* Category */}
-                    <td className="py-3.5 px-4 whitespace-nowrap">
-                      <span className="text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded">
+                    <td className="py-2.5 px-3 whitespace-nowrap">
+                      <span className="text-slate-700 font-medium">
                         {isGu ? art.category.nameGu : art.category.nameEn}
                       </span>
                     </td>
 
-                    {/* Translation Status */}
-                    <td className="py-3.5 px-4 whitespace-nowrap">
-                      {getTranslationBadge(art.translationStatus)}
-                    </td>
-
-                    {/* Publication Status */}
-                    <td className="py-3.5 px-4 whitespace-nowrap">
-                      {getPublishStatusBadge(art.status)}
-                    </td>
-
-                    {/* Date */}
-                    <td className="py-3.5 px-4 whitespace-nowrap text-xs text-slate-500">
-                      {new Date(art.publishedAt || art.createdAt).toLocaleDateString(
-                        isGu ? "gu-IN" : "en-GB",
-                        { day: "numeric", month: "short", year: "numeric" }
+                    {/* Publish Status (Restrained Green for Published) */}
+                    <td className="py-2.5 px-3 whitespace-nowrap">
+                      {art.status === "PUBLISHED" ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          Published
+                        </span>
+                      ) : art.status === "SCHEDULED" ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-50 text-[#016BB7] border border-blue-200">
+                          Scheduled
+                        </span>
+                      ) : art.status === "ARCHIVED" ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+                          Archived
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                          Draft
+                        </span>
                       )}
                     </td>
 
-                    {/* Actions */}
-                    <td className="py-3.5 px-4 whitespace-nowrap text-right">
-                      <div className="flex items-center justify-end gap-1.5">
+                    {/* Actions: View / Edit / Delete */}
+                    <td className="py-2.5 px-3 whitespace-nowrap text-right">
+                      <div className="flex items-center justify-end gap-1">
                         <button
                           type="button"
                           onClick={() => setPreviewArticle(art)}
                           title={isGu ? "પૂર્વાવલોકન" : "Preview Article"}
-                          className="p-1.5 text-slate-600 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors"
+                          className="p-1 text-sky-600 hover:text-sky-800 hover:bg-sky-50 rounded transition-colors"
                         >
-                          <Eye className="w-4 h-4" />
+                          <Eye className="w-3.5 h-3.5" />
                         </button>
 
                         <Link
                           href={`/${lang}/admin/articles/${art.id}`}
                           title={isGu ? "સંપાદિત કરો" : "Edit Article"}
-                          className="p-1.5 text-slate-600 hover:text-[#016BB7] hover:bg-slate-100 rounded-lg transition-colors"
+                          className="p-1 text-slate-600 hover:text-[#016BB7] hover:bg-slate-100 rounded transition-colors"
                         >
-                          <Edit className="w-4 h-4" />
+                          <Edit className="w-3.5 h-3.5" />
                         </Link>
 
                         {art.status === "PUBLISHED" ? (
                           <button
                             onClick={() => handleStatusChange(art.id, "ARCHIVED")}
-                            title={isGu ? "અપ્રકાશિત કરો" : "Unpublish / Archive"}
-                            className="p-1.5 text-slate-600 hover:text-amber-600 hover:bg-slate-100 rounded-lg transition-colors"
+                            title={isGu ? "અપ્રકાશિત કરો" : "Unpublish"}
+                            className="p-1 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded transition-colors"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         ) : (
                           <button
                             onClick={() => handleStatusChange(art.id, "PUBLISHED")}
                             title={isGu ? "હવે પ્રકાશિત કરો" : "Publish Now"}
-                            className="p-1.5 text-slate-600 hover:text-emerald-600 hover:bg-slate-100 rounded-lg transition-colors"
+                            className="p-1 text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 rounded transition-colors"
                           >
-                            <Send className="w-4 h-4" />
+                            <Send className="w-3.5 h-3.5" />
                           </button>
                         )}
                       </div>
@@ -609,39 +657,23 @@ export default function ArticlesAdminPage() {
                 <div className="relative aspect-video rounded-xl overflow-hidden bg-slate-100 border border-slate-200">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={previewArticle.featuredImageUrl}
+                    src={getMediaUrl(previewArticle.featuredImageUrl)}
                     alt={previewArticle.headlineGu}
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const target = e.currentTarget;
+                      if (!target.src.includes("127.0.0.1:4000") && !target.src.includes("localhost:4000")) {
+                        target.src = `http://127.0.0.1:4000${previewArticle.featuredImageUrl?.startsWith("/") ? "" : "/"}${previewArticle.featuredImageUrl}`;
+                      }
+                    }}
                   />
                 </div>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 divide-y md:divide-y-0 md:divide-x divide-slate-200">
-                {/* Gujarati Original */}
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-blue-100 text-[#016BB7]">
-                      ગુજરાતી (મુખ્ય સ્ત્રોત)
-                    </span>
-                  </div>
-                  <h2 className="text-lg font-bold text-slate-900 leading-snug">
-                    {previewArticle.headlineGu}
-                  </h2>
-                </div>
-
-                {/* English Translation */}
-                <div className="space-y-3 md:pl-6 pt-4 md:pt-0">
-                  <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-100 text-emerald-800">
-                      English (AI Translation)
-                    </span>
-                  </div>
-                  <h2 className="text-lg font-bold text-slate-900 leading-snug">
-                    {previewArticle.headlineEn || (
-                      <span className="italic text-slate-400 font-normal">Translation not generated</span>
-                    )}
-                  </h2>
-                </div>
+              <div className="space-y-2">
+                <h2 className="text-xl font-bold font-serif text-slate-900 leading-snug">
+                  {previewArticle.headlineGu}
+                </h2>
               </div>
 
               <div className="pt-4 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">

@@ -172,87 +172,83 @@ export default function CategoriesAdminPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-            {isGu ? "સમાચાર કેટેગરીઝ અને ટેક્સોનોમી" : "News Categories & Taxonomy"}
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight font-serif">
+            {isGu ? "કેટેગરીઝ સંચાલન (Manage Categories)" : "Manage Categories"}
           </h1>
-          <p className="text-sm text-slate-600 mt-1">
+          <p className="text-xs text-slate-500 mt-0.5">
             {isGu
-              ? "અખબારના વિભાગો, દ્વિભાષી નામો અને નેવિગેશન ક્રમનું સંચાલન કરો."
-              : "Manage news sections, bilingual naming, navigation ordering, and taxonomy."}
+              ? "અખબારના મુખ્ય વિભાગો, ગુજરાતી-અંગ્રેજી નામો અને ક્રમનું સંચાલન કરો"
+              : "Organize newspaper editorial sections, bilingual names, and display order."}
           </p>
         </div>
 
         <button
           onClick={openCreateModal}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#016BB7] hover:bg-[#015896] text-white font-medium text-sm shadow-sm transition-colors"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-[#016BB7] hover:bg-[#015896] text-white font-semibold text-xs shadow-2xs transition-colors self-start sm:self-auto"
         >
-          <Plus className="w-4 h-4" />
-          <span>{isGu ? "નવી કેટેગરી ઉમેરો" : "New Category"}</span>
+          <Plus className="w-3.5 h-3.5" />
+          <span>{isGu ? "કેટેગરી ઉમેરો (Add Categories)" : "Add Categories"}</span>
         </button>
       </div>
 
-      {/* Categories Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      {/* Categories Table — Matching Legacy Newsroom Layout */}
+      <div className="bg-white rounded-lg border border-slate-200 shadow-2xs overflow-hidden">
         {loading ? (
-          <div className="p-16 text-center text-slate-500">
-            <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-[#016BB7]" />
-            <span>Loading taxonomy...</span>
+          <div className="p-12 text-center text-slate-500">
+            <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-[#016BB7]" />
+            <span className="text-xs">Loading categories...</span>
           </div>
         ) : error ? (
-          <div className="p-8 text-center text-rose-600 bg-rose-50">
+          <div className="p-6 text-center text-rose-600 bg-rose-50 text-xs">
             <p className="font-semibold">{error}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm border-collapse">
+            <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold text-xs tracking-wider uppercase">
-                  <th className="py-3 px-4">Order</th>
-                  <th className="py-3 px-4">{isGu ? "ગુજરાતી નામ" : "Gujarati Name"}</th>
-                  <th className="py-3 px-4">{isGu ? "અંગ્રેજી નામ" : "English Name"}</th>
-                  <th className="py-3 px-4">Slug / ID</th>
-                  <th className="py-3 px-4">{isGu ? "લેખો" : "Articles"}</th>
-                  <th className="py-3 px-4">{isGu ? "સ્થિતિ" : "Status"}</th>
-                  <th className="py-3 px-4 text-right">{isGu ? "સંપાદન" : "Action"}</th>
+                <tr className="bg-slate-50 border-b border-slate-200 text-slate-700 font-semibold text-[11px] uppercase tracking-wider">
+                  <th className="py-2.5 px-3 w-10 text-center">#</th>
+                  <th className="py-2.5 px-4">{isGu ? "ગુજરાતીમાં કેટેગરી" : "Category in Gujarati"}</th>
+                  <th className="py-2.5 px-4">{isGu ? "અંગ્રેજીમાં કેટેગરી" : "Category in English"}</th>
+                  <th className="py-2.5 px-3 text-center">{isGu ? "ક્રમ" : "Order"}</th>
+                  <th className="py-2.5 px-3 text-center">{isGu ? "સ્થિતિ" : "Status"}</th>
+                  <th className="py-2.5 px-4 text-right">{isGu ? "ક્રિયાઓ" : "Actions"}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {categories.map((c) => (
-                  <tr key={c.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-3 px-4 text-xs font-mono text-slate-500">{c.displayOrder}</td>
-                    <td className="py-3 px-4 font-bold text-slate-900">{c.nameGu}</td>
-                    <td className="py-3 px-4 text-slate-700">{c.nameEn}</td>
-                    <td className="py-3 px-4 font-mono text-xs text-slate-500">{c.slug}</td>
-                    <td className="py-3 px-4">
-                      <span className="inline-flex items-center gap-1 text-xs text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
-                        <FileText className="w-3 h-3" />
-                        <span>{c.articleCount}</span>
-                      </span>
-                    </td>
-                    <td className="py-3 px-4">
-                      {c.isActive ? (
-                        <span className="inline-flex items-center gap-1 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full font-medium">
-                          Active
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full font-medium">
-                          Inactive
-                        </span>
-                      )}
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      <button
-                        onClick={() => openEditModal(c)}
-                        className="p-1.5 text-slate-600 hover:text-[#016BB7] hover:bg-slate-100 rounded-lg transition-colors"
-                        title="Edit Category"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {categories.map((c, index) => {
+                  return (
+                    <tr key={c.id} className="hover:bg-slate-50/70 transition-colors">
+                      <td className="py-2.5 px-3 text-center text-slate-500 font-medium">{index + 1}</td>
+                      <td className="py-2.5 px-4 font-semibold text-slate-900">{c.nameGu}</td>
+                      <td className="py-2.5 px-4 text-slate-700">{c.nameEn}</td>
+                      <td className="py-2.5 px-3 text-center text-slate-500 font-mono text-[11px]">{c.displayOrder}</td>
+                      <td className="py-2.5 px-3 text-center">
+                        {c.isActive ? (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] text-emerald-700 bg-emerald-50 border border-emerald-200 font-semibold">
+                            Active
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] text-slate-500 bg-slate-100 font-semibold">
+                            Inactive
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-2.5 px-4 text-right whitespace-nowrap">
+                        <div className="flex items-center justify-end gap-1.5 text-xs">
+                          <button
+                            onClick={() => openEditModal(c)}
+                            className="text-[#016BB7] hover:underline font-semibold"
+                          >
+                            {isGu ? "જુઓ | સંપાદિત" : "View | Edit"}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

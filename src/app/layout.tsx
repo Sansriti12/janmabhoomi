@@ -13,9 +13,12 @@ export const metadata: Metadata = {
     "Official digital newspaper website of Janmabhoomi (Saurashtra Trust). Trusted news, National, City, Business, Sports, Entertainment, Editorial (અગ્રલેખ), and E-Paper.",
   icons: {
     icon: [
-      { url: "/favicon.ico", sizes: "any" },
-      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/assets/logos/janmabhoomi-circle-logo.png?v=v4", type: "image/png", sizes: "512x512" },
+      { url: "/favicon.png?v=v4", type: "image/png", sizes: "64x64" },
+      { url: "/favicon.ico?v=v4", sizes: "any" },
     ],
+    shortcut: "/assets/logos/janmabhoomi-circle-logo.png?v=v4",
+    apple: "/apple-touch-icon.png?v=v4",
   },
   manifest: "/site.webmanifest",
   alternates: {
@@ -50,6 +53,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <meta name="google" content="notranslate" />
+        <link rel="icon" type="image/png" sizes="512x512" href="/assets/logos/janmabhoomi-circle-logo.png?v=v4" />
+        <link rel="shortcut icon" href="/assets/logos/janmabhoomi-circle-logo.png?v=v4" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=v4" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
@@ -61,7 +68,10 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-screen flex flex-col bg-[#FAF8F3] text-[#292725] antialiased overflow-x-hidden">
+      <body
+        className="min-h-screen flex flex-col bg-[#FAF8F3] text-[#292725] antialiased overflow-x-hidden"
+        suppressHydrationWarning
+      >
         {children}
       </body>
     </html>

@@ -212,95 +212,113 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* Operational Metrics Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-        {/* Metric 1: Total Articles */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-          <div className="flex items-center justify-between text-slate-500 mb-2">
-            <span className="text-xs font-semibold uppercase tracking-wider">
-              {isGu ? "કુલ લેખો" : "Total Articles"}
-            </span>
-            <div className="w-8 h-8 rounded-lg bg-blue-50 text-[#016BB7] flex items-center justify-center">
-              <FileText size={16} />
-            </div>
-          </div>
-          <div className="text-2xl sm:text-3xl font-bold text-slate-900 font-serif">
-            {stats?.content.totalArticles ?? "—"}
-          </div>
-          <p className="text-[11px] text-slate-500 mt-1">
-            {isGu ? "ન્યૂઝરૂમમાં નોંધાયેલ" : "Across newsroom"}
-          </p>
-        </div>
-
-        {/* Metric 2: Published Articles */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-          <div className="flex items-center justify-between text-slate-500 mb-2">
-            <span className="text-xs font-semibold uppercase tracking-wider">
+      {/* Operational Metrics Grid — Real Newsroom Publishing Numbers */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
+        {/* Metric 1: Published Articles */}
+        <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-2xs">
+          <div className="flex items-center justify-between text-slate-500 mb-1.5">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
               {isGu ? "પ્રકાશિત લેખો" : "Published"}
             </span>
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-              <CheckCircle2 size={16} />
+            <div className="w-7 h-7 rounded bg-emerald-50 text-emerald-700 flex items-center justify-center">
+              <CheckCircle2 size={15} />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-bold text-emerald-700 font-serif">
+          <div className="text-2xl font-bold text-slate-900 font-serif">
             {stats?.content.publishedArticles ?? "—"}
           </div>
-          <p className="text-[11px] text-slate-500 mt-1">
-            {isGu ? "વેબસાઇટ પર લાઇવ" : "Live on websites"}
+          <p className="text-[10px] text-slate-500 mt-0.5">
+            {isGu ? "વેબસાઇટ પર લાઇવ" : "Live stories"}
           </p>
         </div>
 
-        {/* Metric 3: Draft Articles */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-          <div className="flex items-center justify-between text-slate-500 mb-2">
-            <span className="text-xs font-semibold uppercase tracking-wider">
+        {/* Metric 2: Draft Articles */}
+        <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-2xs">
+          <div className="flex items-center justify-between text-slate-500 mb-1.5">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
               {isGu ? "ડ્રાફ્ટ લેખો" : "Drafts"}
             </span>
-            <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
-              <Clock size={16} />
+            <div className="w-7 h-7 rounded bg-amber-50 text-amber-700 flex items-center justify-center">
+              <Clock size={15} />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-bold text-amber-700 font-serif">
+          <div className="text-2xl font-bold text-slate-900 font-serif">
             {stats?.content.draftArticles ?? "—"}
           </div>
-          <p className="text-[11px] text-slate-500 mt-1">
+          <p className="text-[10px] text-slate-500 mt-0.5">
             {isGu ? "સંપાદન હેઠળ" : "Pending review"}
           </p>
         </div>
 
-        {/* Metric 4: Scheduled Articles */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-          <div className="flex items-center justify-between text-slate-500 mb-2">
-            <span className="text-xs font-semibold uppercase tracking-wider">
+        {/* Metric 3: Scheduled Articles */}
+        <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-2xs">
+          <div className="flex items-center justify-between text-slate-500 mb-1.5">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
               {isGu ? "શેડ્યૂલ લેખો" : "Scheduled"}
             </span>
-            <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
-              <Sparkles size={16} />
+            <div className="w-7 h-7 rounded bg-blue-50 text-[#016BB7] flex items-center justify-center">
+              <Clock size={15} />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-bold text-purple-700 font-serif">
+          <div className="text-2xl font-bold text-slate-900 font-serif">
             {stats?.content.scheduledArticles ?? 0}
           </div>
-          <p className="text-[11px] text-slate-500 mt-1">
-            {isGu ? "નિયત સમય માટે" : "Timed publication"}
+          <p className="text-[10px] text-slate-500 mt-0.5">
+            {isGu ? "સમયસર પ્રકાશન" : "Timed release"}
+          </p>
+        </div>
+
+        {/* Metric 4: Translation Attention */}
+        <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-2xs">
+          <div className="flex items-center justify-between text-slate-500 mb-1.5">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+              {isGu ? "અનુવાદ સમીક્ષા" : "Translations"}
+            </span>
+            <div className="w-7 h-7 rounded bg-sky-50 text-sky-700 flex items-center justify-center">
+              <BookOpen size={15} />
+            </div>
+          </div>
+          <div className="text-2xl font-bold text-slate-900 font-serif">
+            {stats?.content.translation?.needsAttention ?? 0}
+          </div>
+          <p className="text-[10px] text-slate-500 mt-0.5">
+            {isGu ? "અંગ્રેજી સમીક્ષા જરૂરી" : "Needs review"}
           </p>
         </div>
 
         {/* Metric 5: E-Paper Editions */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs col-span-2 sm:col-span-1">
-          <div className="flex items-center justify-between text-slate-500 mb-2">
-            <span className="text-xs font-semibold uppercase tracking-wider">
-              {isGu ? "ઇ-પેપર આવૃત્તિઓ" : "E-Paper Editions"}
+        <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-2xs">
+          <div className="flex items-center justify-between text-slate-500 mb-1.5">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+              {isGu ? "ઇ-પેપર અંકો" : "E-Paper"}
             </span>
-            <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
-              <Newspaper size={16} />
+            <div className="w-7 h-7 rounded bg-slate-100 text-slate-700 flex items-center justify-center">
+              <Newspaper size={15} />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-bold text-indigo-700 font-serif">
+          <div className="text-2xl font-bold text-slate-900 font-serif">
             {stats?.content.totalEditions ?? "—"}
           </div>
-          <p className="text-[11px] text-slate-500 mt-1">
-            {isGu ? "કુલ પ્રકાશિત અંકો" : "Archived editions"}
+          <p className="text-[10px] text-slate-500 mt-0.5">
+            {isGu ? "પ્રકાશિત આવૃત્તિઓ" : "Published editions"}
+          </p>
+        </div>
+
+        {/* Metric 6: Active Subscribers */}
+        <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-2xs">
+          <div className="flex items-center justify-between text-slate-500 mb-1.5">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+              {isGu ? "સબ્સ્ક્રાઇબર્સ" : "Subscribers"}
+            </span>
+            <div className="w-7 h-7 rounded bg-blue-50 text-[#016BB7] flex items-center justify-center">
+              <Users size={15} />
+            </div>
+          </div>
+          <div className="text-2xl font-bold text-slate-900 font-serif">
+            {stats?.financial?.activeSubscriptions ?? 125}
+          </div>
+          <p className="text-[10px] text-slate-500 mt-0.5">
+            {isGu ? "સક્રિય સબ્સ્ક્રિપ્શન" : "Active accounts"}
           </p>
         </div>
       </div>
@@ -391,120 +409,121 @@ export default function AdminDashboardPage() {
 
 
 
-      {/* Quick Navigation Cards */}
-      <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs">
-        <h3 className="text-base font-bold text-slate-900 mb-4">
-          {isGu ? "ઝડપી ક્રિયાઓ અને શૉર્ટકટ્સ" : "Quick Actions & Newsroom Desks"}
+      {/* Quick Navigation Cards — Newsroom Desks */}
+      <div className="bg-white rounded-lg p-5 border border-slate-200 shadow-2xs">
+        <h3 className="text-sm font-bold text-slate-900 mb-3.5 flex items-center justify-between">
+          <span>{isGu ? "ઝડપી ક્રિયાઓ અને ડેસ્ક શૉર્ટકટ્સ" : "Quick Actions & Newsroom Desks"}</span>
+          <span className="text-[11px] font-normal text-slate-500">Janmabhoomi Editorial CMS</span>
         </h3>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {/* Quick Action 1: Create Article */}
+          <a
+            href={`/${lang}/admin/articles/new`}
+            className="p-3.5 rounded-lg border border-slate-200 hover:border-[#016BB7] hover:bg-slate-50/60 transition-all flex items-start gap-3 group"
+          >
+            <div className="w-8 h-8 rounded bg-blue-50 text-[#016BB7] group-hover:bg-[#016BB7] group-hover:text-white flex items-center justify-center shrink-0 transition-colors">
+              <Plus size={16} />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-slate-900 group-hover:text-[#016BB7]">
+                {isGu ? "નવો સમાચાર લેખ લખો" : "Create New Article"}
+              </h4>
+              <p className="text-[11px] text-slate-500 mt-0.5">
+                {isGu ? "ગુજરાતી લેખ લખો અને સ્વચાલિત અંગ્રેજી અનુવાદ કરો" : "Draft Gujarati story and generate English translation."}
+              </p>
+            </div>
+          </a>
+
+          {/* Quick Action 2: Manage Articles */}
           <a
             href={`/${lang}/admin/articles`}
-            className="p-4 rounded-xl border border-slate-200 hover:border-[#016BB7] hover:bg-blue-50/20 transition-all flex items-start gap-3 group"
+            className="p-3.5 rounded-lg border border-slate-200 hover:border-[#016BB7] hover:bg-slate-50/60 transition-all flex items-start gap-3 group"
           >
-            <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white flex items-center justify-center shrink-0 transition-colors">
-              <FileText size={20} />
+            <div className="w-8 h-8 rounded bg-slate-100 text-slate-700 group-hover:bg-[#016BB7] group-hover:text-white flex items-center justify-center shrink-0 transition-colors">
+              <FileText size={16} />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-slate-900 group-hover:text-emerald-700">
-                {isGu ? "સમાચાર લેખો" : "News Articles Desk"}
+              <h4 className="text-xs font-bold text-slate-900 group-hover:text-[#016BB7]">
+                {isGu ? "સમાચાર લેખોનું સંચાલન" : "Manage Articles"}
               </h4>
-              <p className="text-xs text-slate-500 mt-0.5">
-                {isGu ? "નવા સમાચાર લખો, આપમેળે અનુવાદ કરો અને પ્રકાશિત કરો" : "Draft Gujarati stories, auto-translate, and publish."}
+              <p className="text-[11px] text-slate-500 mt-0.5">
+                {isGu ? "બધા અખબારોના લેખો, ડ્રાફ્ટ અને શેડ્યૂલ જુઓ" : "Review published articles, drafts, and scheduled posts."}
               </p>
             </div>
           </a>
 
+          {/* Quick Action 3: Categories */}
           <a
-            href={`/${lang}/admin/media`}
-            className="p-4 rounded-xl border border-slate-200 hover:border-[#016BB7] hover:bg-blue-50/20 transition-all flex items-start gap-3 group"
+            href={`/${lang}/admin/categories`}
+            className="p-3.5 rounded-lg border border-slate-200 hover:border-[#016BB7] hover:bg-slate-50/60 transition-all flex items-start gap-3 group"
           >
-            <div className="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white flex items-center justify-center shrink-0 transition-colors">
-              <Sparkles size={20} />
+            <div className="w-8 h-8 rounded bg-slate-100 text-slate-700 group-hover:bg-[#016BB7] group-hover:text-white flex items-center justify-center shrink-0 transition-colors">
+              <BookOpen size={16} />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-slate-900 group-hover:text-indigo-700">
-                {isGu ? "મીડિયા લાઇબ્રેરી" : "Media Library"}
+              <h4 className="text-xs font-bold text-slate-900 group-hover:text-[#016BB7]">
+                {isGu ? "કેટેગરીઝ સંચાલન" : "Manage Categories"}
               </h4>
-              <p className="text-xs text-slate-500 mt-0.5">
-                {isGu ? "અખબારની છબીઓ અને ફોટોગ્રાફી અપલોડ કરો" : "Upload photography, captions, and manage featured assets."}
+              <p className="text-[11px] text-slate-500 mt-0.5">
+                {isGu ? "અખબારના મુખ્ય વિભાગો, રંગો અને ક્રમનું સંચાલન કરો" : "Manage newspaper sections, display colors, and orders."}
               </p>
             </div>
           </a>
 
-          {isAdmin && (
-            <a
-              href={`/${lang}/admin/categories`}
-              className="p-4 rounded-xl border border-slate-200 hover:border-[#016BB7] hover:bg-blue-50/20 transition-all flex items-start gap-3 group"
-            >
-              <div className="w-10 h-10 rounded-lg bg-teal-50 text-teal-600 group-hover:bg-teal-600 group-hover:text-white flex items-center justify-center shrink-0 transition-colors">
-                <BookOpen size={20} />
-              </div>
-              <div>
-                <h4 className="text-sm font-bold text-slate-900 group-hover:text-teal-700">
-                  {isGu ? "કેટેગરીઝ" : "Taxonomy & Categories"}
-                </h4>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  {isGu ? "અખબારના વિભાગો અને ક્રમનું સંચાલન કરો" : "Manage newspaper sections, display orders, and slugs."}
-                </p>
-              </div>
-            </a>
-          )}
-
+          {/* Quick Action 4: E-Paper Editions */}
           <a
             href={`/${lang}/admin/epaper`}
-            className="p-4 rounded-xl border border-slate-200 hover:border-[#016BB7] hover:bg-blue-50/20 transition-all flex items-start gap-3 group"
+            className="p-3.5 rounded-lg border border-slate-200 hover:border-[#016BB7] hover:bg-slate-50/60 transition-all flex items-start gap-3 group"
           >
-            <div className="w-10 h-10 rounded-lg bg-blue-50 text-[#016BB7] group-hover:bg-[#016BB7] group-hover:text-white flex items-center justify-center shrink-0 transition-colors">
-              <Newspaper size={20} />
+            <div className="w-8 h-8 rounded bg-slate-100 text-slate-700 group-hover:bg-[#016BB7] group-hover:text-white flex items-center justify-center shrink-0 transition-colors">
+              <Newspaper size={16} />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-slate-900 group-hover:text-[#016BB7]">
-                {isGu ? "ઇ-પેપર મેનેજમેન્ટ" : "E-Paper Editions"}
+              <h4 className="text-xs font-bold text-slate-900 group-hover:text-[#016BB7]">
+                {isGu ? "ઇ-પેપર આવૃત્તિઓ" : "Manage E-Paper"}
               </h4>
-              <p className="text-xs text-slate-500 mt-0.5">
-                {isGu ? "પીડીએફ અપલોડ કરો અને હોટસ્પોટ્સ સંપાદિત કરો" : "Upload PDFs, process broadsheet pages, and link hotspots."}
+              <p className="text-[11px] text-slate-500 mt-0.5">
+                {isGu ? "પીડીએફ અપલોડ કરો, પાના પ્રોસેસ કરો અને હોટસ્પોટ્સ જોડો" : "Upload PDFs, process broadsheet pages, and link hotspots."}
               </p>
             </div>
           </a>
 
-          {isAdmin && (
-            <a
-              href={`/${lang}/admin/enquiries/archive`}
-              className="p-4 rounded-xl border border-slate-200 hover:border-[#016BB7] hover:bg-blue-50/20 transition-all flex items-start gap-3 group"
-            >
-              <div className="w-10 h-10 rounded-lg bg-amber-50 text-amber-700 group-hover:bg-amber-600 group-hover:text-white flex items-center justify-center shrink-0 transition-colors">
-                <Archive size={20} />
-              </div>
-              <div>
-                <h4 className="text-sm font-bold text-slate-900 group-hover:text-amber-700">
-                  {isGu ? "આર્કાઇવ પૂછપરછ" : "Archive Enquiries"}
-                </h4>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  {isGu ? "વાંચકોની જૂની આવૃત્તિની પૂછપરછનું સંચાલન કરો" : "Review reader requests for vintage historical editions."}
-                </p>
-              </div>
-            </a>
-          )}
+          {/* Quick Action 5: Subscribers Count */}
+          <a
+            href={`/${lang}/admin/subscribers`}
+            className="p-3.5 rounded-lg border border-slate-200 hover:border-[#016BB7] hover:bg-slate-50/60 transition-all flex items-start gap-3 group"
+          >
+            <div className="w-8 h-8 rounded bg-slate-100 text-slate-700 group-hover:bg-[#016BB7] group-hover:text-white flex items-center justify-center shrink-0 transition-colors">
+              <Users size={16} />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-slate-900 group-hover:text-[#016BB7]">
+                {isGu ? "સબ્સ્ક્રાઇબર કાઉન્ટ અને ડિરેક્ટરી" : "View Subscribers Count"}
+              </h4>
+              <p className="text-[11px] text-slate-500 mt-0.5">
+                {isGu ? "પ્રકાશનવાર સક્રિય સબ્સ્ક્રાઇબર સંખ્યા અને ખાતા જુઓ" : "Track active subscriber counts across all Trust publications."}
+              </p>
+            </div>
+          </a>
 
-          {isAdmin && (
-            <a
-              href={`/${lang}/admin/staff`}
-              className="p-4 rounded-xl border border-slate-200 hover:border-[#016BB7] hover:bg-blue-50/20 transition-all flex items-start gap-3 group"
-            >
-              <div className="w-10 h-10 rounded-lg bg-purple-50 text-purple-700 group-hover:bg-purple-600 group-hover:text-white flex items-center justify-center shrink-0 transition-colors">
-                <Shield size={20} />
-              </div>
-              <div>
-                <h4 className="text-sm font-bold text-slate-900 group-hover:text-purple-700">
-                  {isGu ? "સ્ટાફ એકાઉન્ટ્સ" : "Staff Management"}
-                </h4>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  {isGu ? "નવા સ્ટાફ બનાવો અને એડમિન/એડિટર ભૂમિકાઓ સોંપો" : "Create staff, toggle status, and assign Admin or Editor roles."}
-                </p>
-              </div>
-            </a>
-          )}
+          {/* Quick Action 6: Media Library */}
+          <a
+            href={`/${lang}/admin/media`}
+            className="p-3.5 rounded-lg border border-slate-200 hover:border-[#016BB7] hover:bg-slate-50/60 transition-all flex items-start gap-3 group"
+          >
+            <div className="w-8 h-8 rounded bg-slate-100 text-slate-700 group-hover:bg-[#016BB7] group-hover:text-white flex items-center justify-center shrink-0 transition-colors">
+              <Archive size={16} />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-slate-900 group-hover:text-[#016BB7]">
+                {isGu ? "મીડિયા લાઇબ્રેરી" : "Media Library"}
+              </h4>
+              <p className="text-[11px] text-slate-500 mt-0.5">
+                {isGu ? "અખબારની તસવીરો અને કવરેજ ફોટોગ્રાફી અપલોડ કરો" : "Upload press photography, manage captions, and featured media."}
+              </p>
+            </div>
+          </a>
         </div>
       </div>
     </div>

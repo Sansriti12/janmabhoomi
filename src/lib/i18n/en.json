@@ -18,7 +18,7 @@
   },
   "nav": {
     "home": "Home",
-    "latest": "Latest",
+    "latest": "Breaking News",
     "national": "National",
     "city": "City",
     "business": "Business",
@@ -27,7 +27,7 @@
     "editorial": "Editorial",
     "publications": "Publications",
     "otherPublications": "Other Publications",
-    "maran": "Maran (Obituaries)",
+    "maran": "Obituaries",
     "more": "More",
     "international": "International",
     "education": "Education",
