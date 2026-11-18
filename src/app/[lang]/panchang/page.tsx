@@ -40,7 +40,7 @@ export default async function PanchangPage({
   return (
     <div className="py-8 space-y-8 notranslate" translate="no" suppressHydrationWarning>
       {/* Page Header Banner */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="container-wide">
         <div className="rounded-2xl border-2 border-[#016BB7]/25 bg-white p-6 sm:p-8 shadow-xs" suppressHydrationWarning>
           <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
             <div className="flex items-center gap-2">
@@ -81,7 +81,7 @@ export default async function PanchangPage({
       />
 
       {/* Reference Guide to Choghadiya Meaning */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="container-wide">
         <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-7 space-y-4 shadow-xs">
           <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
             <BookOpen className="h-5 w-5 text-[#016BB7]" />

@@ -43,7 +43,7 @@ export default async function ArchiveEnquiryPage({
 
   return (
     <div className="bg-[#FAF8F3] min-h-screen py-8 sm:py-12">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-8">
+      <div className="container-wide space-y-8">
         
         {/* Breadcrumb Navigation */}
         <nav aria-label="Breadcrumb" className="text-xs text-[#1F2937]/70 flex items-center gap-1.5 font-medium">

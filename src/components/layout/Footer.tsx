@@ -41,7 +41,7 @@ export function Footer({ lang, dict }: FooterProps) {
       style={{ backgroundColor: "#016BB7" }}
       className="mt-8 border-t-2 border-[#016BB7] bg-[#016BB7] text-white"
     >
-      <div className="mx-auto max-w-7xl 2xl:max-w-[1440px] px-4 sm:px-6 lg:px-8 py-6 sm:py-7">
+      <div className="container-wide py-6 sm:py-7">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 pb-5 border-b border-white/20">
           {/* Col 1 (4 Cols): Janmabhoomi Brand, Verified Short Intro & Socials */}
           <div className="lg:col-span-4 space-y-2.5">
@@ -159,21 +159,32 @@ export function Footer({ lang, dict }: FooterProps) {
             </ul>
           </div>
 
-          {/* Col 3 (3 Cols): Other Publications (7 verified titles) */}
+          {/* Col 3 (3 Cols): Saurashtra Trust Publications */}
           <div className="lg:col-span-3 space-y-2">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-white border-b border-white/25 pb-1 inline-block">
-              {dict.footer.otherPublications || "Other Publications"}
-            </h3>
+            <div className="flex items-center justify-between border-b border-white/25 pb-1">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-white">
+                {isGu ? "સૌરાષ્ટ્ર ટ્રસ્ટ પ્રકાશનો" : "All Publications"}
+              </h3>
+              <Link
+                href={`/${lang}/publications`}
+                className="text-[10px] font-bold text-sky-200 hover:text-white underline"
+              >
+                {isGu ? "તમામ જુઓ" : "View All"}
+              </Link>
+            </div>
             <ul className="space-y-1 text-xs text-white/90 pt-1">
-              {otherPublications.map((pub) => {
+              {publications.map((pub) => {
+                const isJanmabhoomi = pub.id === "pub-janmabhoomi";
                 const isExternal = pub.websiteUrl.startsWith("http");
-                const href = isExternal
+                const href = isJanmabhoomi
+                  ? `/${lang}`
+                  : isExternal
                   ? pub.websiteUrl
                   : pub.slug === "panchang"
                   ? `/${lang}/panchang`
                   : pub.slug === "kavita"
                   ? `/${lang}/about#kavita`
-                  : `/${lang}`;
+                  : `/${lang}/epaper?publication=${pub.id}`;
                 return (
                   <li key={`footer-${pub.id}`}>
                     <a
@@ -182,10 +193,16 @@ export function Footer({ lang, dict }: FooterProps) {
                       rel={isExternal ? "noopener noreferrer" : undefined}
                       className="inline-flex items-center gap-1 hover:text-white transition-colors"
                     >
-                      <span className="truncate">{pub.name[lang] || pub.name.gu}</span>
-                      {isExternal && (
+                      <span className={`truncate ${isJanmabhoomi ? "font-bold underline" : ""}`}>
+                        {pub.name[lang] || pub.name.gu}
+                      </span>
+                      {isJanmabhoomi ? (
+                        <span className="text-[9px] bg-white/20 px-1 py-0.2 rounded font-semibold ml-1">
+                          {isGu ? "મુખ્ય" : "Main"}
+                        </span>
+                      ) : isExternal ? (
                         <ExternalLink className="h-2.5 w-2.5 text-white/70 shrink-0" />
-                      )}
+                      ) : null}
                     </a>
                   </li>
                 );

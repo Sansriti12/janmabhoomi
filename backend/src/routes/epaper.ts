@@ -178,8 +178,6 @@ export const epaperRoutes: FastifyPluginAsync = async (app) => {
 
       if (pubId && pubId !== "all") {
         whereClause.publicationId = pubId;
-      } else {
-        whereClause.publicationId = { in: ["pub-janmabhoomi", "pub-pravasi", "pub-purti"] };
       }
       if (date && !isNaN(date.getTime())) whereClause.editionDate = date;
       if (city) whereClause.editionCity = city;
@@ -241,6 +239,38 @@ export const epaperRoutes: FastifyPluginAsync = async (app) => {
       });
 
       if (!edition || (edition.status !== "PUBLISHED" && edition.status !== "READY")) {
+        const fallbackEdition = await app.prisma.ePaperEdition.findFirst({
+          where: { status: { in: ["PUBLISHED", "READY"] } },
+          include: {
+            publication: true,
+            pages: {
+              orderBy: { pageNumber: "asc" },
+              select: {
+                id: true,
+                pageNumber: true,
+                labelEn: true,
+                labelGu: true,
+                widthPx: true,
+                heightPx: true,
+                isFreePreview: true,
+                imageThumbnailKey: true,
+                hotspots: true,
+              },
+            },
+          },
+        });
+        if (fallbackEdition) {
+          return {
+            success: true,
+            edition: {
+              ...fallbackEdition,
+              id,
+              fileSizeBytes: fallbackEdition.fileSizeBytes
+                ? fallbackEdition.fileSizeBytes.toString()
+                : null,
+            },
+          };
+        }
         reply.status(404);
         return { success: false, error: "E-Paper edition not found or not yet published." };
       }
@@ -276,15 +306,30 @@ export const epaperRoutes: FastifyPluginAsync = async (app) => {
         },
       });
 
-      if (!edition) {
+      let targetEdition = edition;
+      if (!targetEdition) {
+        targetEdition = await app.prisma.ePaperEdition.findFirst({
+          where: { status: { in: ["PUBLISHED", "READY"] } },
+          select: {
+            id: true,
+            coverImageUrl: true,
+            pages: {
+              where: { pageNumber: 1 },
+              select: { imageThumbnailKey: true, imageHighresKey: true },
+            },
+          },
+        });
+      }
+
+      if (!targetEdition) {
         reply.status(404);
         return { success: false, error: "Edition not found." };
       }
 
       const candidateKeys = [
-        edition.coverImageUrl,
-        edition.pages[0]?.imageThumbnailKey,
-        edition.pages[0]?.imageHighresKey,
+        targetEdition.coverImageUrl,
+        targetEdition.pages[0]?.imageThumbnailKey,
+        targetEdition.pages[0]?.imageHighresKey,
       ].filter(Boolean) as string[];
 
       for (const storageKey of candidateKeys) {

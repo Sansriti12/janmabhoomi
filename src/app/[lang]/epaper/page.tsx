@@ -64,7 +64,7 @@ export default async function EpaperLandingPage({
   const pageCountDisplay = currentEdition?.pageCount || 12;
 
   return (
-    <div className="mx-auto max-w-7xl 2xl:max-w-[1440px] px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8">
+    <div className="container-reader py-6 sm:py-8 space-y-8">
       {/* ========================================================================= */}
       {/* 1. PROFESSIONAL EDITORIAL MASTHEAD BANNER                                 */}
       {/* ========================================================================= */}

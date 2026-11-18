@@ -29,7 +29,7 @@ export function LatestEventsSection({ events, lang }: LatestEventsSectionProps) 
   return (
     <section
       aria-labelledby="latest-events-heading"
-      className="mx-auto max-w-7xl 2xl:max-w-[1440px] px-4 sm:px-6 lg:px-8 py-4"
+      className="container-wide py-4"
     >
       {/* Section Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2.5 border-b-2 border-[#016BB7] pb-3 mb-6">

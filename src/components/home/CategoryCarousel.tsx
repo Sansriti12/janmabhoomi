@@ -81,7 +81,7 @@ export function CategoryCarousel({ categories, lang, dict }: CategoryCarouselPro
   return (
     <section
       aria-labelledby="category-carousel-heading"
-      className="mx-auto max-w-7xl 2xl:max-w-[1440px] px-4 sm:px-6 lg:px-8 py-6 border-t border-[#016BB7]/15"
+      className="container-wide py-6 border-t border-[#016BB7]/15"
       onKeyDown={handleKeyDown}
       tabIndex={0}
     >

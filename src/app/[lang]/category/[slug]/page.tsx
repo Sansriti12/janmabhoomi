@@ -46,7 +46,7 @@ export default async function CategoryListingPage({
   );
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+    <div className="container-wide py-8">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b-2 border-[#016BB7] pb-3.5">
         <div>
           <span className="text-xs font-bold uppercase tracking-wider text-[#016BB7]">

@@ -34,7 +34,7 @@ export default async function EditorialArchivePage({
   const allEditorials = [todaysEditorial, ...previousEditorials];
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+    <div className="container-wide py-8">
       <div className="mb-4">
         <Link
           href={`/${locale}/editorial`}

@@ -123,7 +123,7 @@ export default async function ArticlePage({
     : article.publishedAt;
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+    <div className="container-wide py-8">
       {/* Schema.org NewsArticle JSON-LD */}
       <NewsArticleJsonLd article={article} lang={locale} siteUrl={siteUrl} />
 

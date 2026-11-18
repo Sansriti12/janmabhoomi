@@ -174,7 +174,7 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
         style={{ backgroundColor: "#016BB7" }}
         className="bg-[#016BB7] border-b border-white/20 text-white text-xs"
       >
-        <div className="mx-auto max-w-7xl 2xl:max-w-[1440px] px-4 sm:px-6 lg:px-8 h-8 flex items-center justify-between">
+        <div className="container-wide h-8 flex items-center justify-between">
           {/* Left: Automatically generated current date & day */}
           <div className="flex items-center gap-2.5 font-medium truncate">
             <span className="font-semibold text-white tracking-wide">{formattedDate || "મંગળવાર, ૩ નવેમ્બર ૨૦૨૬"}</span>
@@ -251,7 +251,7 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
 
       {/* ROW 2 – MAIN BRANDING HEADER (Logo placed cleanly on the LEFT per Modern Redesign) */}
       <div className="bg-white overflow-hidden sm:overflow-visible">
-        <div className="mx-auto max-w-7xl 2xl:max-w-[1440px] px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3.5 flex items-center justify-between gap-4">
+        <div className="container-wide py-2.5 sm:py-3.5 flex items-center justify-between gap-4">
           {/* Left: Official Blue Janmabhoomi Logo */}
           <div className="flex items-center shrink-0">
             <Link
@@ -419,7 +419,7 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
 
       {/* ROW 3 – DESKTOP CATEGORY NAVIGATION (Evenly balanced across full container width) */}
       <div className="hidden lg:block bg-white border-t border-b border-[#016BB7]/20 shadow-2xs">
-        <div className="mx-auto max-w-7xl 2xl:max-w-[1440px] px-4 sm:px-6 lg:px-8">
+        <div className="container-wide">
           <nav
             aria-label="Main category navigation"
             className="flex items-center justify-between w-full h-11 text-[13px] xl:text-[14px] font-semibold tracking-normal overflow-x-auto scrollbar-none"
@@ -473,44 +473,77 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
               </button>
 
               {publicationsOpen && (
-                <div className="absolute right-0 top-full mt-1 w-72 rounded-lg border border-[#016BB7]/20 bg-white py-2 shadow-xl z-50 text-left">
-                  <div className="px-3.5 py-1.5 border-b border-[#016BB7]/10 mb-1">
+                <div className="absolute right-0 top-full mt-1 w-80 sm:w-88 rounded-xl border border-[#016BB7]/25 bg-white py-2 shadow-2xl z-50 text-left overflow-hidden">
+                  <div className="px-3.5 py-1.5 border-b border-[#016BB7]/10 mb-1 flex items-center justify-between">
                     <p className="text-[11px] font-bold uppercase tracking-wider text-[#016BB7]">
-                      {lang === "gu" ? "સૌરાષ્ટ્ર ટ્રસ્ટ પ્રકાશનો" : "Saurashtra Trust Publications"}
+                      {lang === "gu" ? "સૌરાષ્ટ્ર ટ્રસ્ટના તમામ પ્રકાશનો" : "All Saurashtra Trust Publications"}
                     </p>
+                    <span className="text-[10px] font-bold bg-[#016BB7]/10 text-[#016BB7] px-2 py-0.5 rounded-full">
+                      8 {lang === "gu" ? "પ્રકાશનો" : "Titles"}
+                    </span>
                   </div>
-                  {otherPublications.map((pub) => {
-                    const isExternal = pub.websiteUrl.startsWith("http");
-                    const href = isExternal
-                      ? pub.websiteUrl
-                      : pub.slug === "panchang"
-                      ? `/${lang}/panchang`
-                      : pub.slug === "kavita"
-                      ? `/${lang}/about#kavita`
-                      : `/${lang}`;
-                    return (
-                      <a
-                        key={pub.id}
-                        href={href}
-                        target={isExternal ? "_blank" : undefined}
-                        rel={isExternal ? "noopener noreferrer" : undefined}
-                        onClick={() => setPublicationsOpen(false)}
-                        className="flex items-center justify-between px-3.5 py-2 hover:bg-[#F0F6FA] group transition-colors"
-                      >
-                        <div>
-                          <p className="text-sm font-bold text-[#1F2937] group-hover:text-[#016BB7]">
-                            {pub.name[lang] || pub.name.gu}
-                          </p>
-                          <p className="text-[11px] text-[#1F2937]/70 line-clamp-1">
-                            {pub.frequency[lang] || pub.frequency.gu}
-                          </p>
-                        </div>
-                        {isExternal && (
-                          <ExternalLink className="h-3.5 w-3.5 text-[#016BB7]/60 group-hover:text-[#016BB7] shrink-0" />
-                        )}
-                      </a>
-                    );
-                  })}
+
+                  <div className="max-h-[380px] overflow-y-auto divide-y divide-slate-100">
+                    {publications.map((pub) => {
+                      const isJanmabhoomi = pub.id === "pub-janmabhoomi";
+                      const isExternal = pub.websiteUrl.startsWith("http");
+                      const href = isJanmabhoomi
+                        ? `/${lang}`
+                        : isExternal
+                        ? pub.websiteUrl
+                        : pub.slug === "panchang"
+                        ? `/${lang}/panchang`
+                        : pub.slug === "kavita"
+                        ? `/${lang}/about#kavita`
+                        : `/${lang}/epaper?publication=${pub.id}`;
+
+                      return (
+                        <a
+                          key={pub.id}
+                          href={href}
+                          target={isExternal ? "_blank" : undefined}
+                          rel={isExternal ? "noopener noreferrer" : undefined}
+                          onClick={() => setPublicationsOpen(false)}
+                          className={`flex items-center justify-between px-3.5 py-2 hover:bg-[#F0F6FA] group transition-colors ${
+                            isJanmabhoomi ? "bg-blue-50/50" : ""
+                          }`}
+                        >
+                          <div className="space-y-0.5">
+                            <div className="flex items-center gap-2">
+                              <p className="text-sm font-bold text-[#1F2937] group-hover:text-[#016BB7]">
+                                {pub.name[lang] || pub.name.gu}
+                              </p>
+                              {isJanmabhoomi && (
+                                <span className="text-[9px] font-bold bg-[#016BB7] text-white px-1.5 py-0.5 rounded">
+                                  {lang === "gu" ? "મુખ્ય અખબાર" : "Flagship"}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[11px] text-[#1F2937]/70 line-clamp-1">
+                              {pub.frequency[lang] || pub.frequency.gu} • {pub.region[lang] || pub.region.gu}
+                            </p>
+                          </div>
+                          {isExternal ? (
+                            <ExternalLink className="h-3.5 w-3.5 text-[#016BB7]/60 group-hover:text-[#016BB7] shrink-0" />
+                          ) : (
+                            <ArrowRight className="h-3.5 w-3.5 text-slate-300 group-hover:text-[#016BB7] group-hover:translate-x-0.5 transition-all shrink-0" />
+                          )}
+                        </a>
+                      );
+                    })}
+                  </div>
+
+                  {/* Direct link to dedicated publications directory */}
+                  <div className="p-2 border-t border-[#016BB7]/15 bg-slate-50/90 mt-1">
+                    <Link
+                      href={`/${lang}/publications`}
+                      onClick={() => setPublicationsOpen(false)}
+                      className="flex items-center justify-center gap-1.5 w-full py-2 px-3 text-xs font-bold text-[#016BB7] hover:bg-[#016BB7] hover:text-white rounded-lg transition-all shadow-2xs"
+                    >
+                      <span>{lang === "gu" ? "તમામ ૮ પ્રકાશનોનો પરિચય અને વિગતો જુઓ" : "View All 8 Publications Hub"}</span>
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </Link>
+                  </div>
                 </div>
               )}
             </div>
@@ -566,20 +599,32 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
                   ))}
                 </div>
 
-                {/* Mobile Other Publications Section */}
-                <div className="py-2">
-                  <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-[#016BB7] mb-1">
-                    {dict.nav.publications || "Publications"}
-                  </p>
-                  {otherPublications.map((pub) => {
+                {/* Mobile All Publications Section */}
+                <div className="py-2 border-t border-slate-100">
+                  <div className="flex items-center justify-between px-3 mb-1.5">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-[#016BB7]">
+                      {lang === "gu" ? "સૌરાષ્ટ્ર ટ્રસ્ટના તમામ પ્રકાશનો" : "All 8 Publications"}
+                    </p>
+                    <Link
+                      href={`/${lang}/publications`}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="text-[10px] font-bold text-[#016BB7] underline"
+                    >
+                      {lang === "gu" ? "બધા જુઓ" : "View All"}
+                    </Link>
+                  </div>
+                  {publications.map((pub) => {
+                    const isJanmabhoomi = pub.id === "pub-janmabhoomi";
                     const isExternal = pub.websiteUrl.startsWith("http");
-                    const href = isExternal
+                    const href = isJanmabhoomi
+                      ? `/${lang}`
+                      : isExternal
                       ? pub.websiteUrl
                       : pub.slug === "panchang"
                       ? `/${lang}/panchang`
                       : pub.slug === "kavita"
                       ? `/${lang}/about#kavita`
-                      : `/${lang}`;
+                      : `/${lang}/epaper?publication=${pub.id}`;
                     return (
                       <a
                         key={`mob-${pub.id}`}
@@ -587,10 +632,20 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
                         target={isExternal ? "_blank" : undefined}
                         rel={isExternal ? "noopener noreferrer" : undefined}
                         onClick={() => setMobileMenuOpen(false)}
-                        className="flex items-center justify-between px-3 py-1.5 text-xs text-[#1F2937] hover:text-[#016BB7] hover:bg-[#F0F6FA] rounded"
+                        className={`flex items-center justify-between px-3 py-1.5 text-xs text-[#1F2937] hover:text-[#016BB7] hover:bg-[#F0F6FA] rounded ${
+                          isJanmabhoomi ? "bg-blue-50/60 font-bold text-[#016BB7]" : ""
+                        }`}
                       >
                         <span className="font-semibold">{pub.name[lang] || pub.name.gu}</span>
-                        {isExternal && <ExternalLink className="h-3 w-3 text-[#016BB7]" />}
+                        {isJanmabhoomi ? (
+                          <span className="text-[9px] bg-[#016BB7] text-white px-1.5 py-0.2 rounded font-bold">
+                            {lang === "gu" ? "મુખ્ય" : "Main"}
+                          </span>
+                        ) : isExternal ? (
+                          <ExternalLink className="h-3 w-3 text-[#016BB7]" />
+                        ) : (
+                          <ArrowRight className="h-3 w-3 text-slate-400" />
+                        )}
                       </a>
                     );
                   })}

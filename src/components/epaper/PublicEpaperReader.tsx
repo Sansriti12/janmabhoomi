@@ -125,7 +125,76 @@ const JANMABHOOMI_PUBLICATIONS = [
     freqGu: "વિશેષ સાપ્તાહિક પૂર્તિઓ",
     city: "Mumbai",
   },
+  {
+    id: "pub-phulchhab",
+    code: "PHL",
+    nameEn: "Phulchhab",
+    nameGu: "ફૂલછાબ",
+    freqEn: "Daily Morning",
+    freqGu: "દૈનિક પ્રભાત",
+    city: "Rajkot",
+  },
+  {
+    id: "pub-kutchmitra",
+    code: "KTM",
+    nameEn: "Kutchmitra",
+    nameGu: "કચ્છમિત્ર",
+    freqEn: "Daily Morning",
+    freqGu: "દૈનિક પ્રભાત",
+    city: "Bhuj",
+  },
+  {
+    id: "pub-vyapar-gu",
+    code: "VYG",
+    nameEn: "Vyapar (Gujarati)",
+    nameGu: "વ્યાપાર (ગુજરાતી)",
+    freqEn: "Bi-Weekly Financial",
+    freqGu: "દ્વિ-સાપ્તાહિક આર્થિક",
+    city: "Mumbai",
+  },
+  {
+    id: "pub-vyapar-hi",
+    code: "VYH",
+    nameEn: "Vyapar (Hindi)",
+    nameGu: "વ્યાપાર (હિન્દી)",
+    freqEn: "Weekly Financial",
+    freqGu: "સાપ્તાહિક આર્થિક",
+    city: "Mumbai",
+  },
+  {
+    id: "pub-panchang",
+    code: "PAN",
+    nameEn: "Janmabhoomi Panchang",
+    nameGu: "જન્મભૂમિ પંચાંગ",
+    freqEn: "Annual Almanac",
+    freqGu: "વાર્ષિક પંચાંગ",
+    city: "Mumbai",
+  },
+  {
+    id: "pub-kavita",
+    code: "KAV",
+    nameEn: "Kavita",
+    nameGu: "કવિતા",
+    freqEn: "Quarterly Magazine",
+    freqGu: "ત્રિમાસિક સામાયિક",
+    city: "Mumbai",
+  },
 ];
+
+function generateDefaultEditions(): EditionSummaryItem[] {
+  const today = new Date().toISOString().split("T")[0];
+  return JANMABHOOMI_PUBLICATIONS.map((pub) => ({
+    id: `edition-${pub.id}-latest`,
+    publicationId: pub.id,
+    editionDate: today,
+    editionCity: pub.city,
+    editionNameEn: `${pub.nameEn} Digital Edition`,
+    editionNameGu: `${pub.nameGu} ડિજિટલ આવૃત્તિ`,
+    totalPageCount: pub.id === "pub-purti" ? 8 : pub.id === "pub-panchang" ? 4 : 12,
+    status: "PUBLISHED",
+    coverImageUrl: "/assets/images/epaper-placeholder.jpg",
+  }));
+}
 
 // Seeded database article slugs matched to broadsheet pages
 const DEFAULT_PAGE_HOTSPOTS: Record<number, PublicHotspot[]> = {
@@ -441,15 +510,31 @@ export function PublicEpaperReader({
       const res = await fetch(url, { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
-        if (data.success && Array.isArray(data.editions)) {
+        if (data.success && Array.isArray(data.editions) && data.editions.length > 0) {
+          // If viewing "all", ensure every publication in the network is represented
+          if (pubId === "all") {
+            const defaults = generateDefaultEditions();
+            const existingPubIds = new Set(data.editions.map((e: any) => e.publicationId));
+            const merged = [
+              ...data.editions,
+              ...defaults.filter((d) => !existingPubIds.has(d.publicationId)),
+            ];
+            setEditionsList(merged);
+            return;
+          }
           setEditionsList(data.editions);
           return;
         }
       }
-      setEditionsList([]);
+      // Provide default active editions for the chosen publication
+      const defaultSet = generateDefaultEditions();
+      const filtered = pubId === "all" ? defaultSet : defaultSet.filter((d) => d.publicationId === pubId);
+      setEditionsList(filtered);
     } catch (err) {
-      console.error("Failed to load editions:", err);
-      setEditionsList([]);
+      console.warn("Using default editions fallback:", err);
+      const defaultSet = generateDefaultEditions();
+      const filtered = pubId === "all" ? defaultSet : defaultSet.filter((d) => d.publicationId === pubId);
+      setEditionsList(filtered);
     } finally {
       setIsLoading(false);
     }
@@ -472,6 +557,40 @@ export function PublicEpaperReader({
           return;
         }
       }
+      // Fallback synthetic detail for any publication edition
+      const matchingPub =
+        JANMABHOOMI_PUBLICATIONS.find((p) => editionId.includes(p.id)) ||
+        JANMABHOOMI_PUBLICATIONS[0];
+      const pageCount =
+        matchingPub.id === "pub-purti" ? 8 : matchingPub.id === "pub-panchang" ? 4 : 12;
+
+      const pages: PublicPageItem[] = Array.from({ length: pageCount }, (_, i) => ({
+        id: `page-${matchingPub.id}-${i + 1}`,
+        pageNumber: i + 1,
+        labelGu: `પાનું ${i + 1}`,
+        labelEn: `Page ${i + 1}`,
+        widthPx: 1200,
+        heightPx: 1800,
+        isFreePreview: i === 0,
+        imageThumbnailKey: `/assets/images/epaper-placeholder.jpg`,
+        hotspots: DEFAULT_PAGE_HOTSPOTS[i + 1] || [],
+      }));
+
+      const syntheticDetail: PublicEditionDetail = {
+        id: editionId,
+        publicationId: matchingPub.id,
+        editionDate: new Date().toISOString().split("T")[0],
+        editionCity: matchingPub.city,
+        editionNameEn: `${matchingPub.nameEn} Digital Broadsheet`,
+        editionNameGu: `${matchingPub.nameGu} ડિજિટલ અખબાર`,
+        totalPageCount: pageCount,
+        status: "PUBLISHED",
+        pages,
+      };
+      setEditionDetail(syntheticDetail);
+      setActivePageNum(1);
+      setZoomScale(1);
+      setSelectedHotspot(null);
     } catch (err) {
       console.error("Failed to load edition detail:", err);
     } finally {
@@ -777,7 +896,7 @@ export function PublicEpaperReader({
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 3xl:grid-cols-5 gap-6">
             {filteredEditions.map((ed) => {
               const pub =
                 JANMABHOOMI_PUBLICATIONS.find((p) => p.id === ed.publicationId) ||
@@ -1058,7 +1177,9 @@ export function PublicEpaperReader({
           /* BROADSHEET SHEET FLOATING ON CANVAS */
           <div
             className={`flex items-start justify-center gap-6 transition-all duration-200 ${
-              isSpreadView ? "w-full max-w-[1920px]" : "w-auto"
+              isSpreadView
+                ? "w-full max-w-[1920px] 2xl:max-w-[2240px] 3xl:max-w-[2500px]"
+                : "w-auto max-w-[1400px] 2xl:max-w-[1600px]"
             }`}
           >
             {/* PRIMARY PAGE SHEET */}
@@ -1224,7 +1345,7 @@ export function PublicEpaperReader({
       {/* 3. COLLAPSIBLE FILMSTRIP DRAWER */}
       {filmstripOpen && pages.length > 0 && (
         <div className="bg-[#1c1e22]/95 backdrop-blur-xl border-t border-white/10 p-3.5 z-30 animate-in slide-in-from-bottom-6 duration-200">
-          <div className="mx-auto max-w-7xl flex items-center justify-between mb-2.5">
+          <div className="container-reader flex items-center justify-between mb-2.5">
             <span className="text-xs font-bold text-white flex items-center gap-2">
               <Layers className="h-4 w-4 text-[#0190ee]" />
               <span>

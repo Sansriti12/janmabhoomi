@@ -70,7 +70,7 @@ export function LeadStoryHero({
   return (
     <section
       aria-label={dict.home.leadStoryBadge}
-      className="mx-auto max-w-7xl 2xl:max-w-[1440px] px-4 sm:px-6 lg:px-8 pt-5 pb-8"
+      className="container-wide pt-5 pb-8"
       tabIndex={0}
     >
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
