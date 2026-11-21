@@ -12,8 +12,13 @@ import {
   ArrowRight,
   ExternalLink,
   User,
+  Compass,
+  Archive,
+  Calendar,
+  BookMarked,
 } from "lucide-react";
 import { useSubscriberAuth } from "@/lib/context/SubscriberAuthContext";
+import { ReaderComfortControls } from "@/components/layout/ReaderComfortControls";
 import {
   FacebookIcon,
   TwitterIcon,
@@ -36,6 +41,7 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
   const pathname = usePathname();
   const { isAuthenticated, subscriber, openAuthModal } = useSubscriberAuth();
   const [formattedDate, setFormattedDate] = useState<string>("");
+  const [currentSearch, setCurrentSearch] = useState<string>("");
   const [moreOpen, setMoreOpen] = useState(false);
   const [publicationsOpen, setPublicationsOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -46,7 +52,13 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const publications = getAllPublications();
-  const otherPublications = publications.filter((pub) => pub.id !== "pub-janmabhoomi");
+
+  // Track query string for context-aware bilingual switching
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setCurrentSearch(window.location.search || "");
+    }
+  }, [pathname]);
 
   // Automatically generate current date and day in active locale
   useEffect(() => {
@@ -124,17 +136,21 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
     }
   }, [searchOpen]);
 
-  // Preserve equivalent page route when switching between /en and /gu
+  // Preserve equivalent page route & query parameters when switching between /en and /gu
   const getSwitchedLocaleHref = (targetLocale: Locale) => {
     if (!pathname) return `/${targetLocale}`;
     const segments = pathname.split("/");
+    let nextPath = `/${targetLocale}`;
     if (segments.length > 1 && (segments[1] === "en" || segments[1] === "gu")) {
       segments[1] = targetLocale;
-      return segments.join("/") || `/${targetLocale}`;
+      nextPath = segments.join("/") || `/${targetLocale}`;
+    } else {
+      nextPath = `/${targetLocale}${pathname.startsWith("/") ? pathname : `/${pathname}`}`;
     }
-    return `/${targetLocale}`;
+    return `${nextPath}${currentSearch}`;
   };
 
+  // Decluttered Primary Navigation: 8 Core Editorial Desks
   const primaryNav = [
     { label: dict.nav.home, href: `/${lang}`, exact: true },
     { label: dict.nav.latest, href: `/${lang}/latest` },
@@ -143,10 +159,38 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
     { label: dict.nav.business, href: `/${lang}/category/business` },
     { label: dict.nav.sports, href: `/${lang}/category/sports` },
     { label: dict.nav.entertainment, href: `/${lang}/category/entertainment` },
-    { label: dict.nav.editorial, href: `/${lang}/editorial` },
-    { label: dict.nav.panchang, href: `/${lang}/panchang` },
-    { label: dict.nav.maran, href: `/${lang}/category/maran` },
-    { label: dict.nav.archiveEnquiry, href: `/${lang}/archive-enquiry` },
+    {
+      label: lang === "gu" ? "અગ્રલેખ" : "Editorial (અગ્રલેખ)",
+      href: `/${lang}/editorial`,
+    },
+  ];
+
+  // Utility & Community links grouped in "Reader Services" dropdown
+  const readerServicesNav = [
+    {
+      label: dict.nav.panchang,
+      desc: lang === "gu" ? "દૈનિક તિથિ, ચોઘડિયા અને મુહૂર્ત" : "Daily Tithi, Choghadiya & Muhurat",
+      href: `/${lang}/panchang`,
+      icon: <Compass className="h-4 w-4 text-[#016BB7]" />,
+    },
+    {
+      label: dict.nav.maran,
+      desc: lang === "gu" ? "મરણ નોંધ અને બેસણું શોધો" : "Search Obituaries & Besanu Notices",
+      href: `/${lang}/category/maran`,
+      icon: <BookMarked className="h-4 w-4 text-[#016BB7]" />,
+    },
+    {
+      label: dict.nav.archiveEnquiry,
+      desc: lang === "gu" ? "૧૯૩૪થી ઐતિહાસિક અંકોની પૂછપરછ" : "Historical Edition Requests (1934–2026)",
+      href: `/${lang}/archive-enquiry`,
+      icon: <Archive className="h-4 w-4 text-[#016BB7]" />,
+    },
+    {
+      label: lang === "gu" ? "વિશેષ આયોજનો અને સંવાદ" : "Conclaves & Events",
+      desc: lang === "gu" ? "સૌરાષ્ટ્ર ટ્રસ્ટ પરિષદો અને કાર્યક્રમો" : "Saurashtra Trust Forums & Assemblies",
+      href: `/${lang}/events`,
+      icon: <Calendar className="h-4 w-4 text-[#016BB7]" />,
+    },
   ];
 
   const isActive = (href: string, exact?: boolean) => {
@@ -174,17 +218,51 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
         style={{ backgroundColor: "#016BB7" }}
         className="bg-[#016BB7] border-b border-white/20 text-white text-xs"
       >
-        <div className="container-wide h-8 flex items-center justify-between">
+        <div className="container-wide min-h-9 py-1 flex items-center justify-between gap-2">
           {/* Left: Automatically generated current date & day */}
           <div className="flex items-center gap-2.5 font-medium truncate">
-            <span className="font-semibold text-white tracking-wide">{formattedDate || "મંગળવાર, ૩ નવેમ્બર ૨૦૨૬"}</span>
+            <span className="font-semibold text-white tracking-wide text-[11px] sm:text-xs">
+              {formattedDate || "મંગળવાર, ૩ નવેમ્બર ૨૦૨૬"}
+            </span>
           </div>
 
-          {/* Right: About Us, Contact + Official Social Handles */}
-          <div className="flex items-center gap-4 sm:gap-6">
+          {/* Right: Reader Comfort Controls + Bilingual Toggle + Utility Links + Socials */}
+          <div className="flex items-center gap-2.5 sm:gap-4 shrink-0">
+            {/* Reader Comfort Accessibility Toolbar (A-/A/A+ & Light/Sepia/Dark) */}
+            <ReaderComfortControls lang={lang} />
+
+            <span className="hidden sm:inline-block h-3.5 w-px bg-white/25" />
+
+            {/* Context-Aware Bilingual Toggle (ગુજરાતી / EN) in Top Utility Bar */}
+            <div
+              className="hidden sm:inline-flex items-center gap-1 rounded bg-white/15 border border-white/25 p-0.5 text-[11px] font-bold"
+              aria-label="Language switcher"
+            >
+              <Link
+                href={getSwitchedLocaleHref("gu")}
+                className={`font-gujarati transition-colors px-1.5 py-0.5 rounded-xs ${
+                  lang === "gu"
+                    ? "bg-white text-[#016BB7] shadow-2xs"
+                    : "text-white/90 hover:bg-white/20"
+                }`}
+              >
+                ગુજરાતી
+              </Link>
+              <Link
+                href={getSwitchedLocaleHref("en")}
+                className={`transition-colors px-1.5 py-0.5 rounded-xs ${
+                  lang === "en"
+                    ? "bg-white text-[#016BB7] shadow-2xs"
+                    : "text-white/90 hover:bg-white/20"
+                }`}
+              >
+                EN
+              </Link>
+            </div>
+
             <nav
               aria-label="Top utility links"
-              className="hidden sm:flex items-center gap-4 font-semibold text-white/95"
+              className="hidden xl:flex items-center gap-3.5 font-semibold text-white/95"
             >
               <Link
                 href={`/${lang}/about`}
@@ -200,10 +278,10 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
               </Link>
             </nav>
 
-            <span className="hidden sm:inline-block h-3.5 w-px bg-white/25" />
+            <span className="hidden lg:inline-block h-3.5 w-px bg-white/25" />
 
             {/* Official Social Media Channels: @janmabhoomigroup */}
-            <div className="flex items-center gap-3 text-white/95">
+            <div className="hidden lg:flex items-center gap-2.5 text-white/95">
               <a
                 href="https://facebook.com/janmabhoomigroup"
                 target="_blank"
@@ -422,7 +500,7 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
         <div className="container-wide">
           <nav
             aria-label="Main category navigation"
-            className="flex items-center justify-between w-full h-11 text-[13px] xl:text-[14px] font-semibold tracking-normal overflow-x-auto scrollbar-none"
+            className="flex items-center justify-between w-full h-11 text-[13px] xl:text-[14px] font-semibold tracking-normal"
           >
             {primaryNav.map((item) => {
               const active = isActive(item.href, item.exact);
@@ -445,7 +523,67 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
               );
             })}
 
-            {/* Publications Dropdown (Group's 7 other products) */}
+            {/* Reader Services Dropdown (Panchang, Obituaries, Archive Enquiry, Conclaves) */}
+            <div className="relative h-full shrink-0" ref={moreRef}>
+              <button
+                type="button"
+                onClick={() => {
+                  setMoreOpen(!moreOpen);
+                  setPublicationsOpen(false);
+                }}
+                className={`relative group h-full flex items-center justify-center gap-1.5 px-2.5 xl:px-3.5 transition-colors duration-150 cursor-pointer whitespace-nowrap ${
+                  moreOpen
+                    ? "text-[#016BB7] font-bold"
+                    : "text-[#1F2937] hover:text-[#016BB7]"
+                }`}
+                aria-expanded={moreOpen}
+                aria-haspopup="menu"
+              >
+                <span>{lang === "gu" ? "વાચક સેવાઓ" : "Reader Services"}</span>
+                <ChevronDown
+                  className={`h-3.5 w-3.5 shrink-0 transition-transform duration-200 ${
+                    moreOpen ? "rotate-180 text-[#016BB7]" : "text-[#1F2937] group-hover:text-[#016BB7]"
+                  }`}
+                />
+                {moreOpen && (
+                  <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-[#016BB7]" />
+                )}
+              </button>
+
+              {moreOpen && (
+                <div className="absolute right-0 top-full mt-1 w-72 rounded-xl border border-[#016BB7]/25 bg-white py-2 shadow-2xl z-50 text-left overflow-hidden">
+                  <div className="px-3.5 py-1.5 border-b border-[#016BB7]/10 mb-1">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-[#016BB7]">
+                      {lang === "gu" ? "વાચક અને સમુદાય સેવાઓ" : "Reader & Community Services"}
+                    </p>
+                  </div>
+                  <div className="divide-y divide-slate-100">
+                    {readerServicesNav.map((service) => (
+                      <Link
+                        key={service.href}
+                        href={service.href}
+                        onClick={() => setMoreOpen(false)}
+                        className="flex items-start gap-3 px-3.5 py-2.5 hover:bg-[#F0F6FA] group transition-colors"
+                      >
+                        <span className="mt-0.5 shrink-0 rounded-md bg-blue-50 p-1.5 group-hover:bg-white transition-colors">
+                          {service.icon}
+                        </span>
+                        <div className="min-w-0">
+                          <p className="text-sm font-bold text-[#1F2937] group-hover:text-[#016BB7]">
+                            {service.label}
+                          </p>
+                          <p className="text-[11px] text-[#1F2937]/70 line-clamp-1">
+                            {service.desc}
+                          </p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Publications Dropdown (All 8 Saurashtra Trust Publications) */}
             <div className="relative h-full shrink-0" ref={publicationsRef}>
               <button
                 type="button"
@@ -595,6 +733,28 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
                       }`}
                     >
                       {item.label}
+                    </Link>
+                  ))}
+                </div>
+
+                {/* Mobile Reader Services Section */}
+                <div className="py-2">
+                  <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-[#016BB7] mb-1">
+                    {lang === "gu" ? "વાચક સેવાઓ" : "Reader Services"}
+                  </p>
+                  {readerServicesNav.map((service) => (
+                    <Link
+                      key={`mob-srv-${service.href}`}
+                      href={service.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`flex items-center gap-2.5 rounded-md px-3 py-2 text-xs font-semibold transition-colors ${
+                        isActive(service.href)
+                          ? "bg-[#016BB7] text-white"
+                          : "text-[#1F2937] hover:bg-[#F0F6FA] hover:text-[#016BB7]"
+                      }`}
+                    >
+                      {service.icon}
+                      <span>{service.label}</span>
                     </Link>
                   ))}
                 </div>

@@ -4,9 +4,11 @@ import { getDictionary } from "@/lib/i18n/dictionaries";
 import { newsDataProvider } from "@/lib/data/provider";
 import { CategorySlug, NewsArticle } from "@/lib/data/types";
 import { BreakingNewsTicker } from "@/components/home/BreakingNewsTicker";
+import { AudioBulletinBar } from "@/components/home/AudioBulletinBar";
 import { LeadStoryHero } from "@/components/home/LeadStoryHero";
 import { AdPlacement } from "@/components/home/AdPlacement";
 import { PanchangWidget } from "@/components/home/PanchangWidget";
+import { MaranDirectoryWidget } from "@/components/home/MaranDirectoryWidget";
 import { LatestEventsSection } from "@/components/home/LatestEventsSection";
 import { CategoryCarousel, CategoryCardItem } from "@/components/home/CategoryCarousel";
 
@@ -37,19 +39,43 @@ export default async function HomePage({
     newsDataProvider.getBreakingNews(),
     newsDataProvider.getHomepageHeroData(),
     newsDataProvider.getAdvertisementSlot("homepagePrimaryHorizontal"),
-    newsDataProvider.getArticlesByCategory("national", 1),
-    newsDataProvider.getArticlesByCategory("city", 1),
-    newsDataProvider.getArticlesByCategory("business", 1),
-    newsDataProvider.getArticlesByCategory("sports", 1),
-    newsDataProvider.getArticlesByCategory("entertainment", 1),
-    newsDataProvider.getArticlesByCategory("editorial", 1),
-    newsDataProvider.getArticlesByCategory("maran", 1),
+    newsDataProvider.getArticlesByCategory("national", 6),
+    newsDataProvider.getArticlesByCategory("city", 6),
+    newsDataProvider.getArticlesByCategory("business", 6),
+    newsDataProvider.getArticlesByCategory("sports", 6),
+    newsDataProvider.getArticlesByCategory("entertainment", 6),
+    newsDataProvider.getArticlesByCategory("editorial", 6),
+    newsDataProvider.getArticlesByCategory("maran", 6),
     newsDataProvider.getSpecialCoverageAndEvents(),
     newsDataProvider.getDailyPanchang(),
   ]);
 
   // Lead stories for the hero carousel (main lead + sub-leads)
-  const leadStories = [heroData.leadStory, ...heroData.subLeadStories];
+  const leadStories = [heroData.leadStory, ...heroData.subLeadStories].filter(Boolean);
+
+  // Build Audio Bulletin top 5 distinct headlines
+  const bulletinArticles: NewsArticle[] = [];
+  const bulletinSlugs = new Set<string>();
+  for (const a of [...leadStories, ...breakingNews, ...heroData.headlineBriefs]) {
+    if (a && !bulletinSlugs.has(a.slug)) {
+      bulletinSlugs.add(a.slug);
+      bulletinArticles.push(a);
+    }
+    if (bulletinArticles.length >= 5) break;
+  }
+
+  // Track slugs already featured in Lead Story Hero so Our News Coverage pulls distinct, non-overlapping articles
+  const usedSlugs = new Set<string>(
+    [...leadStories, ...heroData.headlineBriefs].filter(Boolean).map((a) => a.slug)
+  );
+
+  const pickDistinctArticle = (pool: NewsArticle[]): NewsArticle | undefined => {
+    if (!pool || pool.length === 0) return undefined;
+    const fresh = pool.find((a) => a && !usedSlugs.has(a.slug));
+    const chosen = fresh || pool[0];
+    if (chosen) usedSlugs.add(chosen.slug);
+    return chosen;
+  };
 
   const eventArticle: NewsArticle | undefined = specialCoverageData.events?.[0]
     ? {
@@ -64,7 +90,7 @@ export default async function HomePage({
         imageCaption: { en: "Janmabhoomi Events", gu: "જન્મભૂમિ કાર્યક્રમો" },
         author: { en: "Janmabhoomi Desk", gu: "જન્મભૂમિ સંપાદકીય" },
         location: specialCoverageData.events[0].location,
-        publishedAt: "2026-11-03T10:00:00+05:30",
+        publishedAt: "2026-11-21T10:00:00+05:30",
         readTimeMinutes: 3,
         epaperPageNumber: 2,
         epaperEdition: { en: "Mumbai Main Edition", gu: "મુંબઈ મુખ્ય આવૃત્તિ" },
@@ -72,56 +98,56 @@ export default async function HomePage({
       }
     : undefined;
 
-  // The 8 Active Category Desks for the rotating carousel
+  // The 8 Distinct Editorial Desks for Our News Coverage Grid (non-overlapping articles)
   const categoryCarouselItems: CategoryCardItem[] = [
     {
       slug: "national",
       name: { en: "National", gu: "રાષ્ટ્રીય" },
       ctaText: { en: "Explore National News", gu: "રાષ્ટ્રીય સમાચાર જુઓ" },
       href: `/${locale}/category/national`,
-      article: nationalArticles[0],
+      article: pickDistinctArticle(nationalArticles),
     },
     {
       slug: "city",
       name: { en: "City (Mumbai & Gujarat)", gu: "શહેર (મુંબઈ અને ગુજરાત)" },
       ctaText: { en: "Explore City News", gu: "શહેર સમાચાર જુઓ" },
       href: `/${locale}/category/city`,
-      article: cityArticles[0],
+      article: pickDistinctArticle(cityArticles),
     },
     {
       slug: "business",
       name: { en: "Business & Markets", gu: "વ્યાપાર અને બજાર" },
       ctaText: { en: "Explore Business News", gu: "વ્યાપાર સમાચાર જુઓ" },
       href: `/${locale}/category/business`,
-      article: businessArticles[0],
+      article: pickDistinctArticle(businessArticles),
     },
     {
       slug: "sports",
       name: { en: "Sports", gu: "રમતગમત" },
       ctaText: { en: "Explore Sports News", gu: "રમતગમત સમાચાર જુઓ" },
       href: `/${locale}/category/sports`,
-      article: sportsArticles[0],
+      article: pickDistinctArticle(sportsArticles),
     },
     {
       slug: "entertainment",
       name: { en: "Entertainment & Arts", gu: "મનોરંજન અને કલા" },
       ctaText: { en: "Explore Entertainment News", gu: "મનોરંજન સમાચાર જુઓ" },
       href: `/${locale}/category/entertainment`,
-      article: entertainmentArticles[0],
+      article: pickDistinctArticle(entertainmentArticles),
     },
     {
       slug: "editorial",
       name: { en: "Editorial (અગ્રલેખ)", gu: "અગ્રલેખ અને વિચાર" },
       ctaText: { en: "Explore Editorials", gu: "અગ્રલેખ વાંચો" },
       href: `/${locale}/editorial`,
-      article: editorialArticles[0],
+      article: pickDistinctArticle(editorialArticles),
     },
     {
       slug: "maran",
       name: { en: "Maran (Obituaries)", gu: "મરણ નોંધ અને બેસણું" },
       ctaText: { en: "Explore Obituaries", gu: "મરણ નોંધ જુઓ" },
       href: `/${locale}/category/maran`,
-      article: maranArticles[0],
+      article: pickDistinctArticle(maranArticles),
     },
     {
       slug: "events",
@@ -145,7 +171,10 @@ export default async function HomePage({
         label={dict.home.breakingNews}
       />
 
-      {/* SECTION 2 – Main Lead Story Carousel & Headlines Panel */}
+      {/* SECTION 2 – Commuter 2-Minute Audio Bulletin Bar */}
+      <AudioBulletinBar articles={bulletinArticles} lang={locale} />
+
+      {/* SECTION 3 – Main Lead Story Carousel & Headlines Panel */}
       <LeadStoryHero
         leadStories={leadStories}
         headlineBriefs={heroData.headlineBriefs}
@@ -153,7 +182,7 @@ export default async function HomePage({
         dict={dict}
       />
 
-      {/* SECTION 3 – Traditional Daily Panchang Section (Positioned before Advertisement) */}
+      {/* SECTION 4 – City-Switchable Live Daily Panchang */}
       <PanchangWidget
         panchang={dailyPanchang}
         lang={locale}
@@ -161,20 +190,23 @@ export default async function HomePage({
         showChoghadiya={true}
       />
 
-      {/* SECTION 4 – Advertisement Placement */}
+      {/* SECTION 5 – Searchable Maran / Besanu (Obituaries) Directory */}
+      <MaranDirectoryWidget lang={locale} />
+
+      {/* SECTION 6 – Advertisement Placement */}
       <AdPlacement
         slot={primaryAd}
         lang={locale}
         label={dict.home.advertisementLabel}
       />
 
-      {/* SECTION 5 – Conclaves & Civic Dialogue Forums (formerly Latest Events) */}
+      {/* SECTION 7 – Conclaves & Civic Dialogue Forums */}
       <LatestEventsSection
         events={specialCoverageData.events}
         lang={locale}
       />
 
-      {/* SECTION 6 – Category News Carousel */}
+      {/* SECTION 8 – Deduplicated 8-Desk News Coverage Grid */}
       <CategoryCarousel
         categories={categoryCarouselItems}
         lang={locale}

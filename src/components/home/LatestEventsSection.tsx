@@ -90,6 +90,11 @@ export function LatestEventsSection({ events, lang }: LatestEventsSectionProps) 
                     {badge}
                   </span>
                 )}
+                {eventItem.isDemonstrationData && (
+                  <span className="absolute top-2 right-2 rounded-full bg-white/90 backdrop-blur-xs text-slate-600 border border-slate-200 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider">
+                    {isGu ? "પૂર્વાવલોકન" : "Preview"}
+                  </span>
+                )}
               </div>
 
               {/* Compact Event Content */}

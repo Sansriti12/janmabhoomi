@@ -23,18 +23,110 @@
 
 @layer base {
   :root {
-    --background: #FFFFFF;
+    --background: #FAF8F3;
+    --surface: #FFFFFF;
+    --surface-subtle: #F0F6FA;
     --foreground: #1F2937;
+    --foreground-muted: #4B5563;
+    --border-subtle: rgba(1, 107, 183, 0.18);
     --primary: #016BB7;
     --brand-blue: #016BB7;
     --primary-dark: #015a99;
+    --reader-font-scale: 1;
+  }
+
+  /* Warm Sepia Reading Theme (Senior-Friendly Print-Paper Comfort) */
+  html[data-reader-theme="sepia"] {
+    --background: #F4ECD8;
+    --surface: #FAF4E6;
+    --surface-subtle: #EDE2C9;
+    --foreground: #2C2217;
+    --foreground-muted: #5C4B37;
+    --border-subtle: rgba(139, 108, 66, 0.28);
+  }
+
+  /* Low-Glare High-Contrast Dark Reading Theme */
+  html[data-reader-theme="dark"] {
+    --background: #0F141B;
+    --surface: #171F2A;
+    --surface-subtle: #1F2937;
+    --foreground: #E8EDF4;
+    --foreground-muted: #9BA8B9;
+    --border-subtle: rgba(148, 163, 184, 0.2);
   }
 
   body {
-    background-color: #FFFFFF;
-    color: #1F2937;
+    background-color: var(--background);
+    color: var(--foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  /* Dynamic Typography Scaling controlled by A- / A / A+ Reader Comfort Toolbar */
+  main article p,
+  main article h1,
+  main article h2,
+  main article h3,
+  main .reader-scalable {
+    font-size: calc(1em * var(--reader-font-scale, 1));
+  }
+
+  /* Theme-aware overrides for editorial cards and sections */
+  html[data-reader-theme="sepia"] body,
+  html[data-reader-theme="sepia"] main {
+    background-color: #F4ECD8 !important;
+    color: #2C2217 !important;
+  }
+
+  html[data-reader-theme="sepia"] .bg-white {
+    background-color: #FAF4E6 !important;
+  }
+
+  html[data-reader-theme="sepia"] .bg-\[\#FAF8F3\],
+  html[data-reader-theme="sepia"] .bg-slate-50 {
+    background-color: #EFE5CE !important;
+  }
+
+  html[data-reader-theme="dark"] body,
+  html[data-reader-theme="dark"] main {
+    background-color: #0F141B !important;
+    color: #E8EDF4 !important;
+  }
+
+  html[data-reader-theme="dark"] header .bg-white,
+  html[data-reader-theme="dark"] main .bg-white {
+    background-color: #171F2A !important;
+    border-color: rgba(148, 163, 184, 0.2) !important;
+  }
+
+  html[data-reader-theme="dark"] main .bg-\[\#FAF8F3\],
+  html[data-reader-theme="dark"] main .bg-slate-50,
+  html[data-reader-theme="dark"] main .bg-\[\#F0F6FA\] {
+    background-color: #1F2A38 !important;
+  }
+
+  html[data-reader-theme="dark"] header .text-\[\#1F2937\],
+  html[data-reader-theme="dark"] main .text-\[\#1F2937\],
+  html[data-reader-theme="dark"] main .text-\[\#292725\],
+  html[data-reader-theme="dark"] main .text-slate-900,
+  html[data-reader-theme="dark"] main .text-slate-800 {
+    color: #E8EDF4 !important;
+  }
+
+  html[data-reader-theme="dark"] main .text-slate-700,
+  html[data-reader-theme="dark"] main .text-slate-600,
+  html[data-reader-theme="dark"] main .text-slate-500,
+  html[data-reader-theme="dark"] main .text-\[\#1F2937\]\/75,
+  html[data-reader-theme="dark"] main .text-\[\#1F2937\]\/70 {
+    color: #A8B5C7 !important;
+  }
+
+  html[data-reader-theme="dark"] main input,
+  html[data-reader-theme="dark"] main select {
+    background-color: #0F141B !important;
+    color: #E8EDF4 !important;
+    border-color: rgba(148, 163, 184, 0.3) !important;
   }
 
   a {

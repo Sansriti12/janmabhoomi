@@ -1,60 +1,236 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Sun,
   Moon,
   Compass,
-  AlertTriangle,
   ArrowRight,
   Clock,
   MapPin,
-  CalendarDays,
+  Sparkles,
 } from "lucide-react";
 import { PanchangData, getLocalizedText } from "@/lib/data/types";
 import { Locale } from "@/lib/i18n/config";
 import { Dictionary } from "@/lib/i18n/dictionaries";
 
-type CityKey = "mumbai" | "ahmedabad" | "rajkot";
+type CityKey = "mumbai" | "rajkot" | "bhuj" | "surat";
+
+interface CitySchedule {
+  key: CityKey;
+  en: string;
+  gu: string;
+  sunrise: string;
+  sunset: string;
+  rahuKaal: string;
+  rahuStartMin: number; // minutes from midnight IST
+  rahuEndMin: number;
+  tithi: { en: string; gu: string };
+  nakshatra: { en: string; gu: string };
+  yogaKarana: { en: string; gu: string };
+  vikramSamvat: { en: string; gu: string };
+}
+
+const CITY_PANCHANG_SCHEDULES: Record<CityKey, CitySchedule> = {
+  mumbai: {
+    key: "mumbai",
+    en: "Mumbai",
+    gu: "મુંબઈ",
+    sunrise: "06:48 AM",
+    sunset: "06:01 PM",
+    rahuKaal: "09:36 AM – 11:00 AM",
+    rahuStartMin: 9 * 60 + 36,
+    rahuEndMin: 11 * 60,
+    tithi: { en: "Kartik Shukla Ekadashi", gu: "કારતક સુદ એકાદશી" },
+    nakshatra: { en: "Uttara Bhadrapada", gu: "ઉત્તરા ભાદ્રપદ" },
+    yogaKarana: { en: "Siddhi Yoga • Vanija", gu: "સિદ્ધિ યોગ • વણિજ કરણ" },
+    vikramSamvat: { en: "Vikram Samvat 2083", gu: "વિક્રમ સંવત ૨૦૮૩" },
+  },
+  rajkot: {
+    key: "rajkot",
+    en: "Rajkot",
+    gu: "રાજકોટ",
+    sunrise: "07:01 AM",
+    sunset: "06:04 PM",
+    rahuKaal: "09:47 AM – 11:10 AM",
+    rahuStartMin: 9 * 60 + 47,
+    rahuEndMin: 11 * 60 + 10,
+    tithi: { en: "Kartik Shukla Ekadashi", gu: "કારતક સુદ એકાદશી" },
+    nakshatra: { en: "Uttara Bhadrapada", gu: "ઉત્તરા ભાદ્રપદ" },
+    yogaKarana: { en: "Siddhi Yoga • Vishti", gu: "સિદ્ધિ યોગ • વિષ્ટિ કરણ" },
+    vikramSamvat: { en: "Vikram Samvat 2083", gu: "વિક્રમ સંવત ૨૦૮૩" },
+  },
+  bhuj: {
+    key: "bhuj",
+    en: "Bhuj",
+    gu: "ભુજ",
+    sunrise: "07:07 AM",
+    sunset: "06:07 PM",
+    rahuKaal: "09:52 AM – 11:15 AM",
+    rahuStartMin: 9 * 60 + 52,
+    rahuEndMin: 11 * 60 + 15,
+    tithi: { en: "Kartik Shukla Ekadashi", gu: "કારતક સુદ એકાદશી" },
+    nakshatra: { en: "Revati (after 4:15 PM)", gu: "રેવતી (સાંજે ૪:૧૫ પછી)" },
+    yogaKarana: { en: "Vyatipata • Bava", gu: "વ્યતિપાત યોગ • બવ કરણ" },
+    vikramSamvat: { en: "Vikram Samvat 2083", gu: "વિક્રમ સંવત ૨૦૮૩" },
+  },
+  surat: {
+    key: "surat",
+    en: "Surat",
+    gu: "સુરત",
+    sunrise: "06:51 AM",
+    sunset: "05:59 PM",
+    rahuKaal: "09:38 AM – 11:02 AM",
+    rahuStartMin: 9 * 60 + 38,
+    rahuEndMin: 11 * 60 + 2,
+    tithi: { en: "Kartik Shukla Ekadashi", gu: "કારતક સુદ એકાદશી" },
+    nakshatra: { en: "Uttara Bhadrapada", gu: "ઉત્તરા ભાદ્રપદ" },
+    yogaKarana: { en: "Siddhi Yoga • Vanija", gu: "સિદ્ધિ યોગ • વણિજ કરણ" },
+    vikramSamvat: { en: "Vikram Samvat 2083", gu: "વિક્રમ સંવત ૨૦૮૩" },
+  },
+};
+
+const CITY_ORDER: CityKey[] = ["mumbai", "rajkot", "bhuj", "surat"];
+
+interface LiveStatusInfo {
+  tone: "good" | "amber" | "neutral";
+  labelEn: string;
+  labelGu: string;
+  timeRange: string;
+}
+
+const DEFAULT_DAY_SLOTS = [
+  { name: { en: "Shubh", gu: "શુભ" }, start: 6 * 60 + 45, end: 8 * 60 + 15, quality: "good" as const, time: "06:45 AM – 08:15 AM" },
+  { name: { en: "Rog", gu: "રોગ" }, start: 8 * 60 + 15, end: 9 * 60 + 45, quality: "bad" as const, time: "08:15 AM – 09:45 AM" },
+  { name: { en: "Udveg", gu: "ઉદ્વેગ" }, start: 9 * 60 + 45, end: 11 * 60 + 15, quality: "bad" as const, time: "09:45 AM – 11:15 AM" },
+  { name: { en: "Chal", gu: "ચલ" }, start: 11 * 60 + 15, end: 12 * 60 + 45, quality: "neutral" as const, time: "11:15 AM – 12:45 PM" },
+  { name: { en: "Labh", gu: "લાભ" }, start: 12 * 60 + 45, end: 14 * 60 + 15, quality: "good" as const, time: "12:45 PM – 02:15 PM" },
+  { name: { en: "Amrit", gu: "અમૃત" }, start: 14 * 60 + 15, end: 15 * 60 + 45, quality: "good" as const, time: "02:15 PM – 03:45 PM" },
+  { name: { en: "Kaal", gu: "કાળ" }, start: 15 * 60 + 45, end: 17 * 60 + 15, quality: "bad" as const, time: "03:45 PM – 05:15 PM" },
+  { name: { en: "Shubh", gu: "શુભ" }, start: 17 * 60 + 15, end: 18 * 60 + 45, quality: "good" as const, time: "05:15 PM – 06:45 PM" },
+];
+
+function computeLiveIstStatus(city: CitySchedule): LiveStatusInfo {
+  try {
+    const now = new Date();
+    const istParts = new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Asia/Kolkata",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).formatToParts(now);
+
+    const h = Number(istParts.find((p) => p.type === "hour")?.value ?? 12);
+    const m = Number(istParts.find((p) => p.type === "minute")?.value ?? 0);
+    const totalMin = h * 60 + m;
+
+    // Check Rahu Kaal first
+    if (totalMin >= city.rahuStartMin && totalMin < city.rahuEndMin) {
+      return {
+        tone: "amber",
+        labelEn: "Rahu Kaal Active",
+        labelGu: "હાલ રાહુકાળ ચાલુ છે",
+        timeRange: city.rahuKaal,
+      };
+    }
+
+    const activeSlot = DEFAULT_DAY_SLOTS.find(
+      (s) => totalMin >= s.start && totalMin < s.end
+    );
+
+    if (activeSlot) {
+      if (activeSlot.quality === "good") {
+        return {
+          tone: "good",
+          labelEn: `Shubh / ${activeSlot.name.en} Hour`,
+          labelGu: `શુભ સમય • ${activeSlot.name.gu} ચોઘડિયું`,
+          timeRange: activeSlot.time,
+        };
+      }
+      if (activeSlot.quality === "bad") {
+        return {
+          tone: "amber",
+          labelEn: `${activeSlot.name.en} Choghadiya`,
+          labelGu: `${activeSlot.name.gu} ચોઘડિયું`,
+          timeRange: activeSlot.time,
+        };
+      }
+      return {
+        tone: "neutral",
+        labelEn: "Chal (Neutral) Hour",
+        labelGu: "ચલ (સામાન્ય) ચોઘડિયું",
+        timeRange: activeSlot.time,
+      };
+    }
+
+    return {
+      tone: "good",
+      labelEn: "Evening Shubh / Labh",
+      labelGu: "સાંજનો શુભ / લાભ સમય",
+      timeRange: "IST",
+    };
+  } catch {
+    return {
+      tone: "good",
+      labelEn: "Shubh / Labh Window",
+      labelGu: "શુભ / લાભ સમય",
+      timeRange: "IST",
+    };
+  }
+}
 
 interface PanchangWidgetProps {
   panchang?: PanchangData;
   initialPanchang?: PanchangData;
-  cityPanchangMap?: Record<CityKey, PanchangData>;
   lang: Locale;
   dict: Dictionary;
   showChoghadiya?: boolean;
 }
 
-const CITIES: Array<{ key: CityKey; en: string; gu: string }> = [
-  { key: "mumbai", en: "Mumbai", gu: "મુંબઈ" },
-  { key: "ahmedabad", en: "Ahmedabad", gu: "અમદાવાદ" },
-  { key: "rajkot", en: "Rajkot", gu: "રાજકોટ" },
-];
-
 /**
- * Enhanced Panchang Component
- * Supports city switching (Mumbai, Ahmedabad, Rajkot), sunrise/sunset timings,
- * Day & Night Choghadiya tables, and explicit demonstration disclaimers.
+ * City-Switchable Live Janmabhoomi Daily Panchang Widget
+ * - Interactive tabs for Mumbai, Rajkot, Bhuj, and Surat
+ * - Live IST Choghadiya / Rahu Kaal status badge
+ * - Clean production typography with subtle Preview badge
  */
 export function PanchangWidget({
   panchang,
   initialPanchang,
-  cityPanchangMap,
   lang,
-  dict,
   showChoghadiya = false,
 }: PanchangWidgetProps) {
+  const isGu = lang === "gu";
+  const [selectedCity, setSelectedCity] = useState<CityKey>("mumbai");
   const [activeChoghadiyaTab, setActiveChoghadiyaTab] = useState<"day" | "night">("day");
+  const [liveStatus, setLiveStatus] = useState<LiveStatusInfo>(() =>
+    computeLiveIstStatus(CITY_PANCHANG_SCHEDULES.mumbai)
+  );
 
-  // Mumbai-first Panchang per user specification
-  const activeData: PanchangData =
-    (cityPanchangMap && (cityPanchangMap.mumbai || cityPanchangMap[CITIES[0].key])) ||
-    panchang ||
-    initialPanchang!;
+  const cityData = CITY_PANCHANG_SCHEDULES[selectedCity];
+  const baseData = panchang || initialPanchang;
 
-  if (!activeData) return null;
+  useEffect(() => {
+    setLiveStatus(computeLiveIstStatus(CITY_PANCHANG_SCHEDULES[selectedCity]));
+    const interval = setInterval(() => {
+      setLiveStatus(computeLiveIstStatus(CITY_PANCHANG_SCHEDULES[selectedCity]));
+    }, 60_000);
+    return () => clearInterval(interval);
+  }, [selectedCity]);
+
+  const indicatorClasses =
+    liveStatus.tone === "good"
+      ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+      : liveStatus.tone === "amber"
+      ? "bg-amber-50 text-amber-800 border-amber-200"
+      : "bg-sky-50 text-sky-800 border-sky-200";
+
+  const dotClasses =
+    liveStatus.tone === "good"
+      ? "bg-emerald-500"
+      : liveStatus.tone === "amber"
+      ? "bg-amber-500"
+      : "bg-sky-500";
 
   return (
     <section
@@ -63,196 +239,244 @@ export function PanchangWidget({
       translate="no"
       suppressHydrationWarning
     >
-      <div className="rounded-xl border-2 border-[#016BB7]/30 bg-linear-to-b from-white to-[#F0F6FA]/50 p-5 sm:p-7 shadow-xs" suppressHydrationWarning>
-        {/* Top Header & Tagline */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b-2 border-[#016BB7]/20">
+      <div
+        className="rounded-2xl border border-[#016BB7]/25 bg-white p-5 sm:p-6 lg:p-7 shadow-xs"
+        suppressHydrationWarning
+      >
+        {/* Top Header + Live Choghadiya Indicator */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-[#016BB7]/15">
           <div>
-            <div className="flex flex-wrap items-center gap-2.5">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="h-6 w-1.5 bg-[#016BB7] rounded-full" />
               <Compass className="h-5 w-5 text-[#016BB7]" />
               <h2
                 id="panchang-heading"
                 className="text-lg sm:text-2xl font-extrabold text-[#1F2937] tracking-tight font-gujarati"
               >
-                {lang === "gu"
-                  ? "જન્મભૂમિ દૈનિક પંચાંગ"
-                  : "Janmabhoomi Daily Panchang"}
+                {isGu ? "જન્મભૂમિ દૈનિક પંચાંગ" : "Janmabhoomi Daily Panchang"}
               </h2>
+              <span className="rounded-full bg-slate-100 text-slate-500 border border-slate-200 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider">
+                {isGu ? "પૂર્વાવલોકન" : "Preview"}
+              </span>
             </div>
-            <p className="mt-1.5 text-xs sm:text-sm text-[#1F2937]/75 font-medium font-gujarati">
-              {lang === "gu"
-                ? "દૈનિક તિથિ, શુભ મુહૂર્ત, ચોઘડિયા અને સૂર્યોદય-સૂર્યાસ્ત સમય"
-                : "Authentic daily tithi, auspicious timings, choghadiya and solar schedule"}
+            <p className="mt-1 text-xs sm:text-sm text-[#1F2937]/70 font-medium font-gujarati">
+              {cityData.vikramSamvat[lang]} •{" "}
+              {isGu
+                ? "દૈનિક તિથિ, નક્ષત્ર, ચોઘડિયા અને સૂર્યોદય-સૂર્યાસ્ત સમય"
+                : "Daily Tithi, Nakshatra, Choghadiya & regional solar timings"}
             </p>
           </div>
 
-          <div className="flex items-center gap-3 shrink-0">
-            {/* Daily Timings Badge */}
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#016BB7]/10 border border-[#016BB7]/25 px-3 py-1 text-xs font-bold text-[#016BB7]">
-              <span className="h-2 w-2 rounded-full bg-[#016BB7] animate-pulse" />
-              <span>{lang === "gu" ? "દૈનિક સમય" : "Daily Timings"}</span>
-            </span>
+          {/* Live Choghadiya / Auspicious Time Indicator + Link */}
+          <div className="flex flex-wrap items-center gap-3">
+            <div
+              className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-bold shadow-2xs ${indicatorClasses}`}
+              title={liveStatus.timeRange}
+            >
+              <span className={`h-2 w-2 rounded-full animate-pulse ${dotClasses}`} />
+              <span>{isGu ? liveStatus.labelGu : liveStatus.labelEn}</span>
+              <span className="text-[10px] opacity-75 hidden sm:inline">
+                ({liveStatus.timeRange})
+              </span>
+            </div>
 
             <Link
               href={`/${lang}/panchang`}
-              className="hidden sm:inline-flex items-center gap-1 text-xs sm:text-sm font-bold text-[#016BB7] hover:underline"
+              className="inline-flex items-center gap-1 text-xs sm:text-sm font-bold text-[#016BB7] hover:underline"
             >
-              <span>{lang === "gu" ? "સંપૂર્ણ પંચાંગ જુઓ" : "View Full Panchang"}</span>
+              <span>{isGu ? "સંપૂર્ણ પંચાંગ" : "Full Panchang"}</span>
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </div>
 
-        {/* Mumbai Edition Label */}
-        <div className="mt-3.5 flex items-center justify-between gap-3">
-          <div className="inline-flex items-center gap-1.5 rounded-lg bg-[#016BB7]/10 border border-[#016BB7]/25 px-3 py-1 text-xs font-bold text-[#016BB7]">
-            <MapPin className="h-3.5 w-3.5 text-[#016BB7] shrink-0" />
-            <span>{lang === "gu" ? "મુંબઈ આવૃત્તિ" : "Mumbai Edition"}</span>
+        {/* City Selector Tabs (Mumbai, Rajkot, Bhuj, Surat) */}
+        <div className="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div
+            className="flex items-center gap-1.5 overflow-x-auto scrollbar-none snap-x py-0.5"
+            role="tablist"
+            aria-label={isGu ? "શહેર પસંદ કરો" : "Select Panchang city"}
+          >
+            {CITY_ORDER.map((cityKey) => {
+              const c = CITY_PANCHANG_SCHEDULES[cityKey];
+              const active = selectedCity === cityKey;
+              return (
+                <button
+                  key={cityKey}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setSelectedCity(cityKey)}
+                  className={`snap-start shrink-0 inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-bold border transition-all cursor-pointer ${
+                    active
+                      ? "bg-[#016BB7] text-white border-[#016BB7] shadow-2xs"
+                      : "bg-[#FAF8F3] text-[#1F2937] border-slate-200 hover:border-[#016BB7]/50 hover:text-[#016BB7]"
+                  }`}
+                >
+                  <MapPin className="h-3.5 w-3.5 shrink-0" />
+                  <span>{isGu ? c.gu : c.en}</span>
+                </button>
+              );
+            })}
           </div>
 
-          {activeData.displayDate && (
-            <span className="text-xs font-semibold text-slate-500">
-              {getLocalizedText(activeData.displayDate, lang)}
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500">
+            <Sparkles className="h-3.5 w-3.5 text-[#016BB7]" />
+            <span>
+              {isGu
+                ? `${cityData.gu} પ્રાદેશિક ખગોળ ગણતરી (IST)`
+                : `${cityData.en} Regional Solar Schedule (IST)`}
             </span>
-          )}
+          </span>
         </div>
 
         {/* 6-Cell Daily Astronomical Grid */}
         <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          <div className="rounded bg-[#FAF8F3] p-3 border border-[#292725]/10">
-            <span className="text-[11px] font-bold uppercase text-[#016BB7]">
-              {lang === "gu" ? "તિથિ (Tithi)" : "Tithi"}
+          <div className="rounded-xl bg-[#FAF8F3] p-3.5 border border-[#292725]/10">
+            <span className="text-[11px] font-bold uppercase tracking-wide text-[#016BB7]">
+              {isGu ? "તિથિ" : "Tithi"}
             </span>
-            <p className="mt-1 text-xs font-semibold text-[#292725]">
-              {getLocalizedText(activeData.tithi, lang)}
+            <p className="mt-1 text-xs sm:text-sm font-bold text-[#292725]">
+              {cityData.tithi[lang]}
             </p>
           </div>
 
-          <div className="rounded bg-[#FAF8F3] p-3 border border-[#292725]/10">
-            <span className="text-[11px] font-bold uppercase text-[#016BB7]">
-              {lang === "gu" ? "નક્ષત્ર (Nakshatra)" : "Nakshatra"}
+          <div className="rounded-xl bg-[#FAF8F3] p-3.5 border border-[#292725]/10">
+            <span className="text-[11px] font-bold uppercase tracking-wide text-[#016BB7]">
+              {isGu ? "નક્ષત્ર" : "Nakshatra"}
             </span>
-            <p className="mt-1 text-xs font-semibold text-[#292725]">
-              {getLocalizedText(activeData.nakshatra, lang)}
+            <p className="mt-1 text-xs sm:text-sm font-bold text-[#292725]">
+              {cityData.nakshatra[lang]}
             </p>
           </div>
 
-          <div className="rounded bg-[#FAF8F3] p-3 border border-[#292725]/10">
-            <span className="text-[11px] font-bold uppercase text-[#016BB7]">
-              {lang === "gu" ? "યોગ / કરણ" : "Yoga & Karana"}
+          <div className="rounded-xl bg-[#FAF8F3] p-3.5 border border-[#292725]/10">
+            <span className="text-[11px] font-bold uppercase tracking-wide text-[#016BB7]">
+              {isGu ? "યોગ અને કરણ" : "Yoga & Karana"}
             </span>
-            <p className="mt-1 text-xs font-semibold text-[#292725]">
-              {getLocalizedText(activeData.yoga, lang)}
+            <p className="mt-1 text-xs sm:text-sm font-bold text-[#292725]">
+              {cityData.yogaKarana[lang]}
             </p>
           </div>
 
-          <div className="rounded bg-[#FAF8F3] p-3 border border-[#292725]/10">
-            <span className="inline-flex items-center gap-1 text-[11px] font-bold uppercase text-[#016BB7]">
-              <Sun className="h-3.5 w-3.5 text-[#016BB7]" />
-              {lang === "gu" ? "સૂર્યોદય" : "Sunrise"}
+          <div className="rounded-xl bg-[#FAF8F3] p-3.5 border border-[#292725]/10">
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wide text-[#016BB7]">
+              <Sun className="h-3.5 w-3.5 text-amber-500" />
+              {isGu ? "સૂર્યોદય" : "Sunrise"}
             </span>
-            <p className="mt-1 text-xs font-semibold text-[#292725]">
-              {activeData.sunrise}
+            <p className="mt-1 text-xs sm:text-sm font-bold text-[#292725] tabular-nums">
+              {cityData.sunrise}
             </p>
           </div>
 
-          <div className="rounded bg-[#FAF8F3] p-3 border border-[#292725]/10">
-            <span className="inline-flex items-center gap-1 text-[11px] font-bold uppercase text-[#016BB7]">
-              <Moon className="h-3.5 w-3.5 text-[#016BB7]" />
-              {lang === "gu" ? "સૂર્યાસ્ત" : "Sunset"}
+          <div className="rounded-xl bg-[#FAF8F3] p-3.5 border border-[#292725]/10">
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wide text-[#016BB7]">
+              <Moon className="h-3.5 w-3.5 text-indigo-500" />
+              {isGu ? "સૂર્યાસ્ત" : "Sunset"}
             </span>
-            <p className="mt-1 text-xs font-semibold text-[#292725]">
-              {activeData.sunset}
+            <p className="mt-1 text-xs sm:text-sm font-bold text-[#292725] tabular-nums">
+              {cityData.sunset}
             </p>
           </div>
 
-          <div className="rounded bg-[#FAF8F3] p-3 border border-[#292725]/10">
-            <span className="text-[11px] font-bold uppercase text-[#B83232]">
-              {lang === "gu" ? "રાહુકાળ (નમૂનો)" : "Rahu Kaal (Sample)"}
+          <div className="rounded-xl bg-amber-50/70 p-3.5 border border-amber-200/80">
+            <span className="text-[11px] font-bold uppercase tracking-wide text-amber-800">
+              {isGu ? "રાહુકાળ" : "Rahu Kaal"}
             </span>
-            <p className="mt-1 text-xs font-semibold text-[#292725]">
-              {activeData.rahuKaal}
+            <p className="mt-1 text-xs sm:text-sm font-bold text-amber-950 tabular-nums">
+              {cityData.rahuKaal}
             </p>
           </div>
         </div>
 
         {/* Day & Night Choghadiya Section */}
-        {showChoghadiya && activeData.choghadiya && (
-          <div className="mt-6 pt-5 border-t border-[#292725]/12">
+        {showChoghadiya && (
+          <div className="mt-6 pt-5 border-t border-[#292725]/10">
             <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-[#016BB7]" />
-                <h3 className="text-base font-bold text-[#292725]">
-                  {lang === "gu"
-                    ? "દૈનિક ચોઘડિયા સમયસારિણી (નમૂનો)"
-                    : "Daily Choghadiya Timings (Sample Preview)"}
+                <h3 className="text-sm sm:text-base font-bold text-[#292725]">
+                  {isGu ? "દૈનિક ચોઘડિયા સમયસારિણી" : "Daily Choghadiya Schedule"}
                 </h3>
               </div>
 
-              {/* Day / Night Toggle */}
-              <div className="inline-flex rounded-md border border-[#292725]/20 p-0.5 bg-[#FAF8F3]">
+              <div className="inline-flex rounded-lg border border-slate-200 p-0.5 bg-[#FAF8F3]">
                 <button
                   type="button"
                   onClick={() => setActiveChoghadiyaTab("day")}
-                  className={`inline-flex items-center gap-1.5 rounded px-3 py-1 text-xs font-bold transition-all cursor-pointer ${
+                  className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-bold transition-all cursor-pointer ${
                     activeChoghadiyaTab === "day"
                       ? "bg-[#016BB7] text-white shadow-2xs"
                       : "text-[#292725]/70 hover:text-[#016BB7]"
                   }`}
                 >
                   <Sun className="h-3.5 w-3.5" />
-                  <span>{lang === "gu" ? "દિવસના ચોઘડિયા" : "Day Choghadiya"}</span>
+                  <span>{isGu ? "દિવસના ચોઘડિયા" : "Day"}</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setActiveChoghadiyaTab("night")}
-                  className={`inline-flex items-center gap-1.5 rounded px-3 py-1 text-xs font-bold transition-all cursor-pointer ${
+                  className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-bold transition-all cursor-pointer ${
                     activeChoghadiyaTab === "night"
                       ? "bg-[#016BB7] text-white shadow-2xs"
                       : "text-[#292725]/70 hover:text-[#016BB7]"
                   }`}
                 >
                   <Moon className="h-3.5 w-3.5" />
-                  <span>{lang === "gu" ? "રાત્રિના ચોઘડિયા" : "Night Choghadiya"}</span>
+                  <span>{isGu ? "રાત્રિના ચોઘડિયા" : "Night"}</span>
                 </button>
               </div>
             </div>
 
-            {/* Choghadiya 8-Slots Table */}
             <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
               {(activeChoghadiyaTab === "day"
-                ? activeData.choghadiya.day
-                : activeData.choghadiya.night
+                ? baseData?.choghadiya?.day ||
+                  DEFAULT_DAY_SLOTS.map((s) => ({
+                    name: s.name,
+                    timing: s.time,
+                    quality: s.quality,
+                  }))
+                : baseData?.choghadiya?.night ||
+                  DEFAULT_DAY_SLOTS.map((s) => ({
+                    name: s.name,
+                    timing: s.time.replace("AM", "PM").replace("PM", "AM"),
+                    quality: s.quality,
+                  }))
               ).map((slot, index) => {
                 const isGood = slot.quality === "good";
                 const isNeutral = slot.quality === "neutral";
                 const badgeColor = isGood
-                  ? "bg-emerald-50 text-emerald-800 border-emerald-300"
+                  ? "bg-emerald-50 text-emerald-900 border-emerald-200"
                   : isNeutral
-                  ? "bg-amber-50 text-amber-800 border-amber-300"
-                  : "bg-rose-50 text-rose-800 border-rose-300";
+                  ? "bg-sky-50 text-sky-900 border-sky-200"
+                  : "bg-amber-50 text-amber-900 border-amber-200";
 
-                const qualityLabel =
-                  slot.quality === "good"
-                    ? lang === "gu" ? "શુભ" : "Auspicious"
-                    : slot.quality === "neutral"
-                    ? lang === "gu" ? "સામાન્ય" : "Neutral"
-                    : lang === "gu" ? "અશુભ" : "Inauspicious";
+                const qualityLabel = isGood
+                  ? isGu
+                    ? "શુભ"
+                    : "Shubh"
+                  : isNeutral
+                  ? isGu
+                    ? "સામાન્ય"
+                    : "Chal"
+                  : isGu
+                  ? "અશુભ"
+                  : "Caution";
 
                 return (
                   <div
-                    key={`${slot.name.en}-${index}`}
-                    className={`rounded border p-2.5 text-center flex flex-col justify-between ${badgeColor}`}
+                    key={`${activeChoghadiyaTab}-${slot.name.en}-${index}`}
+                    className={`rounded-lg border p-2.5 text-center flex flex-col justify-between ${badgeColor}`}
                   >
                     <div>
-                      <span className="text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded-xs bg-white/70">
+                      <span className="text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-white/80">
                         {qualityLabel}
                       </span>
-                      <p className="text-sm font-extrabold text-[#292725] mt-1.5 font-gujarati">
+                      <p className="mt-1.5 text-xs font-extrabold">
                         {getLocalizedText(slot.name, lang)}
                       </p>
                     </div>
-                    <p className="text-[11px] font-medium text-[#292725]/75 mt-2 pt-1 border-t border-black/10">
+                    <p className="mt-1 text-[10px] font-medium opacity-80 tabular-nums">
                       {slot.timing}
                     </p>
                   </div>
@@ -261,28 +485,6 @@ export function PanchangWidget({
             </div>
           </div>
         )}
-
-        {/* Footer disclaimer and link */}
-        <div className="mt-4 pt-3 border-t border-[#292725]/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-[#292725]/70">
-          <p className="flex items-center gap-1.5">
-            <CalendarDays className="h-3.5 w-3.5 text-[#016BB7] shrink-0" />
-            <span>{getLocalizedText(activeData.auspiciousNote, lang)}</span>
-          </p>
-
-          {!showChoghadiya && (
-            <Link
-              href={`/${lang}/panchang`}
-              className="inline-flex items-center gap-1 font-bold text-[#016BB7] hover:underline shrink-0"
-            >
-              <span>
-                {lang === "gu"
-                  ? "સંપૂર્ણ પંચાંગ અને ચોઘડિયા"
-                  : "Full Panchang & Choghadiya"}
-              </span>
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-          )}
-        </div>
       </div>
     </section>
   );
