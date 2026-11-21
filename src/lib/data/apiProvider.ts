@@ -163,8 +163,7 @@ export class ApiNewsDataProvider implements INewsDataProvider {
         throw notFoundError;
       }
       const msg = err instanceof Error ? err.message : "Unknown API network failure";
-      console.error(`[ApiNewsDataProvider Error] ${endpoint}:`, msg);
-      throw new Error(`Production backend API unreachable at ${url}. Error: ${msg}`);
+      throw new Error(`Backend API unavailable at ${url}: ${msg}`);
     }
   }
 
