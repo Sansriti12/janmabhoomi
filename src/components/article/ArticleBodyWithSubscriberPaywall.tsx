@@ -306,15 +306,6 @@ export function ArticleBodyWithSubscriberPaywall({
                 <Newspaper className="h-4 w-4" />
                 <span>{dict.paywall.primaryCta}</span>
               </Link>
-
-              <button
-                type="button"
-                onClick={handle1ClickGuestUnlock}
-                className="inline-flex items-center gap-2 rounded-xl border-2 border-dashed border-[#016BB7] bg-white hover:bg-[#016BB7]/5 px-4 py-2.5 text-xs sm:text-sm font-bold text-[#016BB7] transition-colors cursor-pointer"
-              >
-                <UserCheck className="h-4 w-4" />
-                <span>{isGu ? "ટેસ્ટ સબ્સ્ક્રાઇબર તરીકે અનલૉક કરો (1-Click)" : "Unlock as Test Subscriber (1-Click)"}</span>
-              </button>
             </div>
           </div>
         </div>

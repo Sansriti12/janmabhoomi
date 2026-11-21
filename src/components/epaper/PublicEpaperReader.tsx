@@ -129,22 +129,48 @@ const JANMABHOOMI_PUBLICATIONS = [
 
 const ALLOWED_EPAPER_PUB_IDS = new Set(JANMABHOOMI_PUBLICATIONS.map((p) => p.id));
 
+const JB_2026_11_16_PAGE_LABELS: Array<{ en: string; gu: string }> = [
+  { en: "Page 1 — Front Page", gu: "પાનું ૧ — મુખ્ય પૃષ્ઠ" },
+  { en: "Page 2 — Vyapar", gu: "પાનું ૨ — વ્યાપાર" },
+  { en: "Page 3 — Main Front News", gu: "પાનું ૩ — મુખ્ય સમાચાર" },
+  { en: "Page 4 — Editorial & Views", gu: "પાનું ૪ — અગ્રલેખ અને કલમ-કિતાબ" },
+  { en: "Page 5 — Nation & World", gu: "પાનું ૫ — દેશ-વિદેશ" },
+  { en: "Page 6 — Saurashtra & Kutch", gu: "પાનું ૬ — ફૂલછાબ-કચ્છમિત્ર સમાચાર" },
+  { en: "Page 7 — Mumbai Mahanagar", gu: "પાનું ૭ — મહાનગર મુંબઈ" },
+  { en: "Page 8 — Variety & Obituary", gu: "પાનું ૮ — વૈવિધ્ય અને શ્રદ્ધાંજલિ" },
+  { en: "Page 9 — Vyapar & Markets", gu: "પાનું ૯ — વ્યાપાર-બજાર" },
+  { en: "Page 10 — Vyapar & Economy", gu: "પાનું ૧૦ — વ્યાપાર-અર્થતંત્ર" },
+  { en: "Page 11 — Sports", gu: "પાનું ૧૧ — રમતગમત" },
+  { en: "Page 12 — Back Page", gu: "પાનું ૧૨ — છેલ્લું પાનું" },
+];
+
 function generateDefaultEditions(): EditionSummaryItem[] {
   const today = new Date().toISOString().split("T")[0];
-  return JANMABHOOMI_PUBLICATIONS.map((pub) => ({
-    id: `edition-${pub.id}-latest`,
-    publicationId: pub.id,
-    editionDate: today,
-    editionCity: pub.city,
-    editionNameEn: `${pub.nameEn} Digital Edition`,
-    editionNameGu: `${pub.nameGu} ડિજિટલ આવૃત્તિ`,
-    totalPageCount: pub.id === "pub-purti" ? 8 : 12,
-    status: "PUBLISHED",
-    coverImageUrl: "/assets/images/epaper-placeholder.jpg",
-  }));
+  return JANMABHOOMI_PUBLICATIONS.map((pub) => {
+    const isJanmabhoomiPdf = pub.id === "pub-janmabhoomi";
+    return {
+      id: isJanmabhoomiPdf
+        ? "edition-pub-janmabhoomi-2026-11-16"
+        : `edition-${pub.id}-latest`,
+      publicationId: pub.id,
+      editionDate: isJanmabhoomiPdf ? "2026-11-16" : today,
+      editionCity: pub.city,
+      editionNameEn: isJanmabhoomiPdf
+        ? "Janmabhoomi Mumbai — 16 Nov 2026"
+        : `${pub.nameEn} Digital Edition`,
+      editionNameGu: isJanmabhoomiPdf
+        ? "જન્મભૂમિ મુંબઈ — ૧૬ નવેમ્બર ૨૦૨૬"
+        : `${pub.nameGu} ડિજિટલ આવૃત્તિ`,
+      totalPageCount: pub.id === "pub-purti" ? 8 : 12,
+      status: "PUBLISHED",
+      coverImageUrl: isJanmabhoomiPdf
+        ? "/assets/epaper/jb-2026-11-16/page-1.jpg"
+        : "/assets/images/epaper-placeholder.jpg",
+    };
+  });
 }
 
-// Seeded database article slugs matched to broadsheet pages
+// Verified article slugs matched to broadsheet pages
 const DEFAULT_PAGE_HOTSPOTS: Record<number, PublicHotspot[]> = {
   1: [
     {
@@ -153,16 +179,16 @@ const DEFAULT_PAGE_HOTSPOTS: Record<number, PublicHotspot[]> = {
       yPercent: 12,
       widthPercent: 46,
       heightPercent: 38,
-      headlineText: "સેન્સેક્સ ૮૫,૦૦૦ ને પાર: ભારતીય શેરબજારમાં ઐતિહાસિક તેજીનો નવો દોર",
+      headlineText: "સેન્સેક્સ અને ભારતીય બજારમાં વિદેશી રોકાણકારોનો વિશ્વાસ: વ્યાપાર અને ઉદ્યોગમાં નવો વેગ",
       summaryText:
-        "મુંબઈ શેરબજારમાં વિદેશી સંસ્થાકીય રોકાણકારોની ભારે લેવાલી અને આર્થિક સુધારાઓના પરિણામે સેન્સેક્સ અને નિફ્ટી સર્વોચ્ચ શિખરે પહોંચ્યા. આઈટી, બેંકિંગ અને ઓટો શેરોમાં અભૂતપૂર્વ ઉછાળો નોંધાયો.",
+        "મુંબઈ શેરબજારમાં વિદેશી સંસ્થાકીય રોકાણકારોની લેવાલી અને આર્થિક સુધારાઓના પરિણામે એમએસએમઇ નિકાસ અને બેંકિંગ ક્ષેત્રે મજબૂત વૃદ્ધિ નોંધાઈ.",
       articleParagraphs: [
-        "મુંબઈ શેરબજારમાં આજે વિદેશી સંસ્થાકીય રોકાણકારોની ભારે લેવાલી અને સકારાત્મક આર્થિક નીતિઓના પરિણામે સેન્સેક્સ પ્રથમવાર ૮૫,૦૦૦ ની ઐતિહાસિક સપાટી પાર કરી ગયો છે.",
-        "નિફ્ટી પણ ૨૬,૦૦૦ ની સર્વોચ્ચ ટોચે પહોંચ્યો છે. આઈટી, બેંકિંગ અને ઓટોમોબાઈલ શેરોમાં અભૂતપૂર્વ ઉછાળો નોંધાયો હતો.",
-        "બજાર નિષ્ણાતોના મતે ભારતીય જીડીપીના મજબૂત વૃદ્ધિદર અને કોર્પોરેટ કમાણીના સારા પરિણામો આગામી સમયમાં પણ આ તેજીને વેગ આપશે.",
+        "મુંબઈ શેરબજારમાં વિદેશી સંસ્થાકીય રોકાણકારોની સતત લેવાલી અને સકારાત્મક આર્થિક નીતિઓના પરિણામે ભારતીય બજારમાં નવો ઉત્સાહ જોવા મળી રહ્યો છે.",
+        "આઈટી, બેંકિંગ અને નિકાસ આધારિત ઉદ્યોગોમાં નોંધપાત્ર વૃદ્ધિ થઈ છે, જ્યારે આરબીઆઈના નવા ક્રેડિટ સેટલમેન્ટ માળખાથી નાના અને મધ્યમ ઉદ્યોગોને મોટી રાહત મળી છે.",
+        "બજાર નિષ્ણાતોના મતે ભારતીય અર્થતંત્રના મજબૂત વૃદ્ધિદર અને કોર્પોરેટ કમાણીના સારા પરિણામો આગામી સમયમાં પણ તેજીને વેગ આપશે.",
       ],
       targetType: "article",
-      articleSlug: "sensex-crosses-85000-historic-bull-run-en",
+      articleSlug: "rbi-msme-export-credit-settlement-framework",
     },
     {
       id: "demo-h2",
@@ -170,16 +196,16 @@ const DEFAULT_PAGE_HOTSPOTS: Record<number, PublicHotspot[]> = {
       yPercent: 12,
       widthPercent: 46,
       heightPercent: 28,
-      headlineText: "મુંબઈ કોસ્ટલ રોડ ફેઝ-૨ નું લોકાર્પણ: દક્ષિણ મુંબઈથી ઉપનગરો સુધી ટ્રાફિક મુક્ત મુસાફરી",
+      headlineText: "મુંબઈ કોસ્ટલ રોડ અને મેટ્રો ઇન્ટરચેન્જ: દક્ષિણ મુંબઈથી ઉપનગરો સુધી ટ્રાફિક મુક્ત મુસાફરી",
       summaryText:
-        "મુંબઈ મહાનગરપાલિકા દ્વારા નિર્મિત કોસ્ટલ રોડના બીજા તબક્કાનું ઉદ્ઘાટન કરવામાં આવ્યું. નવા સી-લિંક કનેક્ટરથી દક્ષિણ મુંબઈથી અંધેરી સુધીનો પ્રવાસ માત્ર ૨૫ મિનિટમાં શક્ય બનશે.",
+        "મુંબઈ મહાનગરમાં નવા કોસ્ટલ રોડ અને મેટ્રો કનેક્ટિવિટીથી દક્ષિણ મુંબઈથી પશ્ચિમી ઉપનગરો સુધીનો પ્રવાસ વધુ ઝડપી અને સરળ બન્યો.",
       articleParagraphs: [
-        "મુંબઈ મહાનગરપાલિકા દ્વારા નિર્મિત કોસ્ટલ રોડના બીજા તબક્કાનું આજે સત્તાવાર લોકાર્પણ કરવામાં આવ્યું છે.",
-        "નવા સી-લિંક કનેક્ટર કાર્યરત થવાથી દક્ષિણ મુંબઈના નરીમાન પોઇન્ટથી પશ્ચિમી ઉપનગરો સુધીની મુસાફરી માત્ર ૨૫ મિનિટમાં પૂર્ણ થશે.",
+        "મુંબઈ મહાનગરમાં મુસાફરોની સુવિધા વધારવા માટે કોસ્ટલ રોડ અને મેટ્રો ઇન્ટરચેન્જ વ્યવસ્થાની સમીક્ષા કરવામાં આવી છે.",
+        "નવા કનેક્ટર કાર્યરત થવાથી દક્ષિણ મુંબઈના નરીમાન પોઇન્ટથી પશ્ચિમી ઉપનગરો સુધીની મુસાફરીમાં નોંધપાત્ર સમયની બચત થશે.",
         "આ માર્ગ પર અદ્યતન ટનલ વેન્ટિલેશન સિસ્ટમ અને સીસીટીવી સર્વેલન્સ ગોઠવવામાં આવ્યા છે, જેથી ટ્રાફિક વ્યવસ્થા સુગમ રહેશે.",
       ],
       targetType: "article",
-      articleSlug: "mumbai-coastal-road-phase-two-inauguration-en",
+      articleSlug: "mumbai-coastal-metro-interchange-commuter-review",
     },
     {
       id: "demo-h3",
@@ -187,15 +213,15 @@ const DEFAULT_PAGE_HOTSPOTS: Record<number, PublicHotspot[]> = {
       yPercent: 52,
       widthPercent: 46,
       heightPercent: 42,
-      headlineText: "સંસદનું શિયાળુ સત્ર: આર્થિક સુધારા અને નાગરિક સુરક્ષા સાથે જોડાયેલા મહત્વપૂર્ણ ખરડાઓ રજૂ",
+      headlineText: "પશ્ચિમ ભારત દરિયાઈ ફ્રેઇટ કોરિડોર વિસ્તરણ યોજના: બંદરો અને વેપારને નવી ગતિ",
       summaryText:
-        "નવી દિલ્હીમાં સંસદના બંને ગૃહોમાં ડિજિટલ અર્થતંત્ર, નિકાસ પ્રોત્સાહન અને ગ્રામીણ ઈન્ફ્રાસ્ટ્રક્ચર સંબંધિત વિધેયકો પર ગહન ચર્ચા.",
+        "મહારાષ્ટ્ર અને ગુજરાતના મુખ્ય બંદરોને જોડતા માલવાહક કોરિડોરના વિસ્તરણથી નિકાસ અને લોજિસ્ટિક્સ ક્ષેત્રે મોટો ફાયદો.",
       articleParagraphs: [
-        "નવી દિલ્હીમાં સંસદના બંને ગૃહોમાં ડિજિટલ અર્થતંત્ર, નિકાસ પ્રોત્સાહન અને ગ્રામીણ ઈન્ફ્રાસ્ટ્રક્ચર સંબંધિત મહત્વપૂર્ણ ખરડાઓ રજૂ કરવામાં આવ્યા છે.",
-        "કેન્દ્રીય મંત્રીઓએ ગૃહમાં સ્પષ્ટતા કરી હતી કે આ સુધારાઓથી ભારતીય નાના ઉદ્યોગોને વૈશ્વિક વેપારમાં સરળ મૂડી અને ધિરાણ મળી રહેશે.",
+        "પશ્ચિમ ભારતના અગ્રણી દરિયાઈ બંદરો અને ઔદ્યોગિક કેન્દ્રોને જોડવા માટે નવી ફ્રેઇટ કોરિડોર વિસ્તરણ યોજના જાહેર કરવામાં આવી છે.",
+        "આ સુધારાઓથી ભારતીય ઉદ્યોગોને વૈશ્વિક વેપારમાં ઝડપી પરિવહન અને કરકસરભરી લોજિસ્ટિક્સ સુવિધા મળી રહેશે.",
       ],
       targetType: "article",
-      articleSlug: "parliament-winter-session-economic-reforms-en",
+      articleSlug: "western-india-maritime-freight-corridor-expansion-plan",
     },
     {
       id: "demo-h4",
@@ -203,16 +229,16 @@ const DEFAULT_PAGE_HOTSPOTS: Record<number, PublicHotspot[]> = {
       yPercent: 42,
       widthPercent: 46,
       heightPercent: 52,
-      headlineText: "અગ્રલેખ: લોકશાહી વ્યવસ્થા અને સંસ્થાગત સ્વાયત્તતાનું રક્ષણ",
+      headlineText: "અગ્રલેખ: દરિયાકાંઠાના શહેરોમાં શહેરી સ્થિતિસ્થાપકતા અને નાગરિક જવાબદારી",
       summaryText:
-        "સંસ્થાકીય સ્વાયત્તતા એ કોઈપણ જીવંત લોકશાહીનો આધારસ્તંભ છે. પારદર્શિતા અને નાગરિક અધિકારોની જાળવણી એ જ શ્રેષ્ઠ શાસનની ઓળખ છે.",
+        "શહેરી વિકાસ, પારદર્શક વહીવટ અને નાગરિક સુવિધાઓનું સંતુલન એ જ જીવંત મહાનગરોની સાચી ઓળખ છે.",
       articleParagraphs: [
-        "સંસ્થાકીય સ્વાયત્તતા એ કોઈપણ જીવંત અને સશક્ત લોકશાહીનો પાયાનો આધારસ્તંભ છે.",
-        "ન્યાયતંત્ર અને લોકતાંત્રિક સંસ્થાઓની નિષ્પક્ષતા જ જનતામાં શાસન વ્યવસ્થા પ્રત્યે અતૂટ વિશ્વાસ જાળવી રાખે છે.",
+        "દરિયાકાંઠાના મહાનગરોમાં વધતી જતી વસ્તી અને હવામાન પરિવર્તનના પડકારો વચ્ચે શહેરી સ્થિતિસ્થાપકતા અત્યંત મહત્વપૂર્ણ બની છે.",
+        "ન્યાયી વહીવટ, આધુનિક માળખાકીય સુવિધાઓ અને નાગરિક સહભાગિતા જ શહેરને સુરક્ષિત અને સમૃદ્ધ બનાવે છે.",
         "પારદર્શક નીતિઓ અને નાગરિક અધિકારોનું રક્ષણ એ જ સ્વસ્થ સમાજ નિર્માણનો સાચો માર્ગ છે.",
       ],
       targetType: "article",
-      articleSlug: "editorial-institutional-autonomy-democracy-en",
+      articleSlug: "urban-resilience-and-civic-accountability-in-coastal-cities",
     },
   ],
   2: [
@@ -222,16 +248,52 @@ const DEFAULT_PAGE_HOTSPOTS: Record<number, PublicHotspot[]> = {
       yPercent: 10,
       widthPercent: 92,
       heightPercent: 40,
-      headlineText: "મુંબઈમાં જાહેર પરિવહનને વધુ સુવિધાજનક બનાવવા નવી મેટ્રો સેવા શરૂ",
+      headlineText: "વ્યાપાર: એફપીઆઈ દ્વારા ₹૯૪,૨૫૦ કરોડનું રોકાણ અને એમએસએમઇ ક્રેડિટ સુધારા",
       summaryText:
-        "મુંબઈ મહાનગરમાં મુસાફરોની વધતી ભીડને ધ્યાનમાં રાખીને નવી મેટ્રો લાઇનનું પરિચાલન શરૂ કરાયું છે. લાખો દૈનિક પ્રવાસીઓને રાહત મળશે.",
+        "ભારતીય મૂડીબજારમાં વિદેશી સંસ્થાકીય રોકાણકારોની સક્રિયતા અને એનએસઇની રોકાણકારો માટે મહત્વપૂર્ણ માર્ગદર્શિકા.",
       articleParagraphs: [
-        "મુંબઈ મહાનગરમાં મુસાફરોની વધતી ભીડને ધ્યાનમાં રાખીને નવી મેટ્રો લાઇનનું પરિચાલન આજથી શરૂ કરવામાં આવ્યું છે.",
-        "આ લાઇન પશ્ચિમી ઉપનગરોને સીધા સેન્ટ્રલ બિઝનેસ ડિસ્ટ્રિક્ટ્સ સાથે જોડે છે, જેનાથી પીક-અવર્સ દરમિયાન પ્રવાસ સમયમાં ૪૫ મિનિટનો બચાવ થશે.",
-        "તમામ સ્ટેશનો પર ઓટોમેટિક ફેર કલેક્શન ગેટ્સ, દિવ્યાંગો માટે અદ્યતન સુવિધાઓ અને ઝીરો-એમિશન ફીડર બસોનું સંકલન કરાયું છે.",
+        "ભારતીય મૂડીબજારમાં વિદેશી સંસ્થાકીય રોકાણકારોએ વિશ્વાસ વ્યક્ત કરીને મોટા પાયે રોકાણ કર્યું છે, જેનાથી વ્યાપાર જગતમાં સકારાત્મક વાતાવરણ સર્જાયું છે.",
+        "રિઝર્વ બેંક દ્વારા એમએસએમઇ નિકાસકારો માટે નવી ક્રેડિટ સેટલમેન્ટ વ્યવસ્થા લાગુ કરાતાં નાના ઉદ્યોગોને સીધો લાભ મળશે.",
+        "એનએસઇ દ્વારા રોકાણકારોને સતર્ક રહેવા અને અધિકૃત માધ્યમો દ્વારા જ સોદા કરવાની સલાહ આપવામાં આવી છે.",
       ],
       targetType: "article",
-      articleSlug: "mumbai-f9d4d4",
+      articleSlug: "rbi-msme-export-credit-settlement-framework",
+    },
+  ],
+  3: [
+    {
+      id: "demo-p3-h1",
+      xPercent: 4,
+      yPercent: 10,
+      widthPercent: 92,
+      heightPercent: 45,
+      headlineText: "મુખ્ય સમાચાર: રાષ્ટ્રીય રાજકારણ, આર્થિક નીતિઓ અને આંતરરાષ્ટ્રીય ઘટનાક્રમ",
+      summaryText:
+        "દેશના મુખ્ય રાજકીય અને રાષ્ટ્રીય સમાચારો, સંસદીય મુદ્દાઓ અને વિદેશ નીતિ અંગે વિસ્તૃત અહેવાલ.",
+      articleParagraphs: [
+        "આજના મુખ્ય પાના પર દેશના અગ્રણી રાજકીય ઘટનાક્રમ, રાષ્ટ્રીય સુરક્ષા અને આર્થિક નીતિઓ અંગે મહત્વપૂર્ણ અહેવાલો પ્રકાશિત કરાયા છે.",
+        "કેન્દ્ર અને રાજ્યો વચ્ચે વિકાસલક્ષી પ્રોજેક્ટ્સના સંકલન માટે નવી પહેલ હાથ ધરવામાં આવી છે.",
+      ],
+      targetType: "article",
+      articleSlug: "western-india-maritime-freight-corridor-expansion-plan",
+    },
+  ],
+  4: [
+    {
+      id: "demo-p4-h1",
+      xPercent: 4,
+      yPercent: 12,
+      widthPercent: 92,
+      heightPercent: 42,
+      headlineText: "અગ્રલેખ અને કલમ-કિતાબ: મોંઘવારીનો પડકાર અને ડિજિટલ યુગમાં માતૃભાષાનું જતન",
+      summaryText:
+        "આર્થિક પડકારો, શિક્ષણમાં માતૃભાષાનું મહત્વ અને સામાજિક ચિંતન પર સંપાદકીય લેખો.",
+      articleParagraphs: [
+        "ડિજિટલ શિક્ષણના આધુનિક યુગમાં માતૃભાષાનું જતન અને ગુણવત્તાયુક્ત શિક્ષણ એ સમાજની પ્રાથમિક જરૂરિયાત છે.",
+        "મોંઘવારી પર અંકુશ અને સામાન્ય નાગરિકોના જીવનધોરણમાં સુધારો એ આર્થિક નીતિનું કેન્દ્રબિંદુ હોવું જોઈએ.",
+      ],
+      targetType: "article",
+      articleSlug: "preserving-mother-tongue-in-digital-education-era",
     },
   ],
   7: [
@@ -241,15 +303,15 @@ const DEFAULT_PAGE_HOTSPOTS: Record<number, PublicHotspot[]> = {
       yPercent: 10,
       widthPercent: 46,
       heightPercent: 42,
-      headlineText: "ગુજરાત અને મહારાષ્ટ્ર વચ્ચે ઔદ્યોગિક સહયોગ: નવા વેપારી પ્રોજેક્ટ્સની જાહેરાત",
+      headlineText: "મહાનગર મુંબઈ: ફિલ્મ શૂટિંગ ટુરિઝમ અને શહેરી પરિવહન સુવિધાઓનો વિસ્તાર",
       summaryText:
-        "ઔદ્યોગિક ચેમ્બર ઓફ કોમર્સની સંયુક્ત બેઠકમાં બંને રાજ્યો વચ્ચે કાપડ, રસાયણ અને એન્જિનિયરિંગ સેક્ટરમાં સંયુક્ત રોકાણ યોજનાઓની જાહેરાત કરાઈ.",
+        "મુંબઈમાં પ્રવાસન, મેટ્રો કનેક્ટિવિટી અને નાગરિક સુરક્ષા માટે મહાનગરપાલિકા અને રાજ્ય સરકારની નવી પહેલ.",
       articleParagraphs: [
-        "મહારાષ્ટ્ર અને ગુજરાત વચ્ચેના મહત્વપૂર્ણ માળખાકીય સંકલનના ભાગરૂપે બંને રાજ્યોના ઔદ્યોગિક ચેમ્બરની સંયુક્ત બેઠક યોજાઈ હતી.",
-        "આ બેઠકમાં કાપડ, રસાયણ અને એન્જિનિયરિંગ સેક્ટરમાં સંયુક્ત રોકાણ યોજનાઓની જાહેરાત કરવામાં આવી છે.",
-        "પરિવહન માર્ગોના આધુનિકીકરણથી બંને રાજ્યો વચ્ચે કાચા માલ અને તૈયાર ઉત્પાદનોની અવરજવર વધુ ઝડપી અને કરકસરભરી બનશે.",
+        "મુંબઈ મહાનગરમાં ફિલ્મ શૂટિંગ ટુરિઝમને પ્રોત્સાહન આપવા અને નાગરિક પરિવહન વધુ સુગમ બનાવવા નવી યોજનાઓ અમલમાં મૂકાઈ છે.",
+        "મુંબઈ ભાડા કાયદા અને મહિલા સુરક્ષા અંગે મહત્વપૂર્ણ નિર્ણયો લેવાયા છે.",
       ],
       targetType: "article",
+      articleSlug: "mumbai-coastal-metro-interchange-commuter-review",
     },
     {
       id: "demo-p7-h2",
@@ -265,6 +327,7 @@ const DEFAULT_PAGE_HOTSPOTS: Record<number, PublicHotspot[]> = {
         "આ યોજનાઓથી નાગરિકોના રોજિંદા જીવનધોરણમાં સુધારો થશે અને ચોમાસા દરમિયાન જળબંબાકારની સ્થિતિ પર કાયમી નિયંત્રણ મેળવી શકાશે.",
       ],
       targetType: "article",
+      articleSlug: "ahmedabad-mumbai-high-speed-corridor-station-concourse-update",
     },
   ],
   8: [
@@ -274,15 +337,15 @@ const DEFAULT_PAGE_HOTSPOTS: Record<number, PublicHotspot[]> = {
       yPercent: 28,
       widthPercent: 44,
       heightPercent: 36,
-      headlineText: "કચ્છના દાનવીર, સમાજસેવક ચંદ્રકાંતભાઈ ગોગરીનું નિધન",
+      headlineText: "વૈવિધ્ય અને શ્રદ્ધાંજલિ: રાશિભવિષ્ય, શબ્દવ્યૂહ અને સામાજિક બેસણાં નોંધ",
       summaryText:
-        "કચ્છના જાણીતા દાનવીર અને સેવાભાવી અગ્રણી ચંદ્રકાંતભાઈ ગોગરીનું નિધન થયું છે. કચ્છી સમાજ, શિક્ષણ અને આરોગ્ય ક્ષેત્રે તેમના સેવાકાર્યો ચિરસ્મરણીય રહેશે.",
+        "આજનું રાશિભવિષ્ય, સુડોકુ, ક્રોસવર્ડ અને મુંબઈ-ગુજરાત સમાજના શ્રદ્ધાંજલિ તેમજ બેસણાં સમાચાર.",
       articleParagraphs: [
-        "મુંબઈ: કચ્છના જાણીતા ઉદ્યોગપતિ, સેવાભાવી અગ્રણી અને આરતી ઇન્ડસ્ટ્રીઝના સ્થાપક ચંદ્રકાંતભાઈ ગોગરીનું ૭૯ વર્ષની વયે મુંબઈ ખાતે નિધન થયું છે.",
-        "ચંદ્રકાંતભાઈએ કચ્છી વિસા ઓસવાળ સમાજ, શિક્ષણ, ગ્રામીણ જળસંચય અને કુદરતી આપત્તિ રાહત ક્ષેત્રે કરોડો રૂપિયાનું દાન આપીને હજારો પરિવારોનું જીવન પરિવર્તિત કર્યું હતું.",
-        "મુખ્યમંત્રી અને સામાજિક અગ્રણીઓએ તેમના નિધન પર શોક વ્યક્ત કરતાં જણાવ્યું કે સમાજે એક સમર્પિત સેવામૂર્તિ અને પ્રેરણાદાયી રાષ્ટ્રસેવક ગુમાવ્યા છે.",
+        "આજના વૈવિધ્ય પાના પર દૈનિક રાશિભવિષ્ય, શબ્દવ્યૂહ, સુડોકુ અને સાંસ્કૃતિક વાંચન સામગ્રી પ્રસ્તુત છે.",
+        "સામાજિક અને વ્યાપારી જગતના અગ્રણીઓને શ્રદ્ધાંજલિ તેમજ પરિવારજનોની પ્રાર્થના સભાની વિગતો પ્રકાશિત કરાઈ છે.",
       ],
       targetType: "article",
+      articleSlug: "community-obituary-and-besanu-notices-sample",
     },
     {
       id: "demo-p8-h2",
@@ -290,30 +353,51 @@ const DEFAULT_PAGE_HOTSPOTS: Record<number, PublicHotspot[]> = {
       yPercent: 28,
       widthPercent: 46,
       heightPercent: 36,
-      headlineText: "ભોસરી વિધાનસભા ક્ષેત્રમાંથી ૪૦ હજાર મતદારોના નામ અન્યત્ર ખસેડવા અંગે પોલીસ ફરિયાદ",
+      headlineText: "સાંસ્કૃતિક વારસો: ગુજરાતી નાટક અને સુગમ સંગીત મહોત્સવની જાહેરાત",
       summaryText:
-        "ચૂંટણી પંચ સમક્ષ મતદાર યાદીમાં ગેરરીતિની રજૂઆત સાથે પોલીસ ફરિયાદ દાખલ કરવામાં આવી. અધિકારીઓએ તપાસ શરૂ કરી છે.",
+        "મુંબઈમાં ગુજરાતી રંગભૂમિ અને શાસ્ત્રીય સુગમ સંગીતના વિશેષ કાર્યક્રમોનું આયોજન.",
       articleParagraphs: [
-        "પુણે: ભોસરી વિધાનસભા ક્ષેત્રમાંથી આશરે ૪૦,૦૦૦ જેટલા કાયદેસર મતદારોના નામ મનસ્વી રીતે અન્ય કેન્દ્રો પર ખસેડી દેવામાં આવ્યા હોવાના આક્ષેપ સાથે પોલીસ મથકે સત્તાવાર ફરિયાદ દાખલ કરવામાં આવી છે.",
-        "વિપક્ષી આગેવાનોએ ચૂંટણી અધિકારીઓ સમક્ષ પુરાવા રજૂ કરતાં આક્ષેપ કર્યો છે કે રહેણાંક સરનામાની પૂરતી ચકાસણી કર્યા વિના જ મતદારોના નામોની યાદીમાં ફેરફાર કરાયા છે.",
-        "પોલીસે ફરિયાદની નોંધ લઈ સાયબર સેલ અને મહેસૂલી તંત્રની મદદથી ડિજિટલ રેકોર્ડ્સની તપાસ હાથ ધરી છે.",
+        "મુંબઈમાં ગુજરાતી નાટકના શતાબ્દી પ્રદર્શન અને સુગમ સંગીત મહોત્સવને લઈને કલાપ્રેમીઓમાં ભારે ઉત્સાહ છે.",
+        "વિવિધ સાંસ્કૃતિક સંસ્થાઓ દ્વારા યુવા કલાકારોને મંચ પૂરું પાડવા વિશેષ આયોજન કરાયું છે.",
       ],
       targetType: "article",
+      articleSlug: "gujarati-natak-centenary-archival-exhibition-mumbai",
     },
+  ],
+  11: [
     {
-      id: "demo-p8-h3",
+      id: "demo-p11-h1",
       xPercent: 4,
-      yPercent: 66,
+      yPercent: 10,
       widthPercent: 92,
-      heightPercent: 30,
-      headlineText: "શ્રદ્ધાંજલિ અને શોક સંદેશ: જાણીતા મહાનુભાવોને ભાવભીની અંજલિ",
+      heightPercent: 44,
+      headlineText: "રમતગમત: ભારતે ૫મી વન-ડેમાં ન્યુઝીલેન્ડને ૨૨ રને હરાવ્યું; લક્ષ્ય સેને જાપાન માસ્ટર્સ જીત્યું",
       summaryText:
-        "સામાજિક અને વ્યાપારી જગતના અગ્રણીઓ દ્વારા શોક સંદેશાઓ પાઠવવામાં આવ્યા. પરિવારો પ્રત્યે સાંત્વના વ્યક્ત કરવામાં આવી.",
+        "ક્રિકેટ અને બેડમિન્ટનમાં ભારતીય ખેલાડીઓનું શાનદાર પ્રદર્શન, રણજી ટ્રોફીમાં મુંબઈ-સૌરાષ્ટ્ર મુકાબલાની તૈયારી.",
       articleParagraphs: [
-        "આજના અંકમાં મુંબઈ અને ગુજરાતના સામાજિક તેમજ વ્યાપારી ક્ષેત્રના અગ્રણીઓને શ્રદ્ધાંજલિ પાઠવવામાં આવી છે.",
-        "પરિવારો પ્રત્યે સાંત્વના વ્યક્ત કરીને દિવંગત આત્માઓની શાંતિ માટે પ્રાર્થના સભાઓનું આયોજન કરવામાં આવ્યું છે.",
+        "ભારતીય ક્રિકેટ ટીમે પાંચમી વન-ડે મેચમાં શાનદાર પ્રદર્શન કરીને ન્યુઝીલેન્ડ સામે ૨૨ રને વિજય મેળવ્યો છે.",
+        "બેડમિન્ટનમાં ભારતના સ્ટાર ખેલાડી લક્ષ્ય સેને જાપાન માસ્ટર્સ ટાઇટલ જીતીને દેશનું ગૌરવ વધાર્યું છે.",
       ],
       targetType: "article",
+      articleSlug: "ranji-trophy-mumbai-saurashtra-clash-preview",
+    },
+  ],
+  12: [
+    {
+      id: "demo-p12-h1",
+      xPercent: 4,
+      yPercent: 10,
+      widthPercent: 92,
+      heightPercent: 44,
+      headlineText: "છેલ્લું પાનું: મુંબઈના ૮ લાખ ઘરો માટે જળ પુરવઠાનું આયોજન અને છઠ પૂજા ઉજવણી",
+      summaryText:
+        "મુંબઈમાં પીવાના પાણીની વ્યવસ્થા, મહાબળેશ્વરમાં ખાદ્ય સુરક્ષા તપાસ અને રાજ્યના મહત્વપૂર્ણ સમાચારો.",
+      articleParagraphs: [
+        "મુંબઈ મહાનગરના ૮ લાખથી વધુ ઘરોને નિયમિત અને શુદ્ધ પાણી પુરવઠો પૂરો પાડવા માટે વિશેષ માળખાકીય આયોજન હાથ ધરાયું છે.",
+        "શહેરમાં છઠ પૂજાની ભવ્ય ઉજવણી અને પ્રવાસન સ્થળોએ ખાદ્ય સુરક્ષા અંગે વિશેષ ઝુંબેશ ચલાવવામાં આવી છે.",
+      ],
+      targetType: "article",
+      articleSlug: "mumbai-coastal-metro-interchange-commuter-review",
     },
   ],
 };
@@ -399,6 +483,9 @@ export function PublicEpaperReader({
       const match = pageId.match(/^page-(pub-[a-z-]+)-(\d+)$/);
       const pub = match?.[1] || editionDetail?.publicationId || "pub-janmabhoomi";
       const page = match?.[2] || "1";
+      if (pub === "pub-janmabhoomi") {
+        return `/assets/epaper/jb-2026-11-16/page-${page}.jpg`;
+      }
       return `/api/v1/epaper/preview-sheet?pub=${encodeURIComponent(pub)}&page=${page}`;
     }
     const activeToken =
@@ -523,28 +610,40 @@ export function PublicEpaperReader({
       const matchingPub =
         JANMABHOOMI_PUBLICATIONS.find((p) => editionId.includes(p.id)) ||
         JANMABHOOMI_PUBLICATIONS[0];
+      const isJanmabhoomiPdf = matchingPub.id === "pub-janmabhoomi";
       const pageCount = matchingPub.id === "pub-purti" ? 8 : 12;
 
       const pages: PublicPageItem[] = Array.from({ length: pageCount }, (_, i) => ({
         id: `page-${matchingPub.id}-${i + 1}`,
         pageNumber: i + 1,
-        labelGu: `પાનું ${i + 1}`,
-        labelEn: `Page ${i + 1}`,
-        widthPx: 1200,
-        heightPx: 1800,
-        isFreePreview: i === 0,
-        imageThumbnailKey: `/assets/images/epaper-placeholder.jpg`,
+        labelGu: isJanmabhoomiPdf
+          ? JB_2026_11_16_PAGE_LABELS[i]?.gu || `પાનું ${i + 1}`
+          : `પાનું ${i + 1}`,
+        labelEn: isJanmabhoomiPdf
+          ? JB_2026_11_16_PAGE_LABELS[i]?.en || `Page ${i + 1}`
+          : `Page ${i + 1}`,
+        widthPx: isJanmabhoomiPdf ? 1767 : 1200,
+        heightPx: isJanmabhoomiPdf ? 2736 : 1800,
+        isFreePreview: isJanmabhoomiPdf ? true : i === 0,
+        imageThumbnailKey: isJanmabhoomiPdf
+          ? `/assets/epaper/jb-2026-11-16/page-${i + 1}.jpg`
+          : `/assets/images/epaper-placeholder.jpg`,
         hotspots: DEFAULT_PAGE_HOTSPOTS[i + 1] || [],
       }));
 
       const syntheticDetail: PublicEditionDetail = {
         id: editionId,
         publicationId: matchingPub.id,
-        editionDate: new Date().toISOString().split("T")[0],
+        editionDate: isJanmabhoomiPdf ? "2026-11-16" : new Date().toISOString().split("T")[0],
         editionCity: matchingPub.city,
-        editionNameEn: `${matchingPub.nameEn} Digital Broadsheet`,
-        editionNameGu: `${matchingPub.nameGu} ડિજિટલ અખબાર`,
+        editionNameEn: isJanmabhoomiPdf
+          ? "Janmabhoomi Mumbai — 16 Nov 2026"
+          : `${matchingPub.nameEn} Digital Broadsheet`,
+        editionNameGu: isJanmabhoomiPdf
+          ? "જન્મભૂમિ મુંબઈ — ૧૬ નવેમ્બર ૨૦૨૬"
+          : `${matchingPub.nameGu} ડિજિટલ અખબાર`,
         totalPageCount: pageCount,
+        freePreviewPageLimit: isJanmabhoomiPdf ? pageCount : 1,
         status: "PUBLISHED",
         pages,
       };
@@ -705,6 +804,13 @@ export function PublicEpaperReader({
       stopSpeaking();
     }
   }, [selectedHotspot]);
+
+  // Ensure TTS playback stops cleanly when navigating away from the E-Paper reader
+  useEffect(() => {
+    return () => {
+      haltSpeaking();
+    };
+  }, []);
 
   const pages = editionDetail?.pages || [];
   const totalPages = pages.length > 0 ? pages.length : editionDetail?.totalPageCount || 12;
@@ -881,7 +987,9 @@ export function PublicEpaperReader({
                     <div className="relative aspect-square w-full bg-slate-100 rounded-xl overflow-hidden border border-slate-200 shadow-inner mb-4 flex items-center justify-center p-2 group-hover:scale-[1.01] transition-transform">
                       <img
                         src={
-                          ed.id.startsWith("edition-pub-")
+                          ed.coverImageUrl && ed.coverImageUrl.startsWith("/assets/epaper/")
+                            ? ed.coverImageUrl
+                            : ed.id.startsWith("edition-pub-")
                             ? `/api/v1/epaper/preview-sheet?pub=${encodeURIComponent(ed.publicationId)}&page=1`
                             : `/api/v1/epaper/editions/${ed.id}/cover`
                         }
@@ -1445,7 +1553,10 @@ export function PublicEpaperReader({
                         {clip.articleSlug ? (
                           <Link
                             href={`/${lang}/article/${clip.articleSlug}`}
-                            onClick={() => setSavedClipsDrawerOpen(false)}
+                            onClick={() => {
+                              stopSpeaking();
+                              setSavedClipsDrawerOpen(false);
+                            }}
                             className="font-bold text-[#016BB7] hover:underline inline-flex items-center gap-1"
                           >
                             <span>{isGu ? "સંપૂર્ણ લેખ વાંચો" : "Read Full Story"}</span>
@@ -1759,6 +1870,7 @@ export function PublicEpaperReader({
                 {selectedHotspot.articleSlug ? (
                   <Link
                     href={`/${lang}/article/${selectedHotspot.articleSlug}`}
+                    onClick={() => stopSpeaking()}
                     className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#016BB7] hover:bg-[#015a99] text-white font-bold transition-colors shadow-xs"
                   >
                     <span>{isGu ? "સંપૂર્ણ લેખ વાંચો" : "Read Full Story"}</span>

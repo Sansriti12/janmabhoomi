@@ -36,9 +36,14 @@ export function stopSpeaking() {
 
   if (activeAudio) {
     try {
+      // Detach all handlers BEFORE clearing src so Chrome never fires a ghost onerror
+      activeAudio.onplay = null;
+      activeAudio.onended = null;
+      activeAudio.onerror = null;
       activeAudio.pause();
       activeAudio.currentTime = 0;
-      activeAudio.src = "";
+      activeAudio.removeAttribute("src");
+      activeAudio.load();
     } catch {}
     activeAudio = null;
   }
@@ -169,6 +174,36 @@ function playAudioChunks(
 
   let currentIndex = 0;
   let hasStarted = false;
+  let fallbackTriggered = false;
+
+  // Slightly faster natural pacing for Gujarati female voice (1.18x base), 1.0x base for English
+  const baseRate = targetLang === "gu" ? 1.18 : 1.0;
+  const effectiveRate = Math.min(1.6, baseRate * (options.rate ?? 1.0));
+
+  const triggerSingleFallback = (err: unknown, failedIndex: number) => {
+    // Strictly ignore errors from stopped/stale sessions or duplicate callbacks
+    if (currentSessionId !== sessionId || fallbackTriggered) return;
+
+    // If audio has already started playing in the primary voice, skip the failed chunk instead
+    // of switching to a second different browser voice mid-article
+    if (hasStarted) {
+      playNext();
+      return;
+    }
+
+    fallbackTriggered = true;
+    const remainingText = chunks.slice(failedIndex).join(" ");
+    const fallbackSuccess = speakWithSpeechSynthesis(
+      remainingText,
+      targetLang,
+      { ...options, rate: effectiveRate },
+      sessionId
+    );
+    if (!fallbackSuccess) {
+      if (options.onError) options.onError(err);
+      if (options.onEnd) options.onEnd();
+    }
+  };
 
   const playNext = () => {
     if (currentSessionId !== sessionId) return;
@@ -179,14 +214,14 @@ function playAudioChunks(
       return;
     }
 
-    const chunk = chunks[currentIndex];
+    const chunkIndex = currentIndex;
+    const chunk = chunks[chunkIndex];
     currentIndex++;
 
     const audioUrl = `/api/v1/tts?text=${encodeURIComponent(chunk)}&lang=${targetLang}`;
     const audio = new Audio(audioUrl);
-    if (options.rate) {
-      audio.playbackRate = options.rate;
-    }
+    audio.playbackRate = effectiveRate;
+    audio.preservesPitch = true;
     activeAudio = audio;
 
     // Preload the next chunk while this one is playing
@@ -197,9 +232,14 @@ function playAudioChunks(
 
     audio.onplay = () => {
       if (currentSessionId !== sessionId) {
+        audio.onplay = null;
+        audio.onended = null;
+        audio.onerror = null;
         audio.pause();
         return;
       }
+      // Re-apply playbackRate on play for browsers that reset rate after metadata load
+      audio.playbackRate = effectiveRate;
       if (!hasStarted) {
         hasStarted = true;
         if (options.onStart) options.onStart();
@@ -213,24 +253,11 @@ function playAudioChunks(
     };
 
     audio.onerror = (err) => {
-      console.warn("[TTS Audio Player error, attempting SpeechSynthesis fallback]:", err);
-      // Fallback to SpeechSynthesis for remaining text
-      const remainingText = chunks.slice(currentIndex - 1).join(" ");
-      const fallbackSuccess = speakWithSpeechSynthesis(remainingText, targetLang, options, sessionId);
-      if (!fallbackSuccess) {
-        if (options.onError) options.onError(err);
-        if (options.onEnd) options.onEnd();
-      }
+      triggerSingleFallback(err, chunkIndex);
     };
 
     audio.play().catch((playErr) => {
-      console.warn("[Audio play blocked, attempting SpeechSynthesis fallback]:", playErr);
-      const remainingText = chunks.slice(currentIndex - 1).join(" ");
-      const fallbackSuccess = speakWithSpeechSynthesis(remainingText, targetLang, options, sessionId);
-      if (!fallbackSuccess) {
-        if (options.onError) options.onError(playErr);
-        if (options.onEnd) options.onEnd();
-      }
+      triggerSingleFallback(playErr, chunkIndex);
     });
   };
 

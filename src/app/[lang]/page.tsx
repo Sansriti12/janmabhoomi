@@ -7,7 +7,6 @@ import { BreakingNewsTicker } from "@/components/home/BreakingNewsTicker";
 import { LeadStoryHero } from "@/components/home/LeadStoryHero";
 import { AdPlacement } from "@/components/home/AdPlacement";
 import { PanchangWidget } from "@/components/home/PanchangWidget";
-import { MaranDirectoryWidget } from "@/components/home/MaranDirectoryWidget";
 import { LatestEventsSection } from "@/components/home/LatestEventsSection";
 import { CategoryCarousel, CategoryCardItem } from "@/components/home/CategoryCarousel";
 
@@ -179,7 +178,7 @@ export default async function HomePage({
         dict={dict}
       />
 
-      {/* SECTION 4 – City-Switchable Live Daily Panchang */}
+      {/* SECTION 3 – City-Switchable Live Daily Panchang */}
       <PanchangWidget
         panchang={dailyPanchang}
         lang={locale}
@@ -187,10 +186,7 @@ export default async function HomePage({
         showChoghadiya={true}
       />
 
-      {/* SECTION 5 – Searchable Maran / Besanu (Obituaries) Directory */}
-      <MaranDirectoryWidget lang={locale} />
-
-      {/* SECTION 6 – Advertisement Placement */}
+      {/* SECTION 4 – Advertisement Placement */}
       <AdPlacement
         slot={primaryAd}
         lang={locale}

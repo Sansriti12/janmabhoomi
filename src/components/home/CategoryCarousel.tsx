@@ -1,9 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Newspaper, Clock } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowRight, Newspaper, Clock } from "lucide-react";
 import { CategorySlug, BilingualText, NewsArticle, getLocalizedText } from "@/lib/data/types";
 import { Locale } from "@/lib/i18n/config";
 import { Dictionary } from "@/lib/i18n/dictionaries";
@@ -24,16 +24,56 @@ interface CategoryCarouselProps {
 }
 
 /**
- * Deduplicated "Our News Coverage" 8-Desk Grid
- * - Renders each of the 8 editorial desks exactly once (zero duplicate cards across breakpoints).
- * - Desktop / Tablet (sm+): Clean 2-col / 4-col grid displaying all 8 distinct desk cards.
- * - Mobile (< sm): Horizontal snap-scroll strip.
+ * Our News Coverage Carousel
+ * - Displays 4 distinct category cards per slide on desktop/tablet with smooth auto-rotation
+ *   between Group 1 (4 cards) and Group 2 (4 cards) + manual Prev/Next controls.
+ * - Mobile (< sm): Horizontal snap-scroll strip (mutually exclusive with desktop grid so zero duplicates).
  */
 export function CategoryCarousel({ categories, lang, dict }: CategoryCarouselProps) {
-  // Deduplicate by category slug defensively
   const uniqueCategories = Array.from(
     new Map(categories.map((item) => [item.slug, item])).values()
   );
+
+  const [currentGroup, setCurrentGroup] = useState<number>(0);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const groupSize = 4;
+  const totalGroups = Math.ceil(uniqueCategories.length / groupSize) || 1;
+  const currentGroupCategories = uniqueCategories.slice(
+    currentGroup * groupSize,
+    currentGroup * groupSize + groupSize
+  );
+
+  const startTimer = useCallback(() => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    if (totalGroups <= 1) return;
+
+    timerRef.current = setInterval(() => {
+      setCurrentGroup((prev) => (prev + 1) % totalGroups);
+    }, 5000);
+  }, [totalGroups]);
+
+  useEffect(() => {
+    startTimer();
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [startTimer]);
+
+  const handlePrev = () => {
+    setCurrentGroup((prev) => (prev === 0 ? totalGroups - 1 : prev - 1));
+    startTimer();
+  };
+
+  const handleNext = () => {
+    setCurrentGroup((prev) => (prev + 1) % totalGroups);
+    startTimer();
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "ArrowLeft") handlePrev();
+    else if (e.key === "ArrowRight") handleNext();
+  };
 
   const renderCard = (item: CategoryCardItem, keyPrefix: string, extraClass = "") => {
     const categoryName = getLocalizedText(item.name, lang);
@@ -48,14 +88,12 @@ export function CategoryCarousel({ categories, lang, dict }: CategoryCarouselPro
         className={`group flex flex-col justify-between rounded-xl border border-[#016BB7]/20 bg-white p-3.5 hover:border-[#016BB7] hover:shadow-md transition-all ${extraClass}`}
       >
         <div>
-          {/* Category Header Badge */}
           <div className="flex items-center justify-between mb-2.5">
             <span className="rounded-xs bg-[#016BB7] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white truncate max-w-[180px]">
               {categoryName}
             </span>
           </div>
 
-          {/* News Thumbnail */}
           <Link
             href={hasArticle ? `/${lang}/article/${item.article!.slug}` : item.href}
             className="block relative aspect-16/10 w-full overflow-hidden rounded-lg bg-[#F0F6FA]"
@@ -78,7 +116,6 @@ export function CategoryCarousel({ categories, lang, dict }: CategoryCarouselPro
             )}
           </Link>
 
-          {/* Headline & Metadata */}
           <div className="mt-3">
             {hasArticle ? (
               <>
@@ -108,7 +145,6 @@ export function CategoryCarousel({ categories, lang, dict }: CategoryCarouselPro
           </div>
         </div>
 
-        {/* Clear Category CTA Button */}
         <div className="mt-3 pt-2.5 border-t border-[#016BB7]/10">
           <Link
             href={item.href}
@@ -126,9 +162,11 @@ export function CategoryCarousel({ categories, lang, dict }: CategoryCarouselPro
     <section
       aria-labelledby="category-carousel-heading"
       className="container-wide py-6 border-t border-[#016BB7]/15"
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
     >
-      {/* SECTION HEADER */}
-      <div className="mb-5 flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b-2 border-[#016BB7] pb-3">
+      {/* SECTION HEADER + Prev / Next Carousel Controls */}
+      <div className="mb-4 flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b-2 border-[#016BB7] pb-3">
         <div>
           <div className="flex items-center gap-2">
             <span className="h-5 w-1.5 bg-[#016BB7] rounded-full" />
@@ -146,9 +184,45 @@ export function CategoryCarousel({ categories, lang, dict }: CategoryCarouselPro
           </p>
         </div>
 
+        <div className="flex items-center gap-1.5 self-end sm:self-auto">
+          <button
+            type="button"
+            onClick={handlePrev}
+            aria-label={lang === "gu" ? "અગાઉના વિભાગો" : "Previous category group"}
+            className="inline-flex items-center justify-center h-8 w-8 rounded-md border border-[#016BB7]/30 text-[#016BB7] bg-white hover:bg-[#016BB7] hover:text-white transition-colors cursor-pointer shadow-2xs"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={handleNext}
+            aria-label={lang === "gu" ? "આગામી વિભાગો" : "Next category group"}
+            className="inline-flex items-center justify-center h-8 w-8 rounded-md border border-[#016BB7]/30 text-[#016BB7] bg-white hover:bg-[#016BB7] hover:text-white transition-colors cursor-pointer shadow-2xs"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* DESKTOP & TABLET VIEW (sm+): 4-Card Rotating Carousel */}
+      <div className="hidden sm:grid grid-cols-2 lg:grid-cols-4 gap-4 transition-opacity duration-300">
+        {currentGroupCategories.map((item) =>
+          renderCard(item, `desktop-${currentGroup}`, "min-h-[340px]")
+        )}
+      </div>
+
+      {/* MOBILE VIEW (< sm ONLY): Horizontal Snap-Scroll Strip */}
+      <div className="sm:hidden flex gap-3 overflow-x-auto scrollbar-none snap-x snap-mandatory pb-2 pt-1">
+        {uniqueCategories.map((item) =>
+          renderCard(item, "mobile", "w-[78vw] shrink-0 snap-start")
+        )}
+      </div>
+
+      {/* Explore All Categories CTA */}
+      <div className="mt-5 flex items-center justify-end border-t border-[#016BB7]/15 pt-4">
         <Link
           href={`/${lang}/category`}
-          className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#016BB7] hover:underline shrink-0 group"
+          className="inline-flex items-center gap-2 rounded-lg bg-[#016BB7] hover:bg-[#016BB7]/90 active:bg-[#015a99] px-5 py-2.5 text-xs sm:text-sm font-bold text-white transition-colors shadow-2xs group"
         >
           <span>
             {dict.home.exploreAllCategories ||
@@ -156,18 +230,6 @@ export function CategoryCarousel({ categories, lang, dict }: CategoryCarouselPro
           </span>
           <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
         </Link>
-      </div>
-
-      {/* DESKTOP & TABLET VIEW (sm+): Clean 4x2 Grid of All 8 Distinct Desks */}
-      <div className="hidden sm:grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5">
-        {uniqueCategories.map((item) => renderCard(item, "grid", "min-h-[330px]"))}
-      </div>
-
-      {/* MOBILE VIEW (< sm ONLY): Horizontal Snap-Scroll Strip (Mutually exclusive with sm:grid) */}
-      <div className="sm:hidden flex gap-3 overflow-x-auto scrollbar-none snap-x snap-mandatory pb-2 pt-1">
-        {uniqueCategories.map((item) =>
-          renderCard(item, "mobile", "w-[78vw] shrink-0 snap-start")
-        )}
       </div>
     </section>
   );

@@ -159,9 +159,18 @@ class MockNewsDataProvider implements INewsDataProvider {
     slug: string,
     _publicationId?: string
   ): Promise<NewsArticle | undefined> {
-    const found = MOCK_ARTICLES.find((article) => article.slug === slug);
+    const LEGACY_EPAPER_SLUG_MAP: Record<string, string> = {
+      "sensex-crosses-85000-historic-bull-run-en": "rbi-msme-export-credit-settlement-framework",
+      "mumbai-coastal-road-phase-two-inauguration-en": "mumbai-coastal-metro-interchange-commuter-review",
+      "parliament-winter-session-economic-reforms-en": "western-india-maritime-freight-corridor-expansion-plan",
+      "editorial-institutional-autonomy-democracy-en": "urban-resilience-and-civic-accountability-in-coastal-cities",
+      "mumbai-f9d4d4": "mumbai-coastal-metro-interchange-commuter-review",
+    };
+    const resolvedSlug = LEGACY_EPAPER_SLUG_MAP[slug] || slug;
+
+    const found = MOCK_ARTICLES.find((article) => article.slug === resolvedSlug);
     if (found) return found;
-    const ed = MOCK_EDITORIALS.find((e) => e.slug === slug);
+    const ed = MOCK_EDITORIALS.find((e) => e.slug === resolvedSlug);
     if (ed) {
       return {
         id: ed.id,
@@ -369,8 +378,13 @@ export class ResilientNewsDataProvider implements INewsDataProvider {
   getLatestArticles(limit?: number, pubId?: string) {
     return this.withFallback(() => this.api.getLatestArticles(limit, pubId), () => this.mock.getLatestArticles(limit, pubId));
   }
-  getArticleBySlug(slug: string, pubId?: string) {
-    return this.withFallback(() => this.api.getArticleBySlug(slug), () => this.mock.getArticleBySlug(slug, pubId));
+  async getArticleBySlug(slug: string, pubId?: string) {
+    const fromApi = await this.withFallback(
+      () => this.api.getArticleBySlug(slug),
+      () => this.mock.getArticleBySlug(slug, pubId)
+    );
+    if (fromApi) return fromApi;
+    return this.mock.getArticleBySlug(slug, pubId);
   }
   searchArticles(query: string, pubId?: string) {
     return this.withFallback(() => this.api.searchArticles(query, pubId), () => this.mock.searchArticles(query, pubId));
