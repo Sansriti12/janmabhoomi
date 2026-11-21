@@ -218,24 +218,24 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
         style={{ backgroundColor: "#016BB7" }}
         className="bg-[#016BB7] border-b border-white/20 text-white text-xs"
       >
-        <div className="container-wide min-h-9 py-1 flex items-center justify-between gap-2">
+        <div className="container-wide min-h-7 py-0.5 flex items-center justify-between gap-2">
           {/* Left: Automatically generated current date & day */}
-          <div className="flex items-center gap-2.5 font-medium truncate">
-            <span className="font-semibold text-white tracking-wide text-[11px] sm:text-xs">
+          <div className="flex items-center gap-2 font-medium truncate">
+            <span className="font-semibold text-white tracking-wide text-[11px]">
               {formattedDate || "મંગળવાર, ૩ નવેમ્બર ૨૦૨૬"}
             </span>
           </div>
 
-          {/* Right: Reader Comfort Controls + Bilingual Toggle + Utility Links + Socials */}
-          <div className="flex items-center gap-2.5 sm:gap-4 shrink-0">
+          {/* Right: Reader Comfort Controls + Single Context-Aware Bilingual Toggle + Utility Links + Socials */}
+          <div className="flex items-center gap-2 sm:gap-3.5 shrink-0">
             {/* Reader Comfort Accessibility Toolbar (A-/A/A+ & Light/Sepia/Dark) */}
             <ReaderComfortControls lang={lang} />
 
-            <span className="hidden sm:inline-block h-3.5 w-px bg-white/25" />
+            <span className="h-3 w-px bg-white/25" />
 
-            {/* Context-Aware Bilingual Toggle (ગુજરાતી / EN) in Top Utility Bar */}
+            {/* Single Context-Aware Bilingual Toggle (ગુજરાતી / EN) in Top Utility Bar */}
             <div
-              className="hidden sm:inline-flex items-center gap-1 rounded bg-white/15 border border-white/25 p-0.5 text-[11px] font-bold"
+              className="inline-flex items-center gap-0.5 rounded bg-white/15 border border-white/25 p-0.5 text-[11px] font-bold"
               aria-label="Language switcher"
             >
               <Link
@@ -329,7 +329,7 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
 
       {/* ROW 2 – MAIN BRANDING HEADER (Logo placed cleanly on the LEFT per Modern Redesign) */}
       <div className="bg-white overflow-hidden sm:overflow-visible">
-        <div className="container-wide py-2.5 sm:py-3.5 flex items-center justify-between gap-4">
+        <div className="container-wide py-1.5 sm:py-2 flex items-center justify-between gap-3">
           {/* Left: Official Blue Janmabhoomi Logo */}
           <div className="flex items-center shrink-0">
             <Link
@@ -337,29 +337,28 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
               className="group flex items-center select-none"
               title="Janmabhoomi - જન્મભૂમિ"
             >
-              <BrandLogo priority className="hover:opacity-95 transition-opacity" />
+              <BrandLogo priority compact className="hover:opacity-95 transition-opacity" />
             </Link>
           </div>
 
-          {/* Right: Search + E-PAPER CTA + Subscribe / Account + Language Switcher + Mobile Menu Button */}
-          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
-            {/* Search Trigger */}
+          {/* Right: Clean Action Cluster (E-PAPER + Subscribe + Sign In/Account + Mobile Search & Menu) */}
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            {/* Mobile-only Search Trigger (Desktop Search sits at far right of category nav) */}
             <button
               type="button"
               onClick={() => setSearchOpen(!searchOpen)}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-[#016BB7]/25 bg-white px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-semibold text-[#1F2937] hover:border-[#016BB7] hover:text-[#016BB7] hover:bg-[#F0F6FA] transition-all cursor-pointer shadow-2xs"
+              className="lg:hidden inline-flex items-center justify-center rounded-lg border border-[#016BB7]/25 bg-white p-1.5 text-[#016BB7] hover:bg-[#F0F6FA] transition-all cursor-pointer"
               aria-label={dict.header.searchButton}
             >
-              <Search className="h-4 w-4 text-[#016BB7]" />
-              <span className="hidden md:inline font-medium">{dict.header.searchButton}</span>
+              <Search className="h-4 w-4" />
             </button>
 
             {/* Prominent E-PAPER CTA Button */}
             <Link
               href={`/${lang}/epaper`}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-[#016BB7] hover:bg-[#016BB7]/90 active:bg-[#015a99] px-2 sm:px-3.5 py-1.5 sm:py-2 text-xs sm:text-sm font-bold tracking-wide text-white transition-colors shadow-xs shrink-0"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-[#016BB7] hover:bg-[#016BB7]/90 active:bg-[#015a99] px-2.5 sm:px-3.5 py-1.5 text-xs sm:text-sm font-bold tracking-wide text-white transition-colors shadow-xs shrink-0"
             >
-              <Newspaper className="h-4 w-4 hidden md:inline" />
+              <Newspaper className="h-3.5 w-3.5 hidden sm:inline" />
               <span>{dict.header.epaperCta}</span>
             </Link>
 
@@ -373,7 +372,7 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
                 <span>{lang === "gu" ? "મારું ખાતું" : "My Account"}</span>
               </Link>
             ) : (
-              <div className="hidden lg:flex items-center gap-1">
+              <div className="hidden lg:flex items-center gap-1.5">
                 <Link
                   href={`/${lang}/subscribe`}
                   className="inline-flex items-center gap-1 rounded-lg border border-[#016BB7]/30 hover:border-[#016BB7] hover:bg-blue-50/50 px-2.5 py-1.5 text-xs font-semibold text-[#016BB7] transition-colors"
@@ -383,41 +382,13 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
                 <button
                   type="button"
                   onClick={() => openAuthModal("login")}
-                  className="inline-flex items-center gap-1 rounded-lg text-gray-700 hover:text-[#016BB7] px-2 py-1.5 text-xs font-semibold transition-colors"
+                  className="inline-flex items-center gap-1 rounded-lg text-gray-700 hover:text-[#016BB7] px-2 py-1.5 text-xs font-semibold transition-colors cursor-pointer"
                 >
                   <User className="h-3.5 w-3.5" />
                   <span>{lang === "gu" ? "લૉગિન" : "Sign In"}</span>
                 </button>
               </div>
             )}
-
-            {/* Gujarati | EN Language Switcher */}
-            <div
-              className="flex items-center gap-0.5 sm:gap-1 text-xs sm:text-sm font-bold pl-0.5 sm:pl-1 shrink-0"
-              aria-label="Language switcher"
-            >
-              <Link
-                href={getSwitchedLocaleHref("gu")}
-                className={`font-gujarati transition-colors px-1 py-0.5 rounded text-[11px] sm:text-xs ${
-                  lang === "gu"
-                    ? "bg-[#016BB7] text-white"
-                    : "text-[#016BB7] hover:bg-[#F0F6FA]"
-                }`}
-              >
-                ગુજરાતી
-              </Link>
-              <span className="text-[#016BB7]/40">/</span>
-              <Link
-                href={getSwitchedLocaleHref("en")}
-                className={`transition-colors px-1 py-0.5 rounded text-[11px] sm:text-xs ${
-                  lang === "en"
-                    ? "bg-[#016BB7] text-white"
-                    : "text-[#016BB7] hover:bg-[#F0F6FA]"
-                }`}
-              >
-                EN
-              </Link>
-            </div>
 
             {/* Mobile Hamburger Menu Button on the RIGHT */}
             <button
@@ -500,7 +471,7 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
         <div className="container-wide">
           <nav
             aria-label="Main category navigation"
-            className="flex items-center justify-between w-full h-11 text-[13px] xl:text-[14px] font-semibold tracking-normal"
+            className="flex items-center justify-between w-full h-9 text-[13px] xl:text-[14px] font-semibold tracking-normal"
           >
             {primaryNav.map((item) => {
               const active = isActive(item.href, item.exact);
@@ -583,108 +554,24 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
               )}
             </div>
 
-            {/* Publications Dropdown (All 8 Saurashtra Trust Publications) */}
-            <div className="relative h-full shrink-0" ref={publicationsRef}>
-              <button
-                type="button"
-                onClick={() => {
-                  setPublicationsOpen(!publicationsOpen);
-                  setMoreOpen(false);
-                }}
-                className={`relative group h-full flex items-center justify-center gap-1.5 px-2.5 xl:px-3.5 transition-colors duration-150 cursor-pointer whitespace-nowrap ${
-                  publicationsOpen
-                    ? "text-[#016BB7] font-bold"
-                    : "text-[#1F2937] hover:text-[#016BB7]"
-                }`}
-                aria-expanded={publicationsOpen}
-                aria-haspopup="menu"
-              >
-                <span className="truncate">{dict.nav.publications || "Publications"}</span>
-                <ChevronDown
-                  className={`h-3.5 w-3.5 shrink-0 transition-transform duration-200 ${
-                    publicationsOpen ? "rotate-180 text-[#016BB7]" : "text-[#1F2937] group-hover:text-[#016BB7]"
-                  }`}
-                />
-                {publicationsOpen && (
-                  <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-[#016BB7]" />
-                )}
-              </button>
-
-              {publicationsOpen && (
-                <div className="absolute right-0 top-full mt-1 w-80 sm:w-88 rounded-xl border border-[#016BB7]/25 bg-white py-2 shadow-2xl z-50 text-left overflow-hidden">
-                  <div className="px-3.5 py-1.5 border-b border-[#016BB7]/10 mb-1 flex items-center justify-between">
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-[#016BB7]">
-                      {lang === "gu" ? "સૌરાષ્ટ્ર ટ્રસ્ટના તમામ પ્રકાશનો" : "All Saurashtra Trust Publications"}
-                    </p>
-                    <span className="text-[10px] font-bold bg-[#016BB7]/10 text-[#016BB7] px-2 py-0.5 rounded-full">
-                      8 {lang === "gu" ? "પ્રકાશનો" : "Titles"}
-                    </span>
-                  </div>
-
-                  <div className="max-h-[380px] overflow-y-auto divide-y divide-slate-100">
-                    {publications.map((pub) => {
-                      const isJanmabhoomi = pub.id === "pub-janmabhoomi";
-                      const isExternal = pub.websiteUrl.startsWith("http");
-                      const href = isJanmabhoomi
-                        ? `/${lang}`
-                        : isExternal
-                        ? pub.websiteUrl
-                        : pub.slug === "panchang"
-                        ? `/${lang}/panchang`
-                        : pub.slug === "kavita"
-                        ? `/${lang}/about#kavita`
-                        : `/${lang}/epaper?publication=${pub.id}`;
-
-                      return (
-                        <a
-                          key={pub.id}
-                          href={href}
-                          target={isExternal ? "_blank" : undefined}
-                          rel={isExternal ? "noopener noreferrer" : undefined}
-                          onClick={() => setPublicationsOpen(false)}
-                          className={`flex items-center justify-between px-3.5 py-2 hover:bg-[#F0F6FA] group transition-colors ${
-                            isJanmabhoomi ? "bg-blue-50/50" : ""
-                          }`}
-                        >
-                          <div className="space-y-0.5">
-                            <div className="flex items-center gap-2">
-                              <p className="text-sm font-bold text-[#1F2937] group-hover:text-[#016BB7]">
-                                {pub.name[lang] || pub.name.gu}
-                              </p>
-                              {isJanmabhoomi && (
-                                <span className="text-[9px] font-bold bg-[#016BB7] text-white px-1.5 py-0.5 rounded">
-                                  {lang === "gu" ? "મુખ્ય અખબાર" : "Flagship"}
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-[11px] text-[#1F2937]/70 line-clamp-1">
-                              {pub.frequency[lang] || pub.frequency.gu} • {pub.region[lang] || pub.region.gu}
-                            </p>
-                          </div>
-                          {isExternal ? (
-                            <ExternalLink className="h-3.5 w-3.5 text-[#016BB7]/60 group-hover:text-[#016BB7] shrink-0" />
-                          ) : (
-                            <ArrowRight className="h-3.5 w-3.5 text-slate-300 group-hover:text-[#016BB7] group-hover:translate-x-0.5 transition-all shrink-0" />
-                          )}
-                        </a>
-                      );
-                    })}
-                  </div>
-
-                  {/* Direct link to dedicated publications directory */}
-                  <div className="p-2 border-t border-[#016BB7]/15 bg-slate-50/90 mt-1">
-                    <Link
-                      href={`/${lang}/publications`}
-                      onClick={() => setPublicationsOpen(false)}
-                      className="flex items-center justify-center gap-1.5 w-full py-2 px-3 text-xs font-bold text-[#016BB7] hover:bg-[#016BB7] hover:text-white rounded-lg transition-all shadow-2xs"
-                    >
-                      <span>{lang === "gu" ? "તમામ ૮ પ્રકાશનોનો પરિચય અને વિગતો જુઓ" : "View All 8 Publications Hub"}</span>
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </div>
+            {/* Search Trigger moved to far right of Primary Category Navigation */}
+            <button
+              type="button"
+              onClick={() => {
+                setSearchOpen(!searchOpen);
+                setMoreOpen(false);
+              }}
+              className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-bold transition-colors cursor-pointer shrink-0 ${
+                searchOpen
+                  ? "bg-[#016BB7] text-white"
+                  : "text-[#016BB7] hover:bg-[#F0F6FA]"
+              }`}
+              aria-label={dict.header.searchButton}
+              aria-expanded={searchOpen}
+            >
+              <Search className="h-3.5 w-3.5" />
+              <span>{dict.header.searchButton}</span>
+            </button>
           </nav>
         </div>
       </div>

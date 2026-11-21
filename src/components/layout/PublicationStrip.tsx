@@ -26,7 +26,7 @@ export function PublicationStrip({ lang }: PublicationStripProps) {
       aria-label={isGu ? "સૌરાષ્ટ્ર ટ્રસ્ટના પ્રકાશનો" : "Saurashtra Trust Publications Network"}
       className="w-full bg-[#F0F6FA] border-b border-[#016BB7]/15"
     >
-      <div className="container-wide py-1.5 flex items-center gap-3">
+      <div className="container-wide py-1 flex items-center gap-2.5">
         {/* Left Network Label */}
         <Link
           href={`/${lang}/publications`}

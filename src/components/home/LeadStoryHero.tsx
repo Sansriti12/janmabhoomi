@@ -11,10 +11,15 @@ import {
 import { NewsArticle, getLocalizedText } from "@/lib/data/types";
 import { Locale } from "@/lib/i18n/config";
 import { Dictionary } from "@/lib/i18n/dictionaries";
+import { AudioBulletinBar } from "@/components/home/AudioBulletinBar";
+
+const DEFAULT_HERO_PHOTO =
+  "https://images.unsplash.com/photo-1567157577867-05ccb1388e66?auto=format&fit=crop&w=1200&q=80";
 
 interface LeadStoryHeroProps {
   leadStories: NewsArticle[];
   headlineBriefs: NewsArticle[];
+  bulletinArticles?: NewsArticle[];
   lang: Locale;
   dict: Dictionary;
 }
@@ -22,10 +27,12 @@ interface LeadStoryHeroProps {
 export function LeadStoryHero({
   leadStories,
   headlineBriefs,
+  bulletinArticles,
   lang,
   dict,
 }: LeadStoryHeroProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const touchStartX = useRef<number | null>(null);
 
@@ -67,15 +74,22 @@ export function LeadStoryHero({
     startTimer();
   };
 
+  const resolvedLeadImage =
+    !currentStory.imageUrl ||
+    currentStory.imageUrl.includes("epaper-placeholder") ||
+    failedImages[currentStory.id]
+      ? DEFAULT_HERO_PHOTO
+      : currentStory.imageUrl;
+
   return (
     <section
       aria-label={dict.home.leadStoryBadge}
-      className="container-wide pt-5 pb-8"
+      className="container-wide pt-3 pb-6"
       tabIndex={0}
     >
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-        {/* COLUMN 1 (8 Cols on Desktop): PROMINENT LEAD STORY CAROUSEL */}
-        <div className="lg:col-span-8 flex flex-col justify-between rounded-xl border border-[#016BB7]/20 bg-white p-4 sm:p-6 shadow-xs relative overflow-hidden">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+        {/* COLUMN 1 (8 Cols / ~66% on Desktop): PROMINENT LEAD STORY CAROUSEL */}
+        <div className="lg:col-span-8 flex flex-col justify-between rounded-xl border border-[#016BB7]/20 bg-white p-4 sm:p-5 shadow-xs relative overflow-hidden">
           {/* Carousel Top Bar: Badges + Story indicators */}
           <div className="mb-3.5 flex items-center justify-between gap-2 border-b border-[#016BB7]/10 pb-3">
             <div className="flex items-center gap-2">
@@ -139,24 +153,27 @@ export function LeadStoryHero({
                 href={`/${lang}/article/${currentStory.slug}`}
                 className="group block"
               >
-                <div className="relative aspect-16/9 sm:aspect-16/10 w-full overflow-hidden rounded-lg bg-[#F0F6FA] shadow-2xs">
+                <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-slate-900 shadow-xs">
                   <Image
-                    src={currentStory.imageUrl}
+                    src={resolvedLeadImage}
                     alt={leadTitle}
                     fill
                     priority
                     sizes="(max-width: 1024px) 100vw, 66vw"
                     className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                    onError={() =>
+                      setFailedImages((prev) => ({ ...prev, [currentStory.id]: true }))
+                    }
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent pointer-events-none" />
+                  {currentStory.imageCaption && (
+                    <p className="absolute bottom-2.5 left-3.5 right-3.5 text-xs text-white/90 font-medium line-clamp-1 drop-shadow-xs pointer-events-none">
+                      {getLocalizedText(currentStory.imageCaption, lang)}
+                    </p>
+                  )}
                 </div>
-                {currentStory.imageCaption && (
-                  <p className="mt-1.5 text-xs text-[#1F2937]/70 italic">
-                    {getLocalizedText(currentStory.imageCaption, lang)}
-                  </p>
-                )}
 
-                <h1 className="mt-4 text-xl sm:text-2xl md:text-3xl font-extrabold text-[#1F2937] group-hover:text-[#016BB7] leading-tight transition-colors">
+                <h1 className="mt-3.5 text-xl sm:text-2xl md:text-[28px] font-extrabold text-[#1F2937] group-hover:text-[#016BB7] leading-tight transition-colors">
                   {leadTitle}
                 </h1>
               </Link>
@@ -212,13 +229,20 @@ export function LeadStoryHero({
           </div>
         </div>
 
-        {/* COLUMN 2 (4 Cols on Desktop): HEADLINES & BRIEFS PANEL */}
+        {/* COLUMN 2 (4 Cols / ~34% on Desktop): COMPACT AUDIO BULLETIN CARD + HEADLINES PANEL */}
         <aside
           aria-labelledby="headlines-panel-heading"
-          className="lg:col-span-4 rounded-xl border border-[#016BB7]/25 bg-[#F0F6FA] p-4 sm:p-5 flex flex-col justify-between shadow-xs min-h-[460px]"
+          className="lg:col-span-4 flex flex-col gap-3.5"
         >
-          <div>
-            <div className="flex items-center justify-between border-b-2 border-[#016BB7] pb-3 mb-3.5">
+          {/* Compact 2-Minute Audio Bulletin Card at Top of Right Hero Sidebar */}
+          {bulletinArticles && bulletinArticles.length > 0 && (
+            <AudioBulletinBar articles={bulletinArticles} lang={lang} />
+          )}
+
+          {/* Other Important News (Numbered Headlines 01–04) */}
+          <div className="flex-1 rounded-xl border border-[#016BB7]/25 bg-[#F0F6FA] p-4 sm:p-5 flex flex-col justify-between shadow-xs">
+            <div>
+              <div className="flex items-center justify-between border-b-2 border-[#016BB7] pb-2.5 mb-3">
               <div className="flex items-center gap-2">
                 <span className="h-5 w-1.5 bg-[#016BB7] rounded-full" />
                 <h2
@@ -288,6 +312,7 @@ export function LeadStoryHero({
               </div>
               <ArrowRight className="h-3.5 w-3.5 text-[#016BB7] group-hover:translate-x-0.5 transition-transform" />
             </Link>
+          </div>
           </div>
         </aside>
       </div>

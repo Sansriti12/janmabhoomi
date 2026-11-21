@@ -28,7 +28,7 @@ export function BreakingNewsTicker({
       aria-label={label}
       className="w-full border-b border-[#292725]/12 bg-white"
     >
-      <div className="container-wide py-2 flex items-center gap-3 overflow-hidden">
+      <div className="container-wide py-1.5 flex items-center gap-3 overflow-hidden">
         {/* Breaking News Red Label (#B83232) */}
         <div className="shrink-0 inline-flex items-center gap-2 rounded-xs bg-[#B83232] px-3 py-1 text-xs font-bold uppercase tracking-wider text-white">
           <span className="h-2 w-2 rounded-full bg-white animate-pulse" />

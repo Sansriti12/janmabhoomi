@@ -4,7 +4,6 @@ import { getDictionary } from "@/lib/i18n/dictionaries";
 import { newsDataProvider } from "@/lib/data/provider";
 import { CategorySlug, NewsArticle } from "@/lib/data/types";
 import { BreakingNewsTicker } from "@/components/home/BreakingNewsTicker";
-import { AudioBulletinBar } from "@/components/home/AudioBulletinBar";
 import { LeadStoryHero } from "@/components/home/LeadStoryHero";
 import { AdPlacement } from "@/components/home/AdPlacement";
 import { PanchangWidget } from "@/components/home/PanchangWidget";
@@ -163,7 +162,7 @@ export default async function HomePage({
   ];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* SECTION 1 – Breaking News Ticker */}
       <BreakingNewsTicker
         articles={breakingNews}
@@ -171,13 +170,11 @@ export default async function HomePage({
         label={dict.home.breakingNews}
       />
 
-      {/* SECTION 2 – Commuter 2-Minute Audio Bulletin Bar */}
-      <AudioBulletinBar articles={bulletinArticles} lang={locale} />
-
-      {/* SECTION 3 – Main Lead Story Carousel & Headlines Panel */}
+      {/* SECTION 2 – Above-the-Fold Lead Story Hero + Right Sidebar (Audio Bulletin Card + Numbered Headlines) */}
       <LeadStoryHero
         leadStories={leadStories}
         headlineBriefs={heroData.headlineBriefs}
+        bulletinArticles={bulletinArticles}
         lang={locale}
         dict={dict}
       />

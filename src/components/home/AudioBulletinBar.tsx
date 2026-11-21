@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Play, Pause, Volume2, Headphones, RotateCcw } from "lucide-react";
+import { Play, Pause, Volume2, Headphones, RotateCcw, SkipForward } from "lucide-react";
 import { NewsArticle, getLocalizedText } from "@/lib/data/types";
 import { Locale } from "@/lib/i18n/config";
 import { speakText, stopSpeaking } from "@/lib/utils/speechHelper";
@@ -21,9 +21,11 @@ function formatTime(seconds: number): string {
 }
 
 /**
- * Commuter "2-Minute Audio Bulletin" Bar
- * Slim, sticky-capable audio player directly below the Breaking News ticker
- * tailored for Mumbai and Gujarat commuters.
+ * Compact Commuter "2-Minute Audio Bulletin" Sidebar Card
+ * - Sits cleanly at the top of the right-hand hero column directly above Other Important News.
+ * - Preserves Play/Pause, live status badge, headline ticker, scrubber, 1x/1.25x speed, skip & replay.
+ * - Automatically docks a slim floating mini-player at the bottom of the viewport if actively playing
+ *   when the user scrolls past the hero section.
  */
 export function AudioBulletinBar({ articles, lang }: AudioBulletinBarProps) {
   const isGu = lang === "gu";
@@ -33,6 +35,9 @@ export function AudioBulletinBar({ articles, lang }: AudioBulletinBarProps) {
   const [speed, setSpeed] = useState<1 | 1.25>(1);
   const [elapsedSec, setElapsedSec] = useState(0);
   const [currentHeadlineIdx, setCurrentHeadlineIdx] = useState(0);
+  const [isCardOutOfView, setIsCardOutOfView] = useState(false);
+
+  const cardRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const clearTimer = useCallback(() => {
@@ -40,6 +45,21 @@ export function AudioBulletinBar({ articles, lang }: AudioBulletinBarProps) {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
+  }, []);
+
+  // Observe when the hero audio card scrolls out of view for bottom sticky mini-player
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsCardOutOfView(!entry.isIntersecting);
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
   }, []);
 
   // Cleanup speech on unmount
@@ -83,7 +103,7 @@ export function AudioBulletinBar({ articles, lang }: AudioBulletinBarProps) {
           setElapsedSec(TOTAL_DURATION_SEC);
         },
         onError: () => {
-          // Keep timer running gracefully even if browser audio is blocked
+          // Keep timer graceful if audio blocked
         },
       });
 
@@ -118,7 +138,7 @@ export function AudioBulletinBar({ articles, lang }: AudioBulletinBarProps) {
       if (elapsedSec >= TOTAL_DURATION_SEC) setElapsedSec(0);
       const startIdx = Math.min(
         Math.max(0, topFive.length - 1),
-        Math.floor((startSec / TOTAL_DURATION_SEC) * topFive.length)
+        Math.floor((startSec / TOTAL_DURATION_SEC) * Math.max(1, topFive.length))
       );
       startPlaybackFromIndex(startIdx, speed);
     }
@@ -130,6 +150,18 @@ export function AudioBulletinBar({ articles, lang }: AudioBulletinBarProps) {
     if (isPlaying) {
       stopSpeaking();
       startPlaybackFromIndex(currentHeadlineIdx, nextSpeed);
+    }
+  };
+
+  const handleSkipNext = () => {
+    if (topFive.length === 0) return;
+    const nextIdx = (currentHeadlineIdx + 1) % topFive.length;
+    const nextSec = Math.floor((nextIdx / topFive.length) * TOTAL_DURATION_SEC);
+    setElapsedSec(nextSec);
+    setCurrentHeadlineIdx(nextIdx);
+    if (isPlaying) {
+      stopSpeaking();
+      startPlaybackFromIndex(nextIdx, speed);
     }
   };
 
@@ -162,13 +194,15 @@ export function AudioBulletinBar({ articles, lang }: AudioBulletinBarProps) {
   const progressPercent = (elapsedSec / TOTAL_DURATION_SEC) * 100;
 
   return (
-    <section
-      aria-label={isGu ? "૨ મિનિટ ઓડિયો બુલેટિન" : "2-Minute Audio Bulletin"}
-      className="sticky top-[92px] sm:top-[104px] lg:top-[144px] z-30 w-full bg-[#0B3558] text-white border-b border-white/15 shadow-sm"
-    >
-      <div className="container-wide py-2 flex flex-col md:flex-row md:items-center justify-between gap-2 md:gap-4">
-        {/* Left: Play/Pause + Title + Active Headline */}
-        <div className="flex items-center gap-3 min-w-0 flex-1">
+    <>
+      {/* COMPACT HERO SIDEBAR CARD */}
+      <div
+        ref={cardRef}
+        aria-label={isGu ? "૨ મિનિટ ઓડિયો બુલેટિન" : "2-Minute Audio Bulletin"}
+        className="rounded-xl bg-gradient-to-br from-[#0B3558] via-[#0E4370] to-[#016BB7] text-white p-3.5 shadow-sm border border-[#016BB7]/30 space-y-2.5"
+      >
+        {/* Top Row: Play Button + Title + Live Badge */}
+        <div className="flex items-start gap-2.5">
           <button
             type="button"
             onClick={togglePlay}
@@ -181,7 +215,7 @@ export function AudioBulletinBar({ articles, lang }: AudioBulletinBarProps) {
                 ? "બુલેટિન સાંભળો"
                 : "Play audio bulletin"
             }
-            className="h-8 w-8 rounded-full bg-white text-[#016BB7] hover:bg-sky-100 flex items-center justify-center shrink-0 shadow-xs transition-transform active:scale-95 cursor-pointer"
+            className="h-9 w-9 rounded-full bg-white text-[#016BB7] hover:bg-sky-100 flex items-center justify-center shrink-0 shadow-xs transition-transform active:scale-95 cursor-pointer mt-0.5"
           >
             {isPlaying ? (
               <Pause className="h-4 w-4 fill-current" />
@@ -191,53 +225,47 @@ export function AudioBulletinBar({ articles, lang }: AudioBulletinBarProps) {
           </button>
 
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-extrabold tracking-wide text-sky-200 uppercase">
+            <div className="flex items-center justify-between gap-1.5">
+              <span className="inline-flex items-center gap-1 text-[11px] font-extrabold tracking-wide text-sky-200 uppercase truncate">
                 <Headphones className="h-3.5 w-3.5 shrink-0" />
-                <span>
-                  {isGu
-                    ? "મુખ્ય ૫ સમાચાર સાંભળો • ૨:૧૫"
-                    : "Listen to Top 5 Headlines • 2:15"}
-                </span>
+                <span>{isGu ? "મુખ્ય ૫ સમાચાર • ૨:૧૫" : "Top 5 Headlines • 2:15"}</span>
               </span>
               {isPlaying && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 border border-emerald-400/40 px-2 py-0.5 text-[10px] font-bold text-emerald-200">
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/25 border border-emerald-400/40 px-2 py-0.5 text-[10px] font-bold text-emerald-200 shrink-0">
                   <Volume2 className="h-2.5 w-2.5 animate-pulse" />
                   <span>{isGu ? "ચાલુ છે" : "Playing"}</span>
                 </span>
               )}
             </div>
             {activeHeadline && (
-              <p className="text-[11px] text-white/80 truncate mt-0.5">
+              <p className="text-xs text-white/90 font-medium line-clamp-1 mt-0.5" title={activeHeadline}>
                 {currentHeadlineIdx + 1}/{topFive.length}: {activeHeadline}
               </p>
             )}
           </div>
         </div>
 
-        {/* Right: Scrubber + Time + 1.25x Speed Toggle */}
-        <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 md:w-[340px] lg:w-[400px]">
-          <span className="text-[11px] font-mono text-sky-200 tabular-nums shrink-0">
+        {/* Bottom Row: Scrubber + Timestamps + Speed / Skip / Replay */}
+        <div className="flex items-center gap-2 pt-0.5">
+          <span className="text-[10px] font-mono text-sky-200 tabular-nums shrink-0">
             {formatTime(elapsedSec)}
           </span>
 
-          <div className="relative flex-1 flex items-center">
-            <input
-              type="range"
-              min={0}
-              max={TOTAL_DURATION_SEC}
-              step={1}
-              value={Math.floor(elapsedSec)}
-              onChange={handleScrub}
-              aria-label={isGu ? "ઓડિયો પ્રગતિ" : "Audio bulletin progress"}
-              className="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-sky-300"
-              style={{
-                background: `linear-gradient(to right, #38bdf8 ${progressPercent}%, rgba(255,255,255,0.22) ${progressPercent}%)`,
-              }}
-            />
-          </div>
+          <input
+            type="range"
+            min={0}
+            max={TOTAL_DURATION_SEC}
+            step={1}
+            value={Math.floor(elapsedSec)}
+            onChange={handleScrub}
+            aria-label={isGu ? "ઓડિયો પ્રગતિ" : "Audio bulletin progress"}
+            className="flex-1 h-1.5 rounded-full appearance-none cursor-pointer accent-sky-300"
+            style={{
+              background: `linear-gradient(to right, #38bdf8 ${progressPercent}%, rgba(255,255,255,0.22) ${progressPercent}%)`,
+            }}
+          />
 
-          <span className="text-[11px] font-mono text-white/70 tabular-nums shrink-0">
+          <span className="text-[10px] font-mono text-white/70 tabular-nums shrink-0">
             2:15
           </span>
 
@@ -245,7 +273,7 @@ export function AudioBulletinBar({ articles, lang }: AudioBulletinBarProps) {
             type="button"
             onClick={toggleSpeed}
             title={isGu ? "ઝડપ બદલો" : "Toggle playback speed"}
-            className={`px-2 py-0.5 rounded text-[11px] font-bold border transition-colors cursor-pointer shrink-0 ${
+            className={`px-1.5 py-0.5 rounded text-[10px] font-bold border transition-colors cursor-pointer shrink-0 ${
               speed === 1.25
                 ? "bg-sky-400 text-[#0B3558] border-sky-300"
                 : "bg-white/10 text-white border-white/25 hover:bg-white/20"
@@ -254,19 +282,75 @@ export function AudioBulletinBar({ articles, lang }: AudioBulletinBarProps) {
             {speed === 1 ? "1x" : "1.25x"}
           </button>
 
+          <button
+            type="button"
+            onClick={handleSkipNext}
+            title={isGu ? "આગામી સમાચાર" : "Next headline"}
+            aria-label={isGu ? "આગામી સમાચાર" : "Next headline"}
+            className="p-1 rounded text-white/80 hover:text-white hover:bg-white/15 transition-colors cursor-pointer shrink-0"
+          >
+            <SkipForward className="h-3.5 w-3.5" />
+          </button>
+
           {elapsedSec > 0 && (
             <button
               type="button"
               onClick={handleReset}
-              title={isGu ? "ફરીથી શરૂ કરો" : "Restart bulletin"}
-              aria-label={isGu ? "ફરીથી શરૂ કરો" : "Restart bulletin"}
-              className="p-1 rounded text-white/75 hover:text-white hover:bg-white/15 transition-colors cursor-pointer shrink-0"
+              title={isGu ? "ફરીથી શરૂ કરો" : "Replay bulletin"}
+              aria-label={isGu ? "ફરીથી શરૂ કરો" : "Replay bulletin"}
+              className="p-1 rounded text-white/80 hover:text-white hover:bg-white/15 transition-colors cursor-pointer shrink-0"
             >
               <RotateCcw className="h-3.5 w-3.5" />
             </button>
           )}
         </div>
       </div>
-    </section>
+
+      {/* DOCKED BOTTOM STICKY MINI-PLAYER (Appears only while playing & scrolled past hero) */}
+      {isPlaying && isCardOutOfView && (
+        <div
+          role="region"
+          aria-label={isGu ? "ચાલુ ઓડિયો બુલેટિન" : "Playing audio bulletin mini-player"}
+          className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[94vw] max-w-xl rounded-full bg-[#0B3558]/95 backdrop-blur-md text-white px-4 py-2 shadow-2xl border border-sky-400/30 flex items-center gap-3"
+        >
+          <button
+            type="button"
+            onClick={togglePlay}
+            aria-label={isGu ? "બુલેટિન રોકો" : "Pause audio bulletin"}
+            className="h-8 w-8 rounded-full bg-white text-[#016BB7] flex items-center justify-center shrink-0 cursor-pointer"
+          >
+            <Pause className="h-3.5 w-3.5 fill-current" />
+          </button>
+
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold text-sky-200 uppercase">
+              <Volume2 className="h-3 w-3 animate-pulse text-emerald-300" />
+              <span>{isGu ? "ઓડિયો બુલેટિન" : "Audio Bulletin"}</span>
+              <span className="text-white/60 font-mono">
+                {formatTime(elapsedSec)} / 2:15
+              </span>
+            </div>
+            <p className="text-xs text-white truncate">{activeHeadline}</p>
+          </div>
+
+          <button
+            type="button"
+            onClick={toggleSpeed}
+            className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/15 border border-white/25 cursor-pointer shrink-0"
+          >
+            {speed === 1 ? "1x" : "1.25x"}
+          </button>
+
+          <button
+            type="button"
+            onClick={handleSkipNext}
+            aria-label={isGu ? "આગામી સમાચાર" : "Next headline"}
+            className="p-1.5 rounded-full hover:bg-white/15 cursor-pointer shrink-0"
+          >
+            <SkipForward className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      )}
+    </>
   );
 }
