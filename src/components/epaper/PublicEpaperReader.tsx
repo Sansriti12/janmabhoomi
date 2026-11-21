@@ -125,61 +125,9 @@ const JANMABHOOMI_PUBLICATIONS = [
     freqGu: "વિશેષ સાપ્તાહિક પૂર્તિઓ",
     city: "Mumbai",
   },
-  {
-    id: "pub-phulchhab",
-    code: "PHL",
-    nameEn: "Phulchhab",
-    nameGu: "ફૂલછાબ",
-    freqEn: "Daily Morning",
-    freqGu: "દૈનિક પ્રભાત",
-    city: "Rajkot",
-  },
-  {
-    id: "pub-kutchmitra",
-    code: "KTM",
-    nameEn: "Kutchmitra",
-    nameGu: "કચ્છમિત્ર",
-    freqEn: "Daily Morning",
-    freqGu: "દૈનિક પ્રભાત",
-    city: "Bhuj",
-  },
-  {
-    id: "pub-vyapar-gu",
-    code: "VYG",
-    nameEn: "Vyapar (Gujarati)",
-    nameGu: "વ્યાપાર (ગુજરાતી)",
-    freqEn: "Bi-Weekly Financial",
-    freqGu: "દ્વિ-સાપ્તાહિક આર્થિક",
-    city: "Mumbai",
-  },
-  {
-    id: "pub-vyapar-hi",
-    code: "VYH",
-    nameEn: "Vyapar (Hindi)",
-    nameGu: "વ્યાપાર (હિન્દી)",
-    freqEn: "Weekly Financial",
-    freqGu: "સાપ્તાહિક આર્થિક",
-    city: "Mumbai",
-  },
-  {
-    id: "pub-panchang",
-    code: "PAN",
-    nameEn: "Janmabhoomi Panchang",
-    nameGu: "જન્મભૂમિ પંચાંગ",
-    freqEn: "Annual Almanac",
-    freqGu: "વાર્ષિક પંચાંગ",
-    city: "Mumbai",
-  },
-  {
-    id: "pub-kavita",
-    code: "KAV",
-    nameEn: "Kavita",
-    nameGu: "કવિતા",
-    freqEn: "Quarterly Magazine",
-    freqGu: "ત્રિમાસિક સામાયિક",
-    city: "Mumbai",
-  },
 ];
+
+const ALLOWED_EPAPER_PUB_IDS = new Set(JANMABHOOMI_PUBLICATIONS.map((p) => p.id));
 
 function generateDefaultEditions(): EditionSummaryItem[] {
   const today = new Date().toISOString().split("T")[0];
@@ -190,7 +138,7 @@ function generateDefaultEditions(): EditionSummaryItem[] {
     editionCity: pub.city,
     editionNameEn: `${pub.nameEn} Digital Edition`,
     editionNameGu: `${pub.nameGu} ડિજિટલ આવૃત્તિ`,
-    totalPageCount: pub.id === "pub-purti" ? 8 : pub.id === "pub-panchang" ? 4 : 12,
+    totalPageCount: pub.id === "pub-purti" ? 8 : 12,
     status: "PUBLISHED",
     coverImageUrl: "/assets/images/epaper-placeholder.jpg",
   }));
@@ -510,20 +458,25 @@ export function PublicEpaperReader({
       const res = await fetch(url, { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
-        if (data.success && Array.isArray(data.editions) && data.editions.length > 0) {
-          // If viewing "all", ensure every publication in the network is represented
-          if (pubId === "all") {
-            const defaults = generateDefaultEditions();
-            const existingPubIds = new Set(data.editions.map((e: any) => e.publicationId));
-            const merged = [
-              ...data.editions,
-              ...defaults.filter((d) => !existingPubIds.has(d.publicationId)),
-            ];
-            setEditionsList(merged);
+        if (data.success && Array.isArray(data.editions)) {
+          const allowedEditions = data.editions.filter((e: EditionSummaryItem) =>
+            ALLOWED_EPAPER_PUB_IDS.has(e.publicationId)
+          );
+          if (allowedEditions.length > 0) {
+            // If viewing "all", ensure all 3 Janmabhoomi editions are represented
+            if (pubId === "all") {
+              const defaults = generateDefaultEditions();
+              const existingPubIds = new Set(allowedEditions.map((e: EditionSummaryItem) => e.publicationId));
+              const merged = [
+                ...allowedEditions,
+                ...defaults.filter((d) => !existingPubIds.has(d.publicationId)),
+              ];
+              setEditionsList(merged);
+              return;
+            }
+            setEditionsList(allowedEditions);
             return;
           }
-          setEditionsList(data.editions);
-          return;
         }
       }
       // Provide default active editions for the chosen publication
@@ -561,8 +514,7 @@ export function PublicEpaperReader({
       const matchingPub =
         JANMABHOOMI_PUBLICATIONS.find((p) => editionId.includes(p.id)) ||
         JANMABHOOMI_PUBLICATIONS[0];
-      const pageCount =
-        matchingPub.id === "pub-purti" ? 8 : matchingPub.id === "pub-panchang" ? 4 : 12;
+      const pageCount = matchingPub.id === "pub-purti" ? 8 : 12;
 
       const pages: PublicPageItem[] = Array.from({ length: pageCount }, (_, i) => ({
         id: `page-${matchingPub.id}-${i + 1}`,
@@ -896,7 +848,7 @@ export function PublicEpaperReader({
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 3xl:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredEditions.map((ed) => {
               const pub =
                 JANMABHOOMI_PUBLICATIONS.find((p) => p.id === ed.publicationId) ||

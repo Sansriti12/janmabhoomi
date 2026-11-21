@@ -176,8 +176,11 @@ export const epaperRoutes: FastifyPluginAsync = async (app) => {
         status: { in: ["PUBLISHED", "READY"] },
       };
 
+      const allowedPubIds = ["pub-janmabhoomi", "pub-pravasi", "pub-purti"];
       if (pubId && pubId !== "all") {
-        whereClause.publicationId = pubId;
+        whereClause.publicationId = allowedPubIds.includes(pubId) ? pubId : { in: [] };
+      } else {
+        whereClause.publicationId = { in: allowedPubIds };
       }
       if (date && !isNaN(date.getTime())) whereClause.editionDate = date;
       if (city) whereClause.editionCity = city;
