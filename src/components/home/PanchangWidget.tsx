@@ -202,21 +202,67 @@ export function PanchangWidget({
 }: PanchangWidgetProps) {
   const isGu = lang === "gu";
   const [selectedCity, setSelectedCity] = useState<CityKey>("mumbai");
+  const [citySchedules, setCitySchedules] = useState<Record<CityKey, CitySchedule>>(
+    CITY_PANCHANG_SCHEDULES
+  );
   const [activeChoghadiyaTab, setActiveChoghadiyaTab] = useState<"day" | "night">("day");
   const [liveStatus, setLiveStatus] = useState<LiveStatusInfo>(() =>
     computeLiveIstStatus(CITY_PANCHANG_SCHEDULES.mumbai)
   );
 
-  const cityData = CITY_PANCHANG_SCHEDULES[selectedCity];
+  // Sync with any updates saved in /admin/panchang
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("janmabhoomi_city_panchang_v1");
+      if (raw) {
+        const saved = JSON.parse(raw);
+        if (saved && typeof saved === "object") {
+          setCitySchedules((prev) => {
+            const next = { ...prev };
+            for (const key of CITY_ORDER) {
+              const s = saved[key];
+              if (s) {
+                next[key] = {
+                  ...prev[key],
+                  sunrise: s.sunrise || prev[key].sunrise,
+                  sunset: s.sunset || prev[key].sunset,
+                  rahuKaal: s.rahuKaal || prev[key].rahuKaal,
+                  tithi: {
+                    en: s.tithiEn || prev[key].tithi.en,
+                    gu: s.tithiGu || prev[key].tithi.gu,
+                  },
+                  nakshatra: {
+                    en: s.nakshatraEn || prev[key].nakshatra.en,
+                    gu: s.nakshatraGu || prev[key].nakshatra.gu,
+                  },
+                  yogaKarana: {
+                    en: s.yogaEn || prev[key].yogaKarana.en,
+                    gu: s.yogaGu || prev[key].yogaKarana.gu,
+                  },
+                  vikramSamvat: {
+                    en: s.vikramSamvatEn || prev[key].vikramSamvat.en,
+                    gu: s.vikramSamvatGu || prev[key].vikramSamvat.gu,
+                  },
+                };
+              }
+            }
+            return next;
+          });
+        }
+      }
+    } catch {}
+  }, []);
+
+  const cityData = citySchedules[selectedCity];
   const baseData = panchang || initialPanchang;
 
   useEffect(() => {
-    setLiveStatus(computeLiveIstStatus(CITY_PANCHANG_SCHEDULES[selectedCity]));
+    setLiveStatus(computeLiveIstStatus(citySchedules[selectedCity]));
     const interval = setInterval(() => {
-      setLiveStatus(computeLiveIstStatus(CITY_PANCHANG_SCHEDULES[selectedCity]));
+      setLiveStatus(computeLiveIstStatus(citySchedules[selectedCity]));
     }, 60_000);
     return () => clearInterval(interval);
-  }, [selectedCity]);
+  }, [selectedCity, citySchedules]);
 
   const indicatorClasses =
     liveStatus.tone === "good"

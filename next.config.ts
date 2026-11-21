@@ -22,14 +22,20 @@ const nextConfig: NextConfig = {
     ],
   },
   async rewrites() {
-    const backendUrl =
-      process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:4000";
-    return [
-      {
-        source: "/api/v1/:path*",
-        destination: `${backendUrl}/api/v1/:path*`,
-      },
-    ];
+    const useApi = process.env.NEXT_PUBLIC_USE_API !== "false";
+    const backendUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+    if (!useApi || !backendUrl || (siteUrl && backendUrl === siteUrl)) {
+      return [];
+    }
+    return {
+      fallback: [
+        {
+          source: "/api/v1/:path*",
+          destination: `${backendUrl}/api/v1/:path*`,
+        },
+      ],
+    };
   },
 };
 

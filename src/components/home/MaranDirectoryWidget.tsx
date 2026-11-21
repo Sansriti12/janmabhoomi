@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { Search, MapPin, Calendar, ArrowRight, RotateCcw, BookMarked } from "lucide-react";
 import { Locale } from "@/lib/i18n/config";
@@ -128,14 +128,27 @@ interface MaranDirectoryWidgetProps {
  */
 export function MaranDirectoryWidget({ lang }: MaranDirectoryWidgetProps) {
   const isGu = lang === "gu";
+  const [notices, setNotices] = useState<MaranNotice[]>(MARAN_DIRECTORY_NOTICES);
   const [surnameQuery, setSurnameQuery] = useState("");
   const [gaamQuery, setGaamQuery] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
 
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("janmabhoomi_maran_notices_v1");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setNotices(parsed);
+        }
+      }
+    } catch {}
+  }, []);
+
   const hasFilters = Boolean(surnameQuery.trim() || gaamQuery.trim() || selectedDate);
 
   const filteredNotices = useMemo(() => {
-    return MARAN_DIRECTORY_NOTICES.filter((notice) => {
+    return notices.filter((notice) => {
       if (surnameQuery.trim()) {
         const q = surnameQuery.trim().toLowerCase();
         const matchSurname =
@@ -162,7 +175,7 @@ export function MaranDirectoryWidget({ lang }: MaranDirectoryWidgetProps) {
 
       return true;
     });
-  }, [surnameQuery, gaamQuery, selectedDate]);
+  }, [notices, surnameQuery, gaamQuery, selectedDate]);
 
   const clearFilters = () => {
     setSurnameQuery("");

@@ -24,6 +24,8 @@ import {
   Tags,
   Layers,
   Calendar,
+  Compass,
+  BookMarked,
   Flame,
   UserCheck,
 } from "lucide-react";
@@ -105,6 +107,18 @@ export function AdminSidebar({
           name: isGu ? "અગ્રલેખો" : "Editorials",
           href: "/editorials",
           icon: BookOpen,
+          adminOnly: false,
+        },
+        {
+          name: isGu ? "દૈનિક પંચાંગ (૪ શહેરો)" : "Daily Panchang",
+          href: "/panchang",
+          icon: Compass,
+          adminOnly: false,
+        },
+        {
+          name: isGu ? "મરણ નોંધ / બેસણું" : "Maran / Obituaries",
+          href: "/maran",
+          icon: BookMarked,
           adminOnly: false,
         },
       ],

@@ -395,6 +395,12 @@ export function PublicEpaperReader({
 
   // Helper to append subscriber/guest auth token to protected page image requests
   const getPageImageUrl = (pageId: string) => {
+    if (pageId.startsWith("page-pub-")) {
+      const match = pageId.match(/^page-(pub-[a-z-]+)-(\d+)$/);
+      const pub = match?.[1] || editionDetail?.publicationId || "pub-janmabhoomi";
+      const page = match?.[2] || "1";
+      return `/api/v1/epaper/preview-sheet?pub=${encodeURIComponent(pub)}&page=${page}`;
+    }
     const activeToken =
       token ||
       (typeof window !== "undefined"
@@ -407,6 +413,9 @@ export function PublicEpaperReader({
   };
 
   const getPageThumbUrl = (pageId: string) => {
+    if (pageId.startsWith("page-pub-")) {
+      return getPageImageUrl(pageId);
+    }
     const activeToken =
       token ||
       (typeof window !== "undefined"
@@ -871,12 +880,16 @@ export function PublicEpaperReader({
                   <div>
                     <div className="relative aspect-square w-full bg-slate-100 rounded-xl overflow-hidden border border-slate-200 shadow-inner mb-4 flex items-center justify-center p-2 group-hover:scale-[1.01] transition-transform">
                       <img
-                        src={`/api/v1/epaper/editions/${ed.id}/cover`}
+                        src={
+                          ed.id.startsWith("edition-pub-")
+                            ? `/api/v1/epaper/preview-sheet?pub=${encodeURIComponent(ed.publicationId)}&page=1`
+                            : `/api/v1/epaper/editions/${ed.id}/cover`
+                        }
                         alt={ed.editionNameGu || pub.nameGu}
                         className="w-full h-full object-contain"
                         onError={(e) => {
                           (e.currentTarget as HTMLImageElement).src =
-                            "/assets/images/epaper-placeholder.jpg";
+                            `/api/v1/epaper/preview-sheet?pub=${encodeURIComponent(ed.publicationId)}&page=1`;
                         }}
                       />
 

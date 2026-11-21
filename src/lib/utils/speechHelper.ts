@@ -184,6 +184,9 @@ function playAudioChunks(
 
     const audioUrl = `/api/v1/tts?text=${encodeURIComponent(chunk)}&lang=${targetLang}`;
     const audio = new Audio(audioUrl);
+    if (options.rate) {
+      audio.playbackRate = options.rate;
+    }
     activeAudio = audio;
 
     // Preload the next chunk while this one is playing

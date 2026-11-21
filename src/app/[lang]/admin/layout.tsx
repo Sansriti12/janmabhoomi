@@ -76,7 +76,7 @@ function AdminLayoutInner({
           onPublicationChange={setSelectedPublication}
         />
 
-        <main className="flex-1 p-4 md:p-6 lg:p-7 max-w-7xl w-full mx-auto">
+        <main className="flex-1 p-4 md:p-6 lg:p-7 max-w-7xl 2xl:max-w-[1680px] 3xl:max-w-[1920px] w-full mx-auto">
           {children}
         </main>
 
