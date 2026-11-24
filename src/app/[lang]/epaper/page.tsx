@@ -9,7 +9,6 @@ import {
   Layers,
   Lock,
   ArrowRight,
-  Sparkles,
 } from "lucide-react";
 import { isValidLocale, Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
@@ -158,7 +157,7 @@ export default async function EpaperLandingPage({
       <section id="subscription-plans" aria-labelledby="plans-heading" className="pt-4">
         <div className="mb-6 border-b border-slate-200 pb-3">
           <div className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-[#016BB7]" />
+            <Newspaper className="h-5 w-5 text-[#016BB7]" />
             <h2
               id="plans-heading"
               className="text-xl sm:text-2xl font-extrabold text-slate-900 font-gujarati"

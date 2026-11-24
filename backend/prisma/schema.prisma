@@ -377,6 +377,11 @@ model EPaperHotspot {
   widthPercent    Decimal     @map("width_percent") @db.Decimal(5, 2)
   heightPercent   Decimal     @map("height_percent") @db.Decimal(5, 2)
   headlineText    String?     @map("headline_text") @db.VarChar(300)
+  subHeadlineText String?     @map("sub_headline_text") @db.VarChar(500)
+  bodyText        String?     @map("body_text") @db.Text
+  headlineEn      String?     @map("headline_en") @db.VarChar(300)
+  subHeadlineEn   String?     @map("sub_headline_en") @db.VarChar(500)
+  bodyTextEn      String?     @map("body_text_en") @db.Text
   externalUrl     String?     @map("external_url") @db.VarChar(1000)
   targetType      String      @default("article") @map("target_type") @db.VarChar(20)
   createdAt       DateTime    @default(now()) @map("created_at")

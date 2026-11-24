@@ -28,6 +28,7 @@ import {
   BookMarked,
   Flame,
   UserCheck,
+  Megaphone,
 } from "lucide-react";
 
 interface AdminSidebarProps {
@@ -110,7 +111,7 @@ export function AdminSidebar({
           adminOnly: false,
         },
         {
-          name: isGu ? "દૈનિક પંચાંગ (૪ શહેરો)" : "Daily Panchang",
+          name: isGu ? "દૈનિક પંચાંગ (૫ શહેરો)" : "Daily Panchang (5 Cities)",
           href: "/panchang",
           icon: Compass,
           adminOnly: false,
@@ -136,6 +137,12 @@ export function AdminSidebar({
           name: isGu ? "પંચાંગ સબ્સ્ક્રિપ્શન" : "Panchang Subscriptions",
           href: "/panchang-subscriptions",
           icon: Calendar,
+          adminOnly: false,
+        },
+        {
+          name: isGu ? "જાહેરાત અને લીડ્સ" : "Ad Campaigns & Leads",
+          href: "/ads",
+          icon: Megaphone,
           adminOnly: false,
         },
         {

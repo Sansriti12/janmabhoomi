@@ -5,6 +5,7 @@ import { Play, Pause, Volume2, Headphones, RotateCcw, SkipForward } from "lucide
 import { NewsArticle, getLocalizedText } from "@/lib/data/types";
 import { Locale } from "@/lib/i18n/config";
 import { speakText, stopSpeaking } from "@/lib/utils/speechHelper";
+import { SponsorStrip } from "@/components/ads/SponsorStrip";
 
 interface AudioBulletinBarProps {
   articles: NewsArticle[];
@@ -303,6 +304,11 @@ export function AudioBulletinBar({ articles, lang }: AudioBulletinBarProps) {
               <RotateCcw className="h-3.5 w-3.5" />
             </button>
           )}
+        </div>
+
+        {/* Audio Bulletin 'Presented By' Sponsor Strip */}
+        <div className="pt-1 border-t border-white/15">
+          <SponsorStrip slotKey="audio_sponsor" lang={lang} theme="dark" compact />
         </div>
       </div>
 

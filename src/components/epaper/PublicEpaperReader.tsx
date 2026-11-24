@@ -24,17 +24,21 @@ import {
   Moon,
   Coffee,
   ZoomIn,
+  ZoomOut,
   RotateCcw,
-  Sparkles,
   Columns,
   Square,
   Play,
   Square as StopIcon,
   MapPin,
   Trash2,
+  Scissors,
+  PanelLeft,
+  List,
 } from "lucide-react";
 import { useSubscriberAuth } from "@/lib/context/SubscriberAuthContext";
 import { speakText, stopSpeaking as haltSpeaking } from "@/lib/utils/speechHelper";
+import { SponsorStrip } from "@/components/ads/SponsorStrip";
 
 export interface PublicHotspot {
   id: string;
@@ -43,8 +47,14 @@ export interface PublicHotspot {
   widthPercent: number | string;
   heightPercent: number | string;
   headlineText?: string;
+  subHeadlineText?: string;
+  bodyText?: string;
+  headlineEn?: string;
+  subHeadlineEn?: string;
+  bodyTextEn?: string;
   summaryText?: string;
   articleParagraphs?: string[];
+  articleParagraphsEn?: string[];
   targetType: "article" | "external" | "zoom";
   externalUrl?: string;
   articleId?: string;
@@ -58,6 +68,7 @@ export interface SavedClipItem {
   articleSlug?: string;
   pageNumber: number;
   savedAt: string;
+  croppedImageDataUrl?: string;
 }
 
 export interface PublicPageItem {
@@ -125,6 +136,15 @@ const JANMABHOOMI_PUBLICATIONS = [
     freqGu: "વિશેષ સાપ્તાહિક પૂર્તિઓ",
     city: "Mumbai",
   },
+  {
+    id: "pub-madhuvan",
+    code: "MDH",
+    nameEn: "Madhuvan",
+    nameGu: "મધુવન",
+    freqEn: "Sunday Magazine Supplement",
+    freqGu: "રવિવારીય મધુવન પૂર્તિ",
+    city: "Mumbai",
+  },
 ];
 
 const ALLOWED_EPAPER_PUB_IDS = new Set(JANMABHOOMI_PUBLICATIONS.map((p) => p.id));
@@ -161,7 +181,7 @@ function generateDefaultEditions(): EditionSummaryItem[] {
       editionNameGu: isJanmabhoomiPdf
         ? "જન્મભૂમિ મુંબઈ — ૧૬ નવેમ્બર ૨૦૨૬"
         : `${pub.nameGu} ડિજિટલ આવૃત્તિ`,
-      totalPageCount: pub.id === "pub-purti" ? 8 : 12,
+      totalPageCount: pub.id === "pub-purti" || pub.id === "pub-madhuvan" ? 8 : 12,
       status: "PUBLISHED",
       coverImageUrl: isJanmabhoomiPdf
         ? "/assets/epaper/jb-2026-11-16/page-1.jpg"
@@ -296,6 +316,42 @@ const DEFAULT_PAGE_HOTSPOTS: Record<number, PublicHotspot[]> = {
       articleSlug: "preserving-mother-tongue-in-digital-education-era",
     },
   ],
+  5: [
+    {
+      id: "demo-p5-h1",
+      xPercent: 4,
+      yPercent: 10,
+      widthPercent: 92,
+      heightPercent: 44,
+      headlineText: "દેશ-વિદેશ: કારકિર્દી માર્ગદર્શન, આંતરરાષ્ટ્રીય સુરક્ષા અને ગુજરાતમાં ઊર્જા-સીએનજી સમાચાર",
+      summaryText:
+        "વિદ્યાર્થીઓ માટે નવી કારકિર્દી તકો, વૈશ્વિક રાજકીય ઘટનાક્રમ અને ગુજરાતમાં ઊર્જા તેમજ સીએનજી દર અંગેના અહેવાલો.",
+      articleParagraphs: [
+        "આજના દેશ-વિદેશ પાના પર યુવાનો માટે કારકિર્દી માર્ગદર્શન અને નવા શૈક્ષણિક અભ્યાસક્રમો અંગે મહત્વપૂર્ણ માહિતી આપવામાં આવી છે.",
+        "ગુજરાતમાં ઊર્જા અને સીએનજી પુરવઠા તેમજ આંતરરાષ્ટ્રીય સ્તરે બનતા મુખ્ય ઘટનાક્રમનો વિસ્તૃત અહેવાલ પ્રકાશિત થયો છે.",
+      ],
+      targetType: "article",
+      articleSlug: "national-renewable-grid-storage-tender-announced",
+    },
+  ],
+  6: [
+    {
+      id: "demo-p6-h1",
+      xPercent: 4,
+      yPercent: 10,
+      widthPercent: 92,
+      heightPercent: 44,
+      headlineText: "ફૂલછાબ-કચ્છમિત્ર સમાચાર: જલારામ જયંતી ઉજવણી અને કચ્છ ટુરિઝમ કોરિડોર વિકાસ",
+      summaryText:
+        "સૌરાષ્ટ્ર અને કચ્છમાં પૂજ્ય જલારામ બાપાની જયંતીની ભક્તિમય ઉજવણી, કચ્છ પ્રવાસન કોરિડોર અને મગફળી ખરીદીના અહેવાલો.",
+      articleParagraphs: [
+        "સૌરાષ્ટ્ર અને કચ્છના વિવિધ શહેરોમાં પૂજ્ય જલારામ બાપાની જયંતીની ધામધૂમથી ઉજવણી કરવામાં આવી હતી.",
+        "કચ્છ ટુરિઝમ કોરિડોરના વિસ્તરણ અને સૌરાષ્ટ્રના માર્કેટિંગ યાર્ડોમાં મગફળીની રેકોર્ડ આવકથી ખેડૂતો અને વેપારીઓમાં ઉત્સાહ છે.",
+      ],
+      targetType: "article",
+      articleSlug: "saurashtra-groundnut-procurement-centres-record-arrivals",
+    },
+  ],
   7: [
     {
       id: "demo-p7-h1",
@@ -362,6 +418,42 @@ const DEFAULT_PAGE_HOTSPOTS: Record<number, PublicHotspot[]> = {
       ],
       targetType: "article",
       articleSlug: "gujarati-natak-centenary-archival-exhibition-mumbai",
+    },
+  ],
+  9: [
+    {
+      id: "demo-p9-h1",
+      xPercent: 4,
+      yPercent: 10,
+      widthPercent: 92,
+      heightPercent: 44,
+      headlineText: "વ્યાપાર-બજાર: બજેટ ૨૦૨૭માં મ્યુચ્યુઅલ ફંડ LTCG અને સિનિયર લિવિંગ ક્ષેત્રે રોકાણની તકો",
+      summaryText:
+        "મ્યુચ્યુઅલ ફંડ રોકાણકારો માટે કરવેરાના નિયમો, રિયલ એસ્ટેટ અને સિનિયર લિવિંગ પ્રોજેક્ટ્સ અંગે વિશેષ વિશ્લેષણ.",
+      articleParagraphs: [
+        "આગામી બજેટમાં મ્યુચ્યુઅલ ફંડના લોંગ ટર્મ કેપિટલ ગેઇન (LTCG) ટેક્સ અંગે રોકાણકારોની અપેક્ષાઓ અને નાણાકીય આયોજન અંગે નિષ્ણાતોના મંતવ્યો રજૂ કરાયા છે.",
+        "ભારતમાં સિનિયર લિવિંગ અને ગિફ્ટ સિટી ફિનટેક ક્ષેત્રે વધી રહેલા રોકાણના અવસરોનો વિશેષ અહેવાલ પ્રકાશિત થયો છે.",
+      ],
+      targetType: "article",
+      articleSlug: "gift-city-fintech-regulatory-sandbox-cohort",
+    },
+  ],
+  10: [
+    {
+      id: "demo-p10-h1",
+      xPercent: 4,
+      yPercent: 10,
+      widthPercent: 92,
+      heightPercent: 44,
+      headlineText: "વ્યાપાર-અર્થતંત્ર: એગ્રી બાયોટેક, નિકાસ વૃદ્ધિ અને NRI TDS નિયમો અંગે માર્ગદર્શન",
+      summaryText:
+        "કૃષિ બાયોટેકનોલોજી ક્ષેત્રે નવીનતા, સહકારી બેંકિંગ સુધારા અને એનઆરઆઈ રોકાણકારો માટે ટીડીએસ માર્ગદર્શિકા.",
+      articleParagraphs: [
+        "દેશમાં એગ્રી બાયોટેક અને આધુનિક ખેતી આધારિત ઉદ્યોગોમાં નિકાસની મોટી સંભાવનાઓ ઉભી થઈ છે.",
+        "એનઆરઆઈ રોકાણકારો માટે ટીડીએસ (TDS) અને મિલકત વેચાણ સંબંધિત કરવેરા નિયમોની સરળ સમજૂતી આજના વ્યાપાર પાના પર આપવામાં આવી છે.",
+      ],
+      targetType: "article",
+      articleSlug: "rbi-msme-export-credit-settlement-framework",
     },
   ],
   11: [
@@ -451,6 +543,7 @@ export function PublicEpaperReader({
 
   // Catalog / Edition state
   const [selectedPubId, setSelectedPubId] = useState<string>(initialPublicationId);
+  const [selectedDateFilter, setSelectedDateFilter] = useState<string>("");
   const [editionsList, setEditionsList] = useState<EditionSummaryItem[]>([]);
   const [selectedEditionId, setSelectedEditionId] = useState<string | null>(null);
   const [editionDetail, setEditionDetail] = useState<PublicEditionDetail | null>(null);
@@ -458,18 +551,42 @@ export function PublicEpaperReader({
   // Reader state
   const [activePageNum, setActivePageNum] = useState<number>(1);
   const [zoomScale, setZoomScale] = useState<number>(1);
+  const [fitMode, setFitMode] = useState<"fit-page" | "fit-width">("fit-page");
+  const [showThumbRail, setShowThumbRail] = useState<boolean>(true);
   const [isSpreadView, setIsSpreadView] = useState<boolean>(false);
   const [filmstripOpen, setFilmstripOpen] = useState<boolean>(false);
   const [savedClipsDrawerOpen, setSavedClipsDrawerOpen] = useState<boolean>(false);
+  const [pageArticlesDrawerOpen, setPageArticlesDrawerOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isImageLoading, setIsImageLoading] = useState<boolean>(true);
   const [imageError, setImageError] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
 
+  // Drag-to-pan & Interactive Clip-to-Read (No Share) state
+  const canvasScrollRef = useRef<HTMLDivElement>(null);
+  const primaryImgRef = useRef<HTMLImageElement | null>(null);
+  const [isPanning, setIsPanning] = useState<boolean>(false);
+  const panStartRef = useRef<{ x: number; y: number; scrollLeft: number; scrollTop: number } | null>(null);
+
+  const [isClipMode, setIsClipMode] = useState<boolean>(false);
+  const [clipDraft, setClipDraft] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
+  const clipStartRef = useRef<{ x: number; y: number } | null>(null);
+  const [croppedClipPreview, setCroppedClipPreview] = useState<{
+    imageDataUrl: string;
+    pageNumber: number;
+    label: string;
+  } | null>(null);
+
   // Article reading modal state
   const [selectedHotspot, setSelectedHotspot] = useState<PublicHotspot | null>(null);
+  const [modalLang, setModalLang] = useState<"gu" | "en">(isGu ? "gu" : "en");
+  const [autoEnCache, setAutoEnCache] = useState<
+    Record<string, { headlineEn: string; subHeadlineEn: string; bodyTextEn: string }>
+  >({});
+  const [isTranslatingModal, setIsTranslatingModal] = useState<boolean>(false);
   const [readingTheme, setReadingTheme] = useState<"white" | "sepia" | "dark">("white");
   const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
+  const [ttsSpeed, setTtsSpeed] = useState<0.9 | 1 | 1.25>(1);
   const [savedClips, setSavedClips] = useState<SavedClipItem[]>([]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -611,7 +728,7 @@ export function PublicEpaperReader({
         JANMABHOOMI_PUBLICATIONS.find((p) => editionId.includes(p.id)) ||
         JANMABHOOMI_PUBLICATIONS[0];
       const isJanmabhoomiPdf = matchingPub.id === "pub-janmabhoomi";
-      const pageCount = matchingPub.id === "pub-purti" ? 8 : 12;
+      const pageCount = matchingPub.id === "pub-purti" || matchingPub.id === "pub-madhuvan" ? 8 : 12;
 
       const pages: PublicPageItem[] = Array.from({ length: pageCount }, (_, i) => ({
         id: `page-${matchingPub.id}-${i + 1}`,
@@ -778,14 +895,18 @@ export function PublicEpaperReader({
     setIsSpeaking(false);
   };
 
-  const handleToggleSpeak = (textToRead: string) => {
-    if (isSpeaking) {
+  const handleToggleSpeak = (textToRead: string, customRate?: 0.9 | 1 | 1.25) => {
+    if (isSpeaking && !customRate) {
       stopSpeaking();
       return;
     }
 
+    haltSpeaking();
+    const hasGujaratiScript = /[\u0A80-\u0AFF]/.test(textToRead);
+
     const started = speakText(textToRead, {
-      lang: isGu ? "gu" : "en",
+      lang: hasGujaratiScript ? "gu" : isGu ? "gu" : "en",
+      rate: customRate || ttsSpeed,
       onStart: () => setIsSpeaking(true),
       onEnd: () => setIsSpeaking(false),
       onError: () => {
@@ -799,11 +920,282 @@ export function PublicEpaperReader({
     }
   };
 
+  // Zoom helpers (Smooth steps 100% -> 125% -> 150% -> 200% -> 250%)
+  const ZOOM_STEPS = [1, 1.25, 1.5, 2, 2.5];
+  const handleZoomIn = () => {
+    setZoomScale((z) => ZOOM_STEPS.find((s) => s > z + 0.01) ?? 2.5);
+  };
+  const handleZoomOut = () => {
+    setZoomScale((z) => [...ZOOM_STEPS].reverse().find((s) => s < z - 0.01) ?? 1);
+  };
+
+  // Drag-to-pan handlers when zoomed in
+  const handleCanvasMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (isClipMode || zoomScale <= 1 || !canvasScrollRef.current) return;
+    setIsPanning(true);
+    panStartRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+      scrollLeft: canvasScrollRef.current.scrollLeft,
+      scrollTop: canvasScrollRef.current.scrollTop,
+    };
+  };
+
+  const handleCanvasMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isPanning || !panStartRef.current || !canvasScrollRef.current) return;
+    e.preventDefault();
+    const dx = e.clientX - panStartRef.current.x;
+    const dy = e.clientY - panStartRef.current.y;
+    canvasScrollRef.current.scrollLeft = panStartRef.current.scrollLeft - dx;
+    canvasScrollRef.current.scrollTop = panStartRef.current.scrollTop - dy;
+  };
+
+  const handleCanvasMouseUp = () => {
+    setIsPanning(false);
+    panStartRef.current = null;
+  };
+
+  const handleCanvasWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    if (!e.ctrlKey && !e.metaKey) return;
+    e.preventDefault();
+    if (e.deltaY < 0) handleZoomIn();
+    else handleZoomOut();
+  };
+
+  // Interactive Clip-to-Read (Pointer-captured so dragging past edge never breaks; CORS-safe fallback; NO share button)
+  const handleSheetClipStart = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isClipMode) return;
+    e.stopPropagation();
+    e.preventDefault();
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {}
+    const rect = e.currentTarget.getBoundingClientRect();
+    const xPct = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+    const yPct = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100));
+    clipStartRef.current = { x: xPct, y: yPct };
+    setClipDraft({ x: xPct, y: yPct, w: 0, h: 0 });
+  };
+
+  const handleSheetClipMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isClipMode || !clipStartRef.current) return;
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    const curX = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+    const curY = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100));
+    const x = Math.min(clipStartRef.current.x, curX);
+    const y = Math.min(clipStartRef.current.y, curY);
+    const w = Math.abs(curX - clipStartRef.current.x);
+    const h = Math.abs(curY - clipStartRef.current.y);
+    setClipDraft({ x, y, w, h });
+  };
+
+  const handleSheetClipEnd = async (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isClipMode || !clipDraft || !clipStartRef.current) return;
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {}
+    const finalDraft = { ...clipDraft };
+    clipStartRef.current = null;
+    setClipDraft(null);
+
+    if (finalDraft.w < 2 || finalDraft.h < 2) {
+      triggerToast(
+        isGu
+          ? "ક્લિપ કરવા માટે લેખ પર માઉસ ખેંચીને બોક્સ બનાવો"
+          : "Drag a larger box over the article to clip it"
+      );
+      return;
+    }
+
+    const img = primaryImgRef.current;
+    if (!img || img.naturalWidth === 0 || img.naturalHeight === 0) {
+      triggerToast(isGu ? "પાનું હજુ લોડ થઈ રહ્યું છે" : "Page image is still loading");
+      setIsClipMode(false);
+      return;
+    }
+
+    const sx = Math.round((finalDraft.x / 100) * img.naturalWidth);
+    const sy = Math.round((finalDraft.y / 100) * img.naturalHeight);
+    const sw = Math.max(24, Math.round((finalDraft.w / 100) * img.naturalWidth));
+    const sh = Math.max(24, Math.round((finalDraft.h / 100) * img.naturalHeight));
+
+    // Scale output cleanly to max 960px wide so preview is crisp & localStorage-friendly
+    const maxOutW = 960;
+    const scale = sw > maxOutW ? maxOutW / sw : 1;
+    const outW = Math.max(24, Math.round(sw * scale));
+    const outH = Math.max(24, Math.round(sh * scale));
+
+    let dataUrl: string | null = null;
+    try {
+      const canvas = document.createElement("canvas");
+      canvas.width = outW;
+      canvas.height = outH;
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.drawImage(img, sx, sy, sw, sh, 0, 0, outW, outH);
+        dataUrl = canvas.toDataURL("image/jpeg", 0.82);
+      }
+    } catch {
+      // Fallback: fetch same-origin image as Blob -> ImageBitmap -> Canvas
+      try {
+        const res = await fetch(img.currentSrc || img.src);
+        const blob = await res.blob();
+        const bitmap = await createImageBitmap(blob);
+        const canvas = document.createElement("canvas");
+        canvas.width = outW;
+        canvas.height = outH;
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.drawImage(bitmap, sx, sy, sw, sh, 0, 0, outW, outH);
+          dataUrl = canvas.toDataURL("image/jpeg", 0.82);
+        }
+        bitmap.close();
+      } catch {
+        dataUrl = null;
+      }
+    }
+
+    if (dataUrl) {
+      setCroppedClipPreview({
+        imageDataUrl: dataUrl,
+        pageNumber: activePageNum,
+        label: isGu
+          ? `${currentPub.nameGu} — પાનું ${activePageNum} ક્લિપિંગ`
+          : `${currentPub.nameEn} — Page ${activePageNum} Clipping`,
+      });
+    } else {
+      triggerToast(
+        isGu
+          ? "આ પાના પર ક્લિપિંગ તૈયાર કરવામાં મુશ્કેલી આવી"
+          : "Could not generate image crop for this page"
+      );
+    }
+    setIsClipMode(false);
+  };
+
+  const handleSaveCroppedClip = () => {
+    if (!croppedClipPreview) return;
+    const newClip: SavedClipItem = {
+      id: `crop-${Date.now()}`,
+      headlineText: croppedClipPreview.label,
+      summaryText: `${displayDate} • ${currentPub.nameEn}`,
+      pageNumber: croppedClipPreview.pageNumber,
+      savedAt: new Date().toLocaleDateString(isGu ? "gu-IN" : "en-IN", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      }),
+      croppedImageDataUrl: croppedClipPreview.imageDataUrl,
+    };
+    const updated = [newClip, ...savedClips];
+    setSavedClips(updated);
+    try {
+      localStorage.setItem("janmabhoomi_saved_clips_v2", JSON.stringify(updated));
+    } catch {
+      // If storage is full, keep the 8 most recent clips and retry
+      try {
+        const trimmed = updated.slice(0, 8);
+        setSavedClips(trimmed);
+        localStorage.setItem("janmabhoomi_saved_clips_v2", JSON.stringify(trimmed));
+      } catch {}
+    }
+    setCroppedClipPreview(null);
+    setSavedClipsDrawerOpen(true);
+    triggerToast(
+      isGu ? "📌 ક્લિપિંગ તમારા સેવ્ડ ક્લિપ્સમાં સેવ થયું" : "📌 Clipping saved to My Saved Clips"
+    );
+  };
+
   useEffect(() => {
     if (!selectedHotspot) {
       stopSpeaking();
+      return;
     }
-  }, [selectedHotspot]);
+    const preferred: "gu" | "en" = isGu ? "gu" : "en";
+    setModalLang(preferred);
+
+    // If user is on /en/epaper and hotspot doesn't have saved English text yet, auto-translate seamlessly
+    if (
+      preferred === "en" &&
+      !selectedHotspot.headlineEn &&
+      !selectedHotspot.bodyTextEn &&
+      !autoEnCache[selectedHotspot.id]
+    ) {
+      const bodyGu =
+        selectedHotspot.bodyText ||
+        (selectedHotspot.articleParagraphs?.join("\n\n") ?? selectedHotspot.summaryText ?? "");
+      if (selectedHotspot.headlineText || bodyGu) {
+        setIsTranslatingModal(true);
+        fetch("/api/v1/epaper/translate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            headlineGu: selectedHotspot.headlineText || "",
+            subHeadlineGu: selectedHotspot.subHeadlineText || "",
+            bodyTextGu: bodyGu,
+          }),
+        })
+          .then((r) => r.json())
+          .then((data) => {
+            if (data?.success) {
+              setAutoEnCache((prev) => ({
+                ...prev,
+                [selectedHotspot.id]: {
+                  headlineEn: data.headlineEn || "",
+                  subHeadlineEn: data.subHeadlineEn || "",
+                  bodyTextEn: data.bodyTextEn || "",
+                },
+              }));
+            }
+          })
+          .catch(() => {})
+          .finally(() => setIsTranslatingModal(false));
+      }
+    }
+  }, [selectedHotspot, isGu]);
+
+  const handleSwitchModalLang = async (target: "gu" | "en") => {
+    stopSpeaking();
+    setModalLang(target);
+    if (
+      target === "en" &&
+      selectedHotspot &&
+      !selectedHotspot.headlineEn &&
+      !selectedHotspot.bodyTextEn &&
+      !autoEnCache[selectedHotspot.id]
+    ) {
+      const bodyGu =
+        selectedHotspot.bodyText ||
+        (selectedHotspot.articleParagraphs?.join("\n\n") ?? selectedHotspot.summaryText ?? "");
+      if (selectedHotspot.headlineText || bodyGu) {
+        setIsTranslatingModal(true);
+        try {
+          const res = await fetch("/api/v1/epaper/translate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              headlineGu: selectedHotspot.headlineText || "",
+              subHeadlineGu: selectedHotspot.subHeadlineText || "",
+              bodyTextGu: bodyGu,
+            }),
+          });
+          const data = await res.json();
+          if (data?.success) {
+            setAutoEnCache((prev) => ({
+              ...prev,
+              [selectedHotspot.id]: {
+                headlineEn: data.headlineEn || "",
+                subHeadlineEn: data.subHeadlineEn || "",
+                bodyTextEn: data.bodyTextEn || "",
+              },
+            }));
+          }
+        } catch {}
+        setIsTranslatingModal(false);
+      }
+    }
+  };
 
   // Ensure TTS playback stops cleanly when navigating away from the E-Paper reader
   useEffect(() => {
@@ -872,15 +1264,31 @@ export function PublicEpaperReader({
     ? "આજની આવૃત્તિ"
     : "Today's Edition";
 
-  const filteredEditions =
-    selectedPubId === "all"
-      ? editionsList
-      : editionsList.filter((ed) => ed.publicationId === selectedPubId);
+  const filteredEditions = editionsList.filter((ed) => {
+    const matchesPub = selectedPubId === "all" || ed.publicationId === selectedPubId;
+    const edDateOnly = ed.editionDate ? ed.editionDate.split("T")[0] : "";
+    const matchesDate = !selectedDateFilter || edDateOnly === selectedDateFilter;
+    return matchesPub && matchesDate;
+  });
 
+  // Guard against garbled legacy DTP font mojibake (Shree-Guj / Terafont mapped onto Latin-1)
+  const isGarbledLegacyText = (txt?: string) => {
+    if (!txt) return false;
+    return /[\u0080-\u00FF\u0152\u0153\u0160\u0161]|&&|`|blpfNpdfu|frhhpf/.test(txt);
+  };
+
+  // Only use static demo hotspots on synthetic fallback editions;
+  // NEVER overlay unrelated demo articles or garbled legacy font text onto real uploaded PDF editions!
+  const isSyntheticDemoEdition = Boolean(editionDetail?.id?.startsWith("edition-pub-"));
+  const rawPageHotspots = (activePage?.hotspots || []).filter(
+    (h) => !isGarbledLegacyText(h.headlineText)
+  );
   const currentHotspots: PublicHotspot[] =
-    activePage?.hotspots && activePage.hotspots.length > 0
-      ? activePage.hotspots
-      : DEFAULT_PAGE_HOTSPOTS[activePageNum] || getFallbackHotspotsForPage(activePageNum);
+    rawPageHotspots.length > 0
+      ? rawPageHotspots
+      : isSyntheticDemoEdition
+      ? DEFAULT_PAGE_HOTSPOTS[activePageNum] || getFallbackHotspotsForPage(activePageNum)
+      : [];
 
   // =========================================================================
   // VIEW 1: CATALOG OF ALL E-PAPERS
@@ -888,12 +1296,13 @@ export function PublicEpaperReader({
   if (!selectedEditionId) {
     return (
       <div className="space-y-6">
+        <SponsorStrip slotKey="epaper_sponsor" lang={lang} />
         <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 sm:p-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-[#016BB7]/10 text-[#016BB7] px-3 py-1 text-xs font-bold border border-[#016BB7]/20">
-                  <Sparkles className="h-3.5 w-3.5" />
+                  <Newspaper className="h-3.5 w-3.5" />
                   <span>{isGu ? "અધિકૃત ડિજિટલ બ્રોડશીટ" : "Official Digital Broadsheet"}</span>
                 </span>
                 <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 text-slate-700 px-3 py-1 text-xs font-bold">
@@ -941,6 +1350,28 @@ export function PublicEpaperReader({
                   </button>
                 );
               })}
+
+              {/* Calendar Date Filter (Browse E-Paper by Any Date) */}
+              <div className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs">
+                <Calendar className="h-3.5 w-3.5 text-[#016BB7] shrink-0" />
+                <input
+                  type="date"
+                  value={selectedDateFilter}
+                  onChange={(e) => setSelectedDateFilter(e.target.value)}
+                  aria-label={isGu ? "તારીખ પસંદ કરો" : "Filter E-Paper by date"}
+                  className="bg-transparent text-xs font-bold text-slate-800 focus:outline-none cursor-pointer"
+                />
+                {selectedDateFilter && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedDateFilter("")}
+                    className="ml-1 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-700 p-0.5 cursor-pointer"
+                    title={isGu ? "તમામ તારીખો જુઓ" : "Show all dates"}
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -1100,8 +1531,71 @@ export function PublicEpaperReader({
           </div>
         </div>
 
-        {/* Right: Section Jump Dropdown + Saved Clips Button + Preview Badge */}
-        <div className="flex items-center gap-2">
+        {/* Right: Date Switcher + Page Articles + Saved Clips + Section Jump + Preview Badge */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Archive Date / Edition Switcher for Same Publication */}
+          {editionsList.filter((e) => e.publicationId === editionDetail?.publicationId).length > 1 && (
+            <select
+              value={selectedEditionId || ""}
+              onChange={(e) => {
+                if (e.target.value) {
+                  stopSpeaking();
+                  setSelectedEditionId(e.target.value);
+                  setActivePageNum(1);
+                  setZoomScale(1);
+                  setIsClipMode(false);
+                }
+              }}
+              className="bg-white/10 text-white text-xs font-bold rounded-lg px-2.5 py-1 border border-white/15 hover:bg-white/15 transition-colors cursor-pointer focus:outline-none"
+              title={isGu ? "અન્ય તારીખની આવૃત્તિ પસંદ કરો" : "Switch Edition Date"}
+            >
+              {editionsList
+                .filter((e) => e.publicationId === editionDetail?.publicationId)
+                .map((ed) => (
+                  <option key={ed.id} value={ed.id} className="bg-slate-900 text-white">
+                    {ed.editionDate?.split("T")[0] || ed.editionNameEn}
+                  </option>
+                ))}
+            </select>
+          )}
+
+          {/* Page Articles List Drawer Trigger (Shows real articles on this page) */}
+          {currentHotspots.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setPageArticlesDrawerOpen(true)}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 text-xs font-bold transition-colors cursor-pointer border border-emerald-400/30"
+              title={isGu ? "આ પાનાના લેખો" : "Articles on This Page"}
+            >
+              <List className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">
+                {isGu ? "પાનાના લેખો" : "Page Articles"}
+              </span>
+              <span className="bg-emerald-500 text-slate-950 text-[10px] font-black rounded-full px-1.5">
+                {currentHotspots.length}
+              </span>
+            </button>
+          )}
+
+          {/* Prominent Clip Article Button in Top Reader Bar */}
+          <button
+            type="button"
+            onClick={() => {
+              if (isSpreadView) setIsSpreadView(false);
+              setIsClipMode((prev) => !prev);
+              setClipDraft(null);
+            }}
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer border ${
+              isClipMode
+                ? "bg-emerald-500 text-slate-950 border-emerald-400"
+                : "bg-white/10 hover:bg-white/20 text-white border-white/15"
+            }`}
+            title={isGu ? "કોઈપણ લેખ કાપીને સેવ કરો" : "Clip & Save Any Article"}
+          >
+            <Scissors className="h-3.5 w-3.5" />
+            <span>{isGu ? "ક્લિપ કરો" : "Clip Article"}</span>
+          </button>
+
           {/* Saved Clips Drawer Trigger */}
           <button
             type="button"
@@ -1156,13 +1650,104 @@ export function PublicEpaperReader({
         </div>
       </div>
 
-      {/* 2. MAIN WARM SLATE CANVAS WITH BROADSHEET SHEET */}
-      <div
-        onContextMenu={(e) => e.preventDefault()}
-        className={`relative bg-[#181a1e] p-4 sm:p-8 flex justify-center items-start overflow-auto select-none min-h-[720px] max-h-[88vh] transition-all scrollbar-thin scrollbar-thumb-white/20 ${
-          zoomScale > 1 ? "cursor-zoom-out" : "cursor-zoom-in"
-        }`}
-      >
+      {/* 1B. E-PAPER READER TOP SPONSOR STRIP (Visible across all 12 broadsheet pages) */}
+      <div className="bg-[#14171c] border-b border-white/10 px-4 py-2 z-20">
+        <SponsorStrip slotKey="epaper_sponsor" lang={lang} theme="dark" compact />
+      </div>
+
+      {/* 2. MAIN READER BODY: COLLAPSIBLE LEFT THUMBNAIL RAIL + WARM SLATE CANVAS */}
+      <div className="flex flex-1 min-h-[720px] max-h-[88vh] bg-[#181a1e] overflow-hidden">
+        {/* Collapsible Left Page Thumbnail Rail (Desktop) */}
+        {showThumbRail && pages.length > 1 && (
+          <aside className="hidden lg:flex flex-col w-28 shrink-0 bg-[#121418] border-r border-white/10 overflow-y-auto p-2.5 space-y-2.5 scrollbar-thin scrollbar-thumb-white/20">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 text-center pb-1 border-b border-white/10">
+              {isGu ? `પાના (${totalPages})` : `Pages (${totalPages})`}
+            </div>
+            {pages.map((p) => {
+              const isCurrent = p.pageNumber === activePageNum;
+              const isLocked = p.pageNumber > freeLimit && !hasActiveAccess && !p.isFreePreview;
+              return (
+                <button
+                  key={`rail-${p.id}`}
+                  type="button"
+                  onClick={() => {
+                    setActivePageNum(p.pageNumber);
+                    setSelectedHotspot(null);
+                    setZoomScale(1);
+                    setIsClipMode(false);
+                  }}
+                  className={`group relative rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${
+                    isCurrent
+                      ? "border-[#0190ee] ring-2 ring-[#0190ee]/40"
+                      : "border-white/10 hover:border-white/35 opacity-75 hover:opacity-100"
+                  }`}
+                >
+                  <div className="aspect-[3/4] w-full bg-slate-800 relative">
+                    <img
+                      src={getPageThumbUrl(p.id)}
+                      alt={`Page ${p.pageNumber}`}
+                      loading="lazy"
+                      className="w-full h-full object-cover"
+                    />
+                    {isLocked && (
+                      <div className="absolute inset-0 bg-black/55 flex items-center justify-center">
+                        <Lock className="h-3.5 w-3.5 text-amber-400" />
+                      </div>
+                    )}
+                  </div>
+                  <div
+                    className={`py-1 text-[10px] font-bold text-center ${
+                      isCurrent ? "bg-[#016BB7] text-white" : "bg-slate-900 text-slate-300"
+                    }`}
+                  >
+                    {isGu ? `પાનું ${p.pageNumber}` : `Page ${p.pageNumber}`}
+                  </div>
+                </button>
+              );
+            })}
+          </aside>
+        )}
+
+        {/* MAIN BROADSHEET SCROLL / PAN CANVAS */}
+        <div
+          ref={canvasScrollRef}
+          onContextMenu={(e) => e.preventDefault()}
+          onMouseDown={handleCanvasMouseDown}
+          onMouseMove={handleCanvasMouseMove}
+          onMouseUp={handleCanvasMouseUp}
+          onMouseLeave={handleCanvasMouseUp}
+          onWheel={handleCanvasWheel}
+          className={`relative flex-1 bg-[#181a1e] p-4 sm:p-8 flex justify-center items-start overflow-auto select-none transition-all scrollbar-thin scrollbar-thumb-white/20 ${
+            isClipMode
+              ? "cursor-crosshair"
+              : zoomScale > 1
+              ? isPanning
+                ? "cursor-grabbing"
+                : "cursor-grab"
+              : "cursor-default"
+          }`}
+        >
+          {/* Clip Mode Active Banner */}
+          {isClipMode && (
+            <div className="fixed top-20 left-1/2 -translate-x-1/2 z-40 bg-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-full shadow-2xl border border-emerald-300/40 flex items-center gap-2">
+              <Scissors className="h-3.5 w-3.5" />
+              <span>
+                {isGu
+                  ? "ક્લિપ મોડ ચાલુ: કોઈપણ લેખ પર માઉસ ખેંચીને પસંદ કરો"
+                  : "Clip Mode Active: Drag a box over any article to zoom & save"}
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsClipMode(false);
+                  setClipDraft(null);
+                }}
+                className="ml-1 rounded-full bg-black/25 hover:bg-black/40 p-0.5 cursor-pointer"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          )}
         {isLoading ? (
           <div className="my-auto flex flex-col items-center justify-center p-16 text-slate-400">
             <Loader2 className="h-10 w-10 animate-spin text-[#0190ee] mb-3" />
@@ -1257,12 +1842,19 @@ export function PublicEpaperReader({
           >
             {/* PRIMARY PAGE SHEET */}
             <div
-              className="relative select-none bg-white rounded-xs overflow-hidden transition-all duration-200 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85),0_0_1px_1px_rgba(255,255,255,0.08)] cursor-pointer"
+              className={`relative select-none bg-white rounded-xs overflow-hidden transition-all duration-200 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85),0_0_1px_1px_rgba(255,255,255,0.08)] ${
+                isClipMode ? "cursor-crosshair" : ""
+              }`}
               style={{
                 transformOrigin: "top center",
                 maxWidth: isSpreadView ? "50%" : "100%",
               }}
-              onClick={() => setZoomScale((prev) => (prev === 1 ? 1.75 : 1))}
+              onDoubleClick={() => {
+                if (!isClipMode) setZoomScale((prev) => (prev > 1 ? 1 : 1.5));
+              }}
+              onPointerDown={handleSheetClipStart}
+              onPointerMove={handleSheetClipMove}
+              onPointerUp={handleSheetClipEnd}
             >
               {isImageLoading && !imageError && (
                 <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 bg-slate-900/85 backdrop-blur-md px-4 py-2 rounded-full flex items-center gap-2 text-white text-xs font-bold shadow-xl border border-white/20 pointer-events-none">
@@ -1277,10 +1869,12 @@ export function PublicEpaperReader({
                 <img
                   key={`primary-page-${activePage.id}`}
                   ref={(img) => {
+                    primaryImgRef.current = img;
                     if (img && img.complete && img.naturalWidth > 0 && isImageLoading) {
                       setIsImageLoading(false);
                     }
                   }}
+                  crossOrigin="anonymous"
                   src={getPageImageUrl(activePage.id)}
                   alt={`${currentPub.nameGu} Page ${activePage.pageNumber}`}
                   draggable={false}
@@ -1294,9 +1888,22 @@ export function PublicEpaperReader({
                   style={{
                     width: isSpreadView
                       ? `${Math.round(620 * zoomScale)}px`
-                      : `${Math.round((isFullscreen ? 1200 : 960) * zoomScale)}px`,
-                    maxWidth: zoomScale > 1 ? "none" : "100%",
+                      : `${Math.round((fitMode === "fit-width" ? 1240 : isFullscreen ? 1140 : 940) * zoomScale)}px`,
+                    maxWidth: zoomScale > 1 || fitMode === "fit-width" ? "none" : "100%",
                     height: "auto",
+                  }}
+                />
+              )}
+
+              {/* Active Clip Selection Box */}
+              {isClipMode && clipDraft && clipDraft.w > 1 && clipDraft.h > 1 && (
+                <div
+                  className="absolute border-2 border-emerald-400 bg-emerald-400/20 pointer-events-none z-30 shadow-[0_0_0_9999px_rgba(0,0,0,0.35)]"
+                  style={{
+                    left: `${clipDraft.x}%`,
+                    top: `${clipDraft.y}%`,
+                    width: `${clipDraft.w}%`,
+                    height: `${clipDraft.h}%`,
                   }}
                 />
               )}
@@ -1310,8 +1917,9 @@ export function PublicEpaperReader({
                 </div>
               )}
 
-              {/* SMART HOTSPOT GLOWS */}
+              {/* SMART HOTSPOT GLOWS (Hidden while Clip Mode is active) */}
               {!isImageLoading &&
+                !isClipMode &&
                 currentHotspots.map((hotspot) => {
                   const x = Number(hotspot.xPercent);
                   const y = Number(hotspot.yPercent);
@@ -1371,11 +1979,13 @@ export function PublicEpaperReader({
                   }}
                 />
 
-                {/* Second Page Hotspots */}
+                {/* Second Page Hotspots (Strict: never overlay fake demo articles on real uploaded PDFs) */}
                 {(secondSpreadPage.hotspots && secondSpreadPage.hotspots.length > 0
                   ? secondSpreadPage.hotspots
-                  : DEFAULT_PAGE_HOTSPOTS[secondSpreadPage.pageNumber] ||
+                  : isSyntheticDemoEdition
+                  ? DEFAULT_PAGE_HOTSPOTS[secondSpreadPage.pageNumber] ||
                     getFallbackHotspotsForPage(secondSpreadPage.pageNumber)
+                  : []
                 ).map((hotspot) => {
                   const x = Number(hotspot.xPercent);
                   const y = Number(hotspot.yPercent);
@@ -1413,6 +2023,7 @@ export function PublicEpaperReader({
             )}
           </div>
         )}
+        </div>
       </div>
 
       {/* 3. COLLAPSIBLE FILMSTRIP DRAWER */}
@@ -1543,6 +2154,16 @@ export function PublicEpaperReader({
                         {clip.headlineText}
                       </h4>
 
+                      {clip.croppedImageDataUrl && (
+                        <div className="rounded-lg overflow-hidden border border-slate-200 bg-white">
+                          <img
+                            src={clip.croppedImageDataUrl}
+                            alt={clip.headlineText}
+                            className="w-full max-h-40 object-contain"
+                          />
+                        </div>
+                      )}
+
                       {clip.summaryText && (
                         <p className="text-xs text-slate-600 line-clamp-2 font-gujarati">
                           {clip.summaryText}
@@ -1628,10 +2249,25 @@ export function PublicEpaperReader({
 
           <div className="h-4 w-px bg-white/20 mx-1" />
 
+          {/* Left Thumbnail Rail Toggle (Desktop) */}
+          <button
+            type="button"
+            onClick={() => setShowThumbRail(!showThumbRail)}
+            className={`hidden lg:inline-flex items-center p-1.5 rounded-full transition-colors cursor-pointer ${
+              showThumbRail ? "bg-[#016BB7] text-white" : "hover:bg-white/15 text-slate-300"
+            }`}
+            title={isGu ? "ડાબી પાના પટ્ટી" : "Toggle Left Page Rail"}
+          >
+            <PanelLeft className="h-4 w-4" />
+          </button>
+
           {/* Spread View Toggle (Desktop) */}
           <button
             type="button"
-            onClick={() => setIsSpreadView(!isSpreadView)}
+            onClick={() => {
+              setIsSpreadView(!isSpreadView);
+              setIsClipMode(false);
+            }}
             className={`hidden md:inline-flex items-center gap-1 p-1.5 rounded-full transition-colors cursor-pointer ${
               isSpreadView ? "bg-[#016BB7] text-white" : "hover:bg-white/15 text-slate-300"
             }`}
@@ -1640,15 +2276,75 @@ export function PublicEpaperReader({
             {isSpreadView ? <Square className="h-4 w-4" /> : <Columns className="h-4 w-4" />}
           </button>
 
-          {/* Zoom Toggle / Reset */}
+          <div className="h-4 w-px bg-white/20 mx-0.5" />
+
+          {/* Smooth Zoom Out / % Reset / Zoom In */}
           <button
             type="button"
-            onClick={() => setZoomScale((z) => (z > 1 ? 1 : 1.75))}
-            className="p-1.5 rounded-full hover:bg-white/15 text-slate-300 hover:text-white transition-colors cursor-pointer"
-            title={zoomScale > 1 ? "Reset Zoom (100%)" : "Zoom In (175%)"}
+            disabled={zoomScale <= 1}
+            onClick={handleZoomOut}
+            className="p-1.5 rounded-full hover:bg-white/15 text-slate-300 hover:text-white disabled:opacity-30 transition-colors cursor-pointer"
+            title={isGu ? "ઝૂમ ઓછું કરો (-)" : "Zoom Out (-)"}
           >
-            {zoomScale > 1 ? <RotateCcw className="h-4 w-4" /> : <ZoomIn className="h-4 w-4" />}
+            <ZoomOut className="h-4 w-4" />
           </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              if (zoomScale > 1) {
+                setZoomScale(1);
+              } else {
+                setFitMode((m) => (m === "fit-page" ? "fit-width" : "fit-page"));
+              }
+            }}
+            className="px-2 py-0.5 rounded-full bg-white/10 hover:bg-white/20 text-[11px] font-bold tabular-nums text-white transition-colors cursor-pointer"
+            title={
+              zoomScale > 1
+                ? isGu
+                  ? "ઝૂમ રીસેટ (100%)"
+                  : "Reset Zoom (100%)"
+                : fitMode === "fit-page"
+                ? isGu
+                  ? "પહોળાઈ મુજબ ફિટ કરો"
+                  : "Switch to Fit Width"
+                : isGu
+                ? "પાના મુજબ ફિટ કરો"
+                : "Switch to Fit Page"
+            }
+          >
+            {zoomScale > 1 ? `${Math.round(zoomScale * 100)}%` : fitMode === "fit-width" ? "Fit W" : "100%"}
+          </button>
+
+          <button
+            type="button"
+            disabled={zoomScale >= 2.5}
+            onClick={handleZoomIn}
+            className="p-1.5 rounded-full hover:bg-white/15 text-slate-300 hover:text-white disabled:opacity-30 transition-colors cursor-pointer"
+            title={isGu ? "ઝૂમ વધારો (+)" : "Zoom In (+)"}
+          >
+            <ZoomIn className="h-4 w-4" />
+          </button>
+
+          {/* Interactive Clip-to-Read Tool (NO Share option) */}
+          {!isSpreadView && (
+            <button
+              type="button"
+              onClick={() => {
+                setIsClipMode(!isClipMode);
+                setClipDraft(null);
+              }}
+              className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] font-bold transition-colors cursor-pointer ${
+                isClipMode
+                  ? "bg-emerald-500 text-slate-950"
+                  : "hover:bg-white/15 text-slate-200"
+              }`}
+              title={isGu ? "લેખ કાપીને ઝૂમમાં વાંચો / સેવ કરો" : "Clip Article to Read & Save"}
+            >
+              <Scissors className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">{isGu ? "ક્લિપ" : "Clip"}</span>
+            </button>
+          )}
 
           {/* Saved Clips Drawer Button with Count Badge */}
           <button
@@ -1696,7 +2392,7 @@ export function PublicEpaperReader({
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm select-none animate-in fade-in duration-150"
         >
           <div
-            className={`rounded-2xl max-w-xl w-full p-6 sm:p-7 shadow-2xl space-y-5 animate-in zoom-in-95 duration-150 border transition-colors ${
+            className={`rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col p-6 sm:p-7 shadow-2xl space-y-4 animate-in zoom-in-95 duration-150 border transition-colors ${
               readingTheme === "white"
                 ? "bg-white text-slate-900 border-slate-200"
                 : readingTheme === "sepia"
@@ -1767,75 +2463,170 @@ export function PublicEpaperReader({
             </div>
 
             {/* Headline & Body Content */}
-            <div className="space-y-3.5">
-              <h3 className="text-xl sm:text-2xl font-black leading-snug font-gujarati">
-                {selectedHotspot.headlineText || (isGu ? "સમાચાર અહેવાલ" : "News Article")}
-              </h3>
+            {(() => {
+              const cachedEn = autoEnCache[selectedHotspot.id];
+              const useEn = modalLang === "en";
+              const activeHeadline = useEn
+                ? selectedHotspot.headlineEn ||
+                  cachedEn?.headlineEn ||
+                  selectedHotspot.headlineText ||
+                  "News Article"
+                : selectedHotspot.headlineText || (isGu ? "સમાચાર અહેવાલ" : "News Article");
+              const activeSubHeadline = useEn
+                ? selectedHotspot.subHeadlineEn || cachedEn?.subHeadlineEn || selectedHotspot.subHeadlineText
+                : selectedHotspot.subHeadlineText;
+              const activeBodyText = useEn
+                ? selectedHotspot.bodyTextEn || cachedEn?.bodyTextEn || ""
+                : selectedHotspot.bodyText || "";
+              const activeParagraphs: string[] = useEn
+                ? selectedHotspot.articleParagraphsEn && selectedHotspot.articleParagraphsEn.length > 0
+                  ? selectedHotspot.articleParagraphsEn
+                  : activeBodyText
+                  ? activeBodyText.split(/\n+/).map((s) => s.trim()).filter(Boolean)
+                  : []
+                : selectedHotspot.articleParagraphs && selectedHotspot.articleParagraphs.length > 0
+                ? selectedHotspot.articleParagraphs
+                : activeBodyText
+                ? activeBodyText.split(/\n+/).map((s) => s.trim()).filter(Boolean)
+                : selectedHotspot.summaryText
+                ? [selectedHotspot.summaryText]
+                : [];
 
-              {/* TTS Listen Mode Bar (Tested & Fixed) */}
-              <div className="flex items-center justify-between p-3 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10">
-                <div className="flex items-center gap-2 text-xs font-semibold">
-                  <Volume2 className="h-4 w-4 text-[#016BB7]" />
-                  <span>{isGu ? "ઓડિયો લિસન મોડ (સાંભળો)" : "Audio Listen Mode (Text-to-Speech)"}</span>
-                </div>
+              const fullTextToSpeak = [
+                activeHeadline,
+                activeSubHeadline || "",
+                ...activeParagraphs,
+              ]
+                .filter(Boolean)
+                .join(". ");
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    const fullText = [
-                      selectedHotspot.headlineText || "",
-                      ...(selectedHotspot.articleParagraphs && selectedHotspot.articleParagraphs.length > 0
-                        ? selectedHotspot.articleParagraphs
-                        : [selectedHotspot.summaryText || ""]),
-                    ]
-                      .filter(Boolean)
-                      .join(". ");
-                    handleToggleSpeak(fullText);
-                  }}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-xs ${
-                    isSpeaking
-                      ? "bg-rose-600 text-white animate-pulse"
-                      : "bg-[#016BB7] text-white hover:bg-[#015a99]"
-                  }`}
-                >
-                  {isSpeaking ? (
-                    <>
-                      <StopIcon className="h-3.5 w-3.5 fill-current" />
-                      <span>{isGu ? "બંધ કરો" : "Stop"}</span>
-                    </>
-                  ) : (
-                    <>
-                      <Play className="h-3.5 w-3.5 fill-current" />
-                      <span>{isGu ? "સાંભળો" : "Listen"}</span>
-                    </>
+              return (
+                <div className="space-y-3.5">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="inline-flex rounded-lg bg-black/5 dark:bg-white/10 p-0.5 border border-black/10 dark:border-white/10 text-xs font-bold">
+                      <button
+                        type="button"
+                        onClick={() => handleSwitchModalLang("gu")}
+                        className={`px-3 py-1 rounded-md transition-colors cursor-pointer ${
+                          modalLang === "gu"
+                            ? "bg-[#016BB7] text-white"
+                            : "text-slate-600 dark:text-slate-300"
+                        }`}
+                      >
+                        ગુજરાતી
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleSwitchModalLang("en")}
+                        className={`px-3 py-1 rounded-md transition-colors cursor-pointer ${
+                          modalLang === "en"
+                            ? "bg-[#016BB7] text-white"
+                            : "text-slate-600 dark:text-slate-300"
+                        }`}
+                      >
+                        English
+                      </button>
+                    </div>
+                    {isTranslatingModal && (
+                      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#016BB7]">
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        <span>Translating to English...</span>
+                      </span>
+                    )}
+                  </div>
+
+                  <h3 className="text-xl sm:text-2xl font-black leading-snug font-gujarati">
+                    {activeHeadline}
+                  </h3>
+                  {activeSubHeadline && (
+                    <p className="text-sm sm:text-base font-semibold text-[#016BB7] leading-snug font-gujarati -mt-1.5">
+                      {activeSubHeadline}
+                    </p>
                   )}
-                </button>
-              </div>
 
-              {/* Reading Paragraphs */}
-              <div
-                className={`p-4 rounded-xl border text-sm sm:text-base leading-relaxed font-gujarati space-y-3 ${
-                  readingTheme === "white"
-                    ? "bg-slate-50/80 border-slate-200/80 text-slate-700"
-                    : readingTheme === "sepia"
-                    ? "bg-[#eee6d8] border-[#e2d5c3] text-[#3c2f21]"
-                    : "bg-slate-900/60 border-slate-800 text-slate-300"
-                }`}
-              >
-                {selectedHotspot.articleParagraphs && selectedHotspot.articleParagraphs.length > 0 ? (
-                  selectedHotspot.articleParagraphs.map((para, idx) => (
-                    <p key={idx}>{para}</p>
-                  ))
-                ) : (
-                  <p>
-                    {selectedHotspot.summaryText ||
-                      (isGu
-                        ? "આ અહેવાલ આજની જન્મભૂમિ દૈનિક પ્રિન્ટ આવૃત્તિમાંથી પ્રસ્તુત કરવામાં આવ્યો છે. સંપૂર્ણ ડિજિટલ લેખ અને ઊંડાણપૂર્વકનું વિશ્લેષણ વાંચવા માટે નીચે આપેલ બટન પર ક્લિક કરો."
-                        : "This report is from today's Janmabhoomi broadsheet edition. To read the complete digital article with analysis, click below.")}
-                  </p>
-                )}
-              </div>
-            </div>
+                  {/* TTS Listen Mode Bar with Speed Controls (0.9x / 1x / 1.25x) */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10">
+                    <div className="flex items-center gap-2 text-xs font-semibold">
+                      <Volume2 className="h-4 w-4 text-[#016BB7]" />
+                      <span>
+                        {modalLang === "gu"
+                          ? "ઓડિયો લિસન મોડ (ગુજરાતી)"
+                          : "Audio Listen Mode (English)"}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5">
+                      {/* Playback Speed Pills */}
+                      <div className="inline-flex items-center rounded-lg bg-black/5 dark:bg-white/10 p-0.5 border border-black/10 dark:border-white/10">
+                        {([0.9, 1, 1.25] as const).map((rate) => (
+                          <button
+                            key={rate}
+                            type="button"
+                            onClick={() => {
+                              setTtsSpeed(rate);
+                              if (isSpeaking) {
+                                handleToggleSpeak(fullTextToSpeak, rate);
+                              }
+                            }}
+                            className={`px-2 py-1 rounded-md text-[11px] font-bold transition-colors cursor-pointer ${
+                              ttsSpeed === rate
+                                ? "bg-[#016BB7] text-white"
+                                : "text-slate-600 dark:text-slate-300 hover:text-slate-900"
+                            }`}
+                          >
+                            {rate}x
+                          </button>
+                        ))}
+                      </div>
+
+                      <button
+                        type="button"
+                        disabled={isTranslatingModal}
+                        onClick={() => handleToggleSpeak(fullTextToSpeak)}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-xs disabled:opacity-50 ${
+                          isSpeaking
+                            ? "bg-rose-600 text-white animate-pulse"
+                            : "bg-[#016BB7] text-white hover:bg-[#015a99]"
+                        }`}
+                      >
+                        {isSpeaking ? (
+                          <>
+                            <StopIcon className="h-3.5 w-3.5 fill-current" />
+                            <span>{modalLang === "gu" ? "બંધ કરો" : "Stop"}</span>
+                          </>
+                        ) : (
+                          <>
+                            <Play className="h-3.5 w-3.5 fill-current" />
+                            <span>{modalLang === "gu" ? "સાંભળો" : "Listen"}</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Reading Paragraphs (Scrollable for long articles) */}
+                  <div
+                    className={`p-4 rounded-xl border text-sm sm:text-base leading-relaxed font-gujarati space-y-3 overflow-y-auto max-h-[42vh] scrollbar-thin ${
+                      readingTheme === "white"
+                        ? "bg-slate-50/80 border-slate-200/80 text-slate-700"
+                        : readingTheme === "sepia"
+                        ? "bg-[#eee6d8] border-[#e2d5c3] text-[#3c2f21]"
+                        : "bg-slate-900/60 border-slate-800 text-slate-300"
+                    }`}
+                  >
+                    {activeParagraphs.length > 0 ? (
+                      activeParagraphs.map((para, idx) => <p key={idx}>{para}</p>)
+                    ) : (
+                      <p>
+                        {modalLang === "gu"
+                          ? "આ અહેવાલ આજની જન્મભૂમિ પ્રિન્ટ આવૃત્તિમાંથી પ્રસ્તુત કરવામાં આવ્યો છે."
+                          : "This report is from today's Janmabhoomi broadsheet edition."}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Actions Bar (Share Clip Removed; Save Clip & Full Story Link Provided) */}
             <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-black/10 dark:border-white/10 text-xs">
@@ -1889,6 +2680,124 @@ export function PublicEpaperReader({
                   </button>
                 )}
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 7. PAGE ARTICLES INDEX DRAWER (Lists ONLY real extracted/mapped articles on this page) */}
+      {pageArticlesDrawerOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-end bg-black/60 backdrop-blur-xs select-none">
+          <div className="bg-white w-full max-w-md h-full shadow-2xl p-6 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between border-b border-slate-200 pb-4 mb-4">
+                <div className="flex items-center gap-2">
+                  <List className="h-5 w-5 text-[#016BB7]" />
+                  <h3 className="text-base font-black text-slate-900 font-gujarati">
+                    {isGu
+                      ? `પાનું ${activePageNum} — લેખ સૂચિ`
+                      : `Page ${activePageNum} — Articles`}
+                  </h3>
+                  <span className="bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-0.5 rounded-full">
+                    {currentHotspots.length}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setPageArticlesDrawerOpen(false)}
+                  className="p-1 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-100 cursor-pointer"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <div className="space-y-3 overflow-y-auto max-h-[75vh] pr-1 scrollbar-thin">
+                {currentHotspots.map((hotspot, idx) => (
+                  <button
+                    key={`page-article-${hotspot.id}`}
+                    type="button"
+                    onClick={() => {
+                      setPageArticlesDrawerOpen(false);
+                      setSelectedHotspot(hotspot);
+                    }}
+                    className="w-full text-left p-3.5 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-white hover:border-[#016BB7] transition-all cursor-pointer space-y-1.5"
+                  >
+                    <div className="flex items-center justify-between text-[11px] font-bold text-[#016BB7]">
+                      <span>{isGu ? `લેખ ${idx + 1}` : `Article ${idx + 1}`}</span>
+                      <span className="inline-flex items-center gap-1">
+                        <Volume2 className="h-3 w-3" />
+                        <span>{isGu ? "વાંચો / સાંભળો" : "Read / Listen"}</span>
+                      </span>
+                    </div>
+                    <p className="text-sm font-extrabold text-slate-900 font-gujarati line-clamp-3">
+                      {hotspot.headlineText || (isGu ? "સમાચાર અહેવાલ" : "News Article")}
+                    </p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-slate-200">
+              <button
+                type="button"
+                onClick={() => setPageArticlesDrawerOpen(false)}
+                className="w-full py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 cursor-pointer"
+              >
+                {isGu ? "બંધ કરો" : "Close"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 8. CROPPED ARTICLE CLIPPING READER MODAL (Save & Read Only — NO Share Button) */}
+      {croppedClipPreview && (
+        <div
+          onContextMenu={(e) => e.preventDefault()}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm select-none"
+        >
+          <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200">
+            <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-200 bg-slate-50">
+              <div className="flex items-center gap-2">
+                <Scissors className="h-4 w-4 text-[#016BB7]" />
+                <h3 className="text-sm font-extrabold text-slate-900 font-gujarati">
+                  {croppedClipPreview.label}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCroppedClipPreview(null)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-800 cursor-pointer"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="p-4 sm:p-6 overflow-auto bg-[#FAF8F3] flex justify-center">
+              <img
+                src={croppedClipPreview.imageDataUrl}
+                alt={croppedClipPreview.label}
+                className="max-w-full h-auto rounded-lg shadow-md border border-slate-200 bg-white"
+              />
+            </div>
+
+            <div className="flex items-center justify-between px-5 py-3.5 border-t border-slate-200 bg-white">
+              <button
+                type="button"
+                onClick={handleSaveCroppedClip}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#016BB7] hover:bg-[#015696] text-white text-xs font-bold shadow-xs cursor-pointer"
+              >
+                <Bookmark className="h-4 w-4" />
+                <span>{isGu ? "મારા સેવ્ડ ક્લિપ્સમાં સાચવો" : "Save to My Clips"}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setCroppedClipPreview(null)}
+                className="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-bold cursor-pointer"
+              >
+                {isGu ? "બંધ કરો" : "Close"}
+              </button>
             </div>
           </div>
         </div>

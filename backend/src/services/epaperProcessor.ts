@@ -6,6 +6,156 @@ import { epaperStorage } from "../storage/storageProvider.js";
 import { env } from "../config/env.js";
 import type { PrismaClient } from "@prisma/client";
 
+interface ExtractedHotspotBlock {
+  xPercent: number;
+  yPercent: number;
+  widthPercent: number;
+  heightPercent: number;
+  headlineText: string;
+}
+
+/**
+ * Detects garbled legacy DTP Gujarati fonts (Shree-Guj, Terafont, LMG-Arun)
+ * mapped onto Windows-1252 / Latin-1 characters instead of Unicode Gujarati.
+ */
+function isCleanReadableUnicode(text: string): boolean {
+  const trimmed = text.trim();
+  if (trimmed.length < 35) return false;
+
+  // Reject any Windows-1252 / Latin-1 extended mojibake characters (Š, Œ, ª, §, î, Ë, Ä, õ, ±, ©, ®, etc.)
+  if (/[\u0080-\u00FF\u0152\u0153\u0160\u0161\u0178\u201A\u201E\u2020\u2021\u2030\u2039\u203A]/.test(trimmed)) {
+    return false;
+  }
+
+  // Reject heavy legacy-font punctuation artifacts (&&, backticks, pipes)
+  if (/&&|`|~|\|/.test(trimmed)) {
+    return false;
+  }
+
+  // If genuine Unicode Gujarati is present (>= 15 Gujarati chars), accept it
+  const gujaratiChars = (trimmed.match(/[\u0A80-\u0AFF]/g) || []).length;
+  if (gujaratiChars >= 15) {
+    return true;
+  }
+
+  // Otherwise require clean English prose (words with normal vowels, no gibberish consonant runs like 'frhhpf')
+  const words = trimmed.split(/\s+/).filter((w) => /^[A-Za-z]{3,}$/.test(w));
+  if (words.length < 6) return false;
+  const vowelWords = words.filter((w) => /[aeiouyAEIOUY]/.test(w));
+  if (vowelWords.length / words.length < 0.75) {
+    return false;
+  }
+  // Reject unnatural internal uppercase/consonant gibberish like 'blpfNpdfu' or 'frhhpf'
+  const weirdWords = words.filter((w) => /[a-z][A-Z]|[bcdfghjklmnpqrstvwxz]{5,}/i.test(w));
+  if (weirdWords.length / words.length > 0.15) {
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Extracts real Unicode text clusters & percentage bounding boxes from a PDF page
+ * using pdfjs-dist. Returns [] cleanly if the PDF is scanned/outlined or uses legacy non-Unicode fonts.
+ */
+async function extractPageHotspotsFromPdf(
+  pdfBuffer: Buffer
+): Promise<Map<number, ExtractedHotspotBlock[]>> {
+  const result = new Map<number, ExtractedHotspotBlock[]>();
+  try {
+    const pdfjs: any = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    const loadingTask = pdfjs.getDocument({
+      data: new Uint8Array(pdfBuffer),
+      useSystemFonts: true,
+      disableFontFace: true,
+      verbosity: 0,
+    });
+    const doc = await loadingTask.promise;
+
+    for (let pageNum = 1; pageNum <= doc.numPages; pageNum++) {
+      try {
+        const page = await doc.getPage(pageNum);
+        const viewport = page.getViewport({ scale: 1 });
+        const pageW = viewport.width || 1;
+        const pageH = viewport.height || 1;
+        const textContent = await page.getTextContent();
+
+        type TextItem = { x: number; y: number; w: number; h: number; str: string };
+        const items: TextItem[] = [];
+
+        for (const raw of textContent.items || []) {
+          const str = typeof raw.str === "string" ? raw.str.trim() : "";
+          if (!str) continue;
+          // Keep only readable Unicode Gujarati / Devanagari / Latin / digits
+          const readableChars = (str.match(/[\u0A80-\u0AFF\u0900-\u097FA-Za-z0-9]/g) || []).length;
+          if (readableChars === 0) continue;
+
+          const tx = raw.transform || [1, 0, 0, 1, 0, 0];
+          const fontH = Math.max(Math.abs(tx[3] || 10), 8);
+          const x = Math.max(0, tx[4] || 0);
+          const yFromTop = Math.max(0, pageH - (tx[5] || 0) - fontH);
+          const w = Math.max(raw.width || str.length * fontH * 0.5, fontH);
+
+          items.push({ x, y: yFromTop, w, h: fontH, str });
+        }
+
+        if (items.length < 6) continue;
+
+        // Cluster items into a 2x3 broadsheet grid (6 regions) so overlapping text stays grouped cleanly
+        const regions = new Map<string, TextItem[]>();
+        for (const it of items) {
+          const col = it.x < pageW * 0.5 ? 0 : 1;
+          const row = it.y < pageH * 0.36 ? 0 : it.y < pageH * 0.68 ? 1 : 2;
+          const key = `${row}-${col}`;
+          const list = regions.get(key) || [];
+          list.push(it);
+          regions.set(key, list);
+        }
+
+        const blocks: ExtractedHotspotBlock[] = [];
+        for (const [, list] of regions) {
+          const joined = list
+            .sort((a, b) => (Math.abs(a.y - b.y) > 8 ? a.y - b.y : a.x - b.x))
+            .map((i) => i.str)
+            .join(" ")
+            .replace(/\s+/g, " ")
+            .trim();
+
+          if (!isCleanReadableUnicode(joined)) continue;
+
+          const minX = Math.min(...list.map((i) => i.x));
+          const minY = Math.min(...list.map((i) => i.y));
+          const maxX = Math.max(...list.map((i) => i.x + i.w));
+          const maxY = Math.max(...list.map((i) => i.y + i.h));
+
+          const xPct = Math.max(1, Math.min(95, Number(((minX / pageW) * 100).toFixed(2))));
+          const yPct = Math.max(1, Math.min(95, Number(((minY / pageH) * 100).toFixed(2))));
+          const wPct = Math.max(8, Math.min(98 - xPct, Number((((maxX - minX) / pageW) * 100).toFixed(2))));
+          const hPct = Math.max(6, Math.min(98 - yPct, Number((((maxY - minY) / pageH) * 100).toFixed(2))));
+
+          blocks.push({
+            xPercent: xPct,
+            yPercent: yPct,
+            widthPercent: wPct,
+            heightPercent: hPct,
+            headlineText: joined.slice(0, 290),
+          });
+        }
+
+        if (blocks.length > 0) {
+          result.set(pageNum, blocks);
+        }
+      } catch {
+        // Skip page if text extraction fails
+      }
+    }
+    await doc.destroy().catch(() => {});
+  } catch {
+    // Non-fatal: scanned/image PDFs still render cleanly without auto-hotspots
+  }
+  return result;
+}
+
 export interface ProcessPdfResult {
   success: boolean;
   pageCount: number;
@@ -123,9 +273,10 @@ export class EpaperPdfProcessor {
       }
 
       // 6. Real PDF Page Rasterization
-      // Use pdf-to-img to render genuine broadsheet pages at scale 1.5 (approx 150 DPI)
-      const highresDoc = await pdf(pdfBuffer, { scale: 1.5, format: "png" });
-      const thumbDoc = await pdf(pdfBuffer, { scale: 0.25, format: "png" });
+      // Use pdf-to-img to render ultra-crisp high-resolution broadsheet pages at scale 3.0 (~220+ DPI)
+      const RENDER_SCALE = 3.0;
+      const highresDoc = await pdf(pdfBuffer, { scale: RENDER_SCALE, format: "png" });
+      const thumbDoc = await pdf(pdfBuffer, { scale: 0.55, format: "png" });
 
       const generatedPages: ProcessPdfResult["pages"] = [];
       let pageIndex = 0;
@@ -141,6 +292,9 @@ export class EpaperPdfProcessor {
       for await (const thumbPage of thumbDoc) {
         thumbBuffers.push(thumbPage);
       }
+
+      // 6B. Auto-extract real Unicode article text blocks & bounding boxes per page
+      const extractedHotspotsByPage = await extractPageHotspotsFromPdf(pdfBuffer);
 
       for (let i = 0; i < highresBuffers.length; i++) {
         const pageNumber = i + 1;
@@ -160,8 +314,8 @@ export class EpaperPdfProcessor {
         // Get actual page dimension from PDFDocument
         const page = pdfDoc.getPage(i);
         const { width, height } = page.getSize();
-        const widthPx = Math.round(width * 1.5);
-        const heightPx = Math.round(height * 1.5);
+        const widthPx = Math.round(width * RENDER_SCALE);
+        const heightPx = Math.round(height * RENDER_SCALE);
 
         // Save genuine rendered images to isolated storage
         const highres = await epaperStorage.savePageImage(editionId, pageNumber, highresBuffer, false);
@@ -172,9 +326,9 @@ export class EpaperPdfProcessor {
         const labelEn = `Page ${pageNumber}${pageNumber === 1 ? " — Front Page" : pageNumber === pageCount ? " — Back Page" : ""}`;
         const labelGu = `પાનું ${pageNumber}${pageNumber === 1 ? " — મુખ્ય પ્રથમ પાનું" : pageNumber === pageCount ? " — અંતિમ પાનું" : ""}`;
 
-        // Save page to database
+        // Save page & auto-extracted real hotspots to database
         try {
-          await this.prisma.ePaperPage.create({
+          const createdPage = await this.prisma.ePaperPage.create({
             data: {
               editionId,
               pageNumber,
@@ -187,6 +341,21 @@ export class EpaperPdfProcessor {
               isFreePreview: isFree,
             },
           });
+
+          const pageBlocks = extractedHotspotsByPage.get(pageNumber) || [];
+          if (pageBlocks.length > 0) {
+            await this.prisma.ePaperHotspot.createMany({
+              data: pageBlocks.map((b) => ({
+                pageId: createdPage.id,
+                xPercent: b.xPercent,
+                yPercent: b.yPercent,
+                widthPercent: b.widthPercent,
+                heightPercent: b.heightPercent,
+                headlineText: b.headlineText,
+                targetType: "article",
+              })),
+            });
+          }
         } catch {
           // standby mode
         }

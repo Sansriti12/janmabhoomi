@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Check, ShieldCheck, Newspaper, Sparkles, AlertCircle } from "lucide-react";
+import { Check, ShieldCheck, Newspaper, AlertCircle } from "lucide-react";
 import { Locale } from "@/lib/i18n/config";
 import { useSubscriberAuth } from "@/lib/context/SubscriberAuthContext";
 import { RazorpayCheckoutModal, PlanItem } from "@/components/subscription/RazorpayCheckoutModal";
@@ -89,7 +89,7 @@ export default function SubscribePage({ params }: { params: Promise<{ lang: Loca
         {/* Page Title & Mission Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#016BB7]/10 text-[#016BB7] text-xs font-bold mb-3 tracking-wide">
-            <Sparkles className="h-4 w-4" />
+            <ShieldCheck className="h-4 w-4" />
             <span>{isGu ? "જન્મભૂમિ ટ્રસ્ટ ડિજિટલ સબ્સ્ક્રિપ્શન" : "Janmabhoomi Trust Digital Subscription"}</span>
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-[#1F2937] font-serif mb-3 tracking-tight">

@@ -150,7 +150,7 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
     return `${nextPath}${currentSearch}`;
   };
 
-  // Decluttered Primary Navigation: 8 Core Editorial Desks
+  // Decluttered Primary Navigation: Core Editorial Desks + Advertise
   const primaryNav = [
     { label: dict.nav.home, href: `/${lang}`, exact: true },
     { label: dict.nav.latest, href: `/${lang}/latest` },
@@ -162,6 +162,10 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
     {
       label: lang === "gu" ? "અગ્રલેખ" : "Editorial (અગ્રલેખ)",
       href: `/${lang}/editorial`,
+    },
+    {
+      label: lang === "gu" ? "જાહેરાત આપો" : "Advertise With Us",
+      href: `/${lang}/advertise`,
     },
   ];
 
@@ -265,6 +269,12 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
               className="hidden xl:flex items-center gap-3.5 font-semibold text-white/95"
             >
               <Link
+                href={`/${lang}/advertise`}
+                className="inline-flex items-center gap-1 rounded bg-amber-400 px-2 py-0.5 text-[11px] font-black text-[#071F3A] hover:bg-amber-300 transition-colors"
+              >
+                <span>{lang === "gu" ? "જાહેરાત આપો" : "Advertise"}</span>
+              </Link>
+              <Link
                 href={`/${lang}/about`}
                 className="hover:text-white transition-colors"
               >
@@ -329,7 +339,7 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
 
       {/* ROW 2 – MAIN BRANDING HEADER (Logo placed cleanly on the LEFT per Modern Redesign) */}
       <div className="bg-white overflow-hidden sm:overflow-visible">
-        <div className="container-wide py-1.5 sm:py-2 flex items-center justify-between gap-3">
+        <div className="container-wide py-2 sm:py-2.5 flex items-center justify-between gap-4">
           {/* Left: Official Blue Janmabhoomi Logo */}
           <div className="flex items-center shrink-0">
             <Link
@@ -337,7 +347,7 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
               className="group flex items-center select-none"
               title="Janmabhoomi - જન્મભૂમિ"
             >
-              <BrandLogo priority compact className="hover:opacity-95 transition-opacity" />
+              <BrandLogo priority className="hover:opacity-95 transition-opacity" />
             </Link>
           </div>
 

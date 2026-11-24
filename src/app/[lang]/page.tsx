@@ -186,9 +186,10 @@ export default async function HomePage({
         showChoghadiya={true}
       />
 
-      {/* SECTION 4 – Advertisement Placement */}
+      {/* SECTION 4 – Primary Advertisement Leaderboard */}
       <AdPlacement
         slot={primaryAd}
+        slotKey="homepage_leaderboard"
         lang={locale}
         label={dict.home.advertisementLabel}
       />

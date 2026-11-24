@@ -101,6 +101,29 @@ const PUB_META: Record<
       },
     ],
   },
+  "pub-madhuvan": {
+    nameGu: "મધુવન",
+    nameEn: "MADHUVAN SUNDAY MAGAZINE",
+    taglineGu: "રવિવારીય મધુવન પૂર્તિ • સાહિત્ય, વાર્તા, કાવ્ય, આરોગ્ય અને પરિવાર",
+    city: "Mumbai",
+    accent: "#7C2D12",
+    pages: [
+      {
+        labelGu: "પાનું ૧ • મધુવન મુખ્ય કવર",
+        labelEn: "Page 1 • Madhuvan Cover Story",
+        leadGu: "મધુવન રવિવારીય વિશેષ: સાહિત્ય, સંસ્કૃતિ અને જીવનમૂલ્યોની સફર",
+        subGu: "ગુજરાતી વાર્તા, નવલકથા હપ્તો અને લોકપ્રિય કટાર લેખો",
+        col2Gu: "પરિવાર, આરોગ્ય, પ્રવાસ અને કલા-સંગીતની રસપ્રદ વાંચન સામગ્રી",
+      },
+      {
+        labelGu: "પાનું ૨ • વાર્તા, કાવ્ય અને ચિંતન",
+        labelEn: "Page 2 • Fiction, Poetry & Reflections",
+        leadGu: "સમકાલીન ગુજરાતી સાહિત્યમાં નવા લેખકોનો ઉભરતો અવાજ",
+        subGu: "આરોગ્ય અને આયુર્વેદ: ઋતુ પ્રમાણે આહાર અને જીવનશૈલી માર્ગદર્શન",
+        col2Gu: "ગૃહિણી અને યુવા વાચકો માટે વિશેષ સર્જનાત્મક વિભાગ",
+      },
+    ],
+  },
 };
 
 function escapeXml(str: string): string {

@@ -60,11 +60,11 @@ export function buildApp(): FastifyInstance {
     credentials: true,
   });
 
-  // Multipart streaming upload support for PDF files
+  // Multipart streaming upload support for single or multi-file page-wise PDF uploads
   app.register(multipart, {
     limits: {
       fileSize: env.MAX_PDF_UPLOAD_SIZE_MB * 1024 * 1024,
-      files: 1,
+      files: 60,
     },
   });
 

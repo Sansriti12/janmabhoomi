@@ -136,14 +136,7 @@ class MockNewsDataProvider implements INewsDataProvider {
       })).slice(0, limit);
     }
     const matching = MOCK_ARTICLES.filter((article) => article.category === category);
-    if (matching.length >= 2) {
-      return matching.slice(0, limit);
-    }
-    // Provide supplementary clearly-marked demo items if a secondary category has fewer entries
-    return [...matching, ...MOCK_ARTICLES.slice(0, Math.max(0, 3 - matching.length))].slice(
-      0,
-      limit
-    );
+    return matching.slice(0, limit);
   }
 
   async getLatestArticles(limit = 12, _publicationId?: string): Promise<NewsArticle[]> {

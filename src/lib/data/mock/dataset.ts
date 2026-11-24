@@ -538,6 +538,402 @@ export const MOCK_ARTICLES: NewsArticle[] = [
     epaperEdition: { en: "Mumbai Main Edition", gu: "મુંબઈ મુખ્ય આવૃત્તિ" },
     isDemonstrationData: true,
   },
+  {
+    id: "jb-maran-02",
+    slug: "shradhanjali-besanu-kutch-samaj-mumbai-ghatkopar",
+    category: "maran",
+    categoryLabel: { en: "Maran (Obituaries)", gu: "મરણ નોંધ" },
+    title: {
+      en: "Besanu & Prarthana Sabha: Late Shri Harshadrai Nanji Shah (Ghatkopar, Mumbai)",
+      gu: "બેસણું અને પ્રાર્થનાસભા: સ્વ. શ્રી હર્ષદરાય નાનજી શાહ (ઘાટકોપર, મુંબઈ)",
+    },
+    summary: {
+      en: "Prayer meeting scheduled at Kutchi Visa Oswal Hall, Ghatkopar East, Mumbai from 4:00 PM to 6:00 PM.",
+      gu: "ઘાટકોપર પૂર્વ સ્થિત કચ્છી વિસા ઓસવાળ મહાજન વાડી ખાતે સાંજે ૪:૦૦ થી ૬:૦૦ દરમિયાન પ્રાર્થનાસભાનું આયોજન.",
+    },
+    teaserParagraphs: {
+      en: [
+        "MUMBAI: With deep sorrow, the Shah family announces the peaceful passing of Shri Harshadrai Nanji Shah (age 82), originally of Mandvi, Kutch, and a long-time resident of Ghatkopar, Mumbai.",
+        "The Besanu (prayer meeting) will be held on Thursday from 4:00 PM to 6:00 PM at Kutchi Visa Oswal Mahajan Wadi, Ghatkopar (East). Relatives and well-wishers are requested to join in paying respects.",
+      ],
+      gu: [
+        "મુંબઈ: મૂળ માંડવી (કચ્છ) અને હાલ ઘાટકોપર (મુંબઈ) નિવાસી શ્રી હર્ષદરાય નાનજી શાહ (ઉંમર ૮૨)નું દુઃખદ અવસાન થયું છે.",
+        "સદ્ગતનું બેસણું અને પ્રાર્થનાસભા ગુરુવારે સાંજે ૪:૦૦ થી ૬:૦૦ કલાકે કચ્છી વિસા ઓસવાળ મહાજન વાડી, ઘાટકોપર (પૂર્વ) ખાતે રાખવામાં આવેલ છે.",
+      ],
+    },
+    author: { en: "Janmabhoomi Notice Desk", gu: "જન્મભૂમિ નોંધ વિભાગ" },
+    location: { en: "Ghatkopar, Mumbai", gu: "ઘાટકોપર, મુંબઈ" },
+    publishedAt: "2026-11-22T08:30:00+05:30",
+    readTimeMinutes: 2,
+    imageUrl: "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=800&q=80",
+    imageCaption: {
+      en: "Community obituary & prayer meeting notice.",
+      gu: "સામાજિક અવસાન નોંધ અને પ્રાર્થનાસભા.",
+    },
+    epaperPageNumber: 8,
+    epaperEdition: { en: "Mumbai Main Edition", gu: "મુંબઈ મુખ્ય આવૃત્તિ" },
+    isDemonstrationData: true,
+  },
+  {
+    id: "jb-maran-03",
+    slug: "besanu-notice-late-shrimati-pushpaben-mehta-borivali",
+    category: "maran",
+    categoryLabel: { en: "Maran (Obituaries)", gu: "મરણ નોંધ" },
+    title: {
+      en: "Shradhanjali Notice: Late Smt. Pushpaben Pravinchandra Mehta (Borivali, Mumbai)",
+      gu: "શ્રદ્ધાંજલિ નોંધ: સ્વ. શ્રીમતી પુષ્પાબેન પ્રવીણચંદ્ર મહેતા (બોરીવલી, મુંબઈ)",
+    },
+    summary: {
+      en: "Saurashtra Nagarik Mandal and Mehta family announce Prarthana Sabha in Borivali West.",
+      gu: "મૂળ ભાવનગર અને હાલ બોરીવલી પશ્ચિમ નિવાસી સ્વ. પુષ્પાબેન મહેતાની પ્રાર્થનાસભાનું આયોજન.",
+    },
+    teaserParagraphs: {
+      en: [
+        "MUMBAI: Smt. Pushpaben Pravinchandra Mehta (age 78), originally from Bhavnagar and residing in Borivali West, passed away peacefully surrounded by family.",
+        "A prayer meeting in her memory will be held on Friday from 5:00 PM to 6:30 PM at Prabodhankar Thackeray Mini Hall, Borivali (West).",
+      ],
+      gu: [
+        "મુંબઈ: મૂળ ભાવનગર અને હાલ બોરીવલી (પશ્ચિમ) નિવાસી શ્રીમતી પુષ્પાબેન પ્રવીણચંદ્ર મહેતા (ઉંમર ૭૮)નું અવસાન થયું છે.",
+        "તેમની સ્મૃતિમાં પ્રાર્થનાસભા શુક્રવારે સાંજે ૫:૦૦ થી ૬:૩૦ કલાકે પ્રબોધનકાર ઠાકરે મિની હોલ, બોરીવલી (પશ્ચિમ) ખાતે રાખવામાં આવી છે.",
+      ],
+    },
+    author: { en: "Janmabhoomi Notice Desk", gu: "જન્મભૂમિ નોંધ વિભાગ" },
+    location: { en: "Borivali, Mumbai", gu: "બોરીવલી, મુંબઈ" },
+    publishedAt: "2026-11-21T09:15:00+05:30",
+    readTimeMinutes: 2,
+    imageUrl: "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=800&q=80",
+    imageCaption: {
+      en: "Official Shradhanjali & Besanu directory.",
+      gu: "અધિકૃત શ્રદ્ધાંજલિ અને બેસણું ડિરેક્ટરી.",
+    },
+    epaperPageNumber: 8,
+    epaperEdition: { en: "Mumbai Main Edition", gu: "મુંબઈ મુખ્ય આવૃત્તિ" },
+    isDemonstrationData: true,
+  },
+  {
+    id: "jb-maran-04",
+    slug: "prarthana-sabha-late-shri-kantilal-patel-ahmedabad-vadodra",
+    category: "maran",
+    categoryLabel: { en: "Maran (Obituaries)", gu: "મરણ નોંધ" },
+    title: {
+      en: "Obituary & Besanu: Late Shri Kantilal Maganbhai Patel (Ahmedabad / Vadodra)",
+      gu: "અવસાન નોંધ અને બેસણું: સ્વ. શ્રી કાંતિલાલ મગનભાઈ પટેલ (અમદાવાદ / વડોદરા)",
+    },
+    summary: {
+      en: "Prayer gathering organized by the Patel family in Navrangpura, Ahmedabad for relatives across Gujarat and Mumbai.",
+      gu: "અમદાવાદના નવરંગપુરા ખાતે પટેલ પરિવાર દ્વારા પ્રાર્થનાસભાનું આયોજન.",
+    },
+    teaserParagraphs: {
+      en: [
+        "AHMEDABAD: Respected educationist and social worker Shri Kantilal Maganbhai Patel (age 84) passed away peacefully in Ahmedabad.",
+        "The family has arranged a Besanu from 4:30 PM to 6:00 PM at Sardar Patel Seva Samaj Hall, Navrangpura, Ahmedabad.",
+      ],
+      gu: [
+        "અમદાવાદ: જાણીતા શિક્ષણવિદ અને સમાજસેવક શ્રી કાંતિલાલ મગનભાઈ પટેલ (ઉંમર ૮૪)નું અમદાવાદ ખાતે અવસાન થયું છે.",
+        "સદ્ગતનું બેસણું સાંજે ૪:૩૦ થી ૬:૦૦ કલાકે સરદાર પટેલ સેવા સમાજ હોલ, નવરંગપુરા, અમદાવાદ ખાતે રાખવામાં આવેલ છે.",
+      ],
+    },
+    author: { en: "Janmabhoomi Notice Desk", gu: "જન્મભૂમિ નોંધ વિભાગ" },
+    location: { en: "Ahmedabad / Vadodra", gu: "અમદાવાદ / વડોદરા" },
+    publishedAt: "2026-11-20T07:45:00+05:30",
+    readTimeMinutes: 2,
+    imageUrl: "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=800&q=80",
+    imageCaption: {
+      en: "Gujarat & Mumbai community obituary notices.",
+      gu: "ગુજરાત અને મુંબઈ સામાજિક મરણ નોંધ.",
+    },
+    epaperPageNumber: 8,
+    epaperEdition: { en: "Mumbai Main Edition", gu: "મુંબઈ મુખ્ય આવૃત્તિ" },
+    isDemonstrationData: true,
+  },
+  {
+    id: "jb-city-04",
+    slug: "mumbai-surat-vadodra-urban-water-and-smart-traffic-upgrade",
+    category: "city",
+    categoryLabel: { en: "City", gu: "શહેર" },
+    title: {
+      en: "Mumbai, Surat & Vadodra Roll Out Integrated Smart Traffic Signals and Drinking Water Grids",
+      gu: "મુંબઈ, સુરત અને વડોદરામાં સ્માર્ટ ટ્રાફિક સિગ્નલ અને પીવાના પાણીના નવા પ્રોજેક્ટ્સ શરૂ",
+    },
+    summary: {
+      en: "Municipal corporations approve adaptive junction signals and 24x7 pressurized water pipelines across major residential corridors.",
+      gu: "મહાનગરપાલિકાઓ દ્વારા મુખ્ય ચાર રસ્તાઓ પર સ્માર્ટ સિગ્નલ અને રહેણાંક વિસ્તારોમાં શુદ્ધ પાણીની લાઇનો મંજૂર.",
+    },
+    teaserParagraphs: {
+      en: [
+        "MUMBAI / VADODRA: Civic authorities across Mumbai, Surat, and Vadodra have launched coordinated urban upgrades targeting peak-hour traffic congestion and summer water supply resilience.",
+        "Over 140 arterial junctions will receive adaptive signal controllers synchronized with public bus corridors.",
+      ],
+      gu: [
+        "મુંબઈ / વડોદરા: મુંબઈ, સુરત અને વડોદરા મહાનગરપાલિકાઓ દ્વારા ટ્રાફિક નિયંત્રણ અને પાણી પુરવઠાની વ્યવસ્થા મજબૂત કરવા નવા પ્રોજેક્ટ્સ શરૂ કરાયા છે.",
+        "૧૪૦થી વધુ મુખ્ય જંક્શનો પર અદ્યતન ટ્રાફિક સિગ્નલ સિસ્ટમ લગાવવામાં આવશે જેનાથી દૈનિક મુસાફરોને મોટી રાહત મળશે.",
+      ],
+    },
+    author: { en: "Civic Affairs Desk", gu: "મહાનગર સંવાદદાતા" },
+    location: { en: "Mumbai / Vadodra", gu: "મુંબઈ / વડોદરા" },
+    publishedAt: "2026-11-22T10:20:00+05:30",
+    readTimeMinutes: 3,
+    imageUrl: "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?auto=format&fit=crop&w=800&q=80",
+    imageCaption: {
+      en: "Urban civic infrastructure and traffic corridor.",
+      gu: "શહેરી ટ્રાફિક અને નાગરિક સુવિધા પ્રોજેક્ટ.",
+    },
+    epaperPageNumber: 7,
+    epaperEdition: { en: "Mumbai Main Edition", gu: "મુંબઈ મુખ્ય આવૃત્તિ" },
+    isDemonstrationData: true,
+  },
+  {
+    id: "jb-biz-03",
+    slug: "fpi-inflows-cross-94250-crore-indian-equities-rally",
+    category: "business",
+    categoryLabel: { en: "Business", gu: "વ્યાપાર" },
+    title: {
+      en: "Foreign Portfolio Investors Pump ₹94,250 Crore Into Indian Equities Amid Strong GDP Outlook",
+      gu: "ભારતીય શેરબજારમાં વિદેશી રોકાણકારોનો વિશ્વાસ: એફપીઆઈ દ્વારા ₹૯૪,૨૫૦ કરોડનું રોકાણ",
+    },
+    summary: {
+      en: "Banking, capital goods, and pharma stocks lead Dalal Street gains as NSE issues fresh investor safety advisories.",
+      gu: "બેંકિંગ, કેપિટલ ગુડ્સ અને ફાર્મા શેરોમાં તેજી; એનએસઇ દ્વારા રોકાણકારો માટે સુરક્ષા માર્ગદર્શિકા જાહેર.",
+    },
+    teaserParagraphs: {
+      en: [
+        "MUMBAI: Foreign Portfolio Investors (FPIs) have injected ₹94,250 crore into Indian equities this quarter, buoyed by steady corporate earnings and strong domestic consumption.",
+        "Dalal Street analysts note that retail SIP inflows continue to provide a resilient cushion against global rate volatility.",
+      ],
+      gu: [
+        "મુંબઈ: મજબૂત કોર્પોરેટ પરિણામો અને સ્થિર આર્થિક વૃદ્ધિદરને પગલે વિદેશી સંસ્થાકીય રોકાણકારોએ ભારતીય બજારમાં ₹૯૪,૨૫૦ કરોડનું રોકાણ કર્યું છે.",
+        "બજાર નિષ્ણાતોના મતે મ્યુચ્યુઅલ ફંડમાં રિટેલ એસઆઈપી પ્રવાહ સતત વધવાથી ભારતીય બજાર વધુ મજબૂત બન્યું છે.",
+      ],
+    },
+    author: { en: "Vyapar Markets Bureau", gu: "વ્યાપાર બજાર બ્યુરો" },
+    location: { en: "Mumbai", gu: "મુંબઈ" },
+    publishedAt: "2026-11-22T11:40:00+05:30",
+    readTimeMinutes: 4,
+    imageUrl: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=800&q=80",
+    imageCaption: {
+      en: "Dalal Street market indices and trading screen.",
+      gu: "દલાલ સ્ટ્રીટ શેરબજાર અને વ્યાપાર ગતિવિધિ.",
+    },
+    epaperPageNumber: 2,
+    epaperEdition: { en: "Mumbai Main Edition", gu: "મુંબઈ મુખ્ય આવૃત્તિ" },
+    isDemonstrationData: true,
+  },
+  {
+    id: "jb-biz-04",
+    slug: "gold-bullion-diamond-export-demand-surge-zaveri-bazaar-surat",
+    category: "business",
+    categoryLabel: { en: "Business", gu: "વ્યાપાર" },
+    title: {
+      en: "Wedding Season Lifts Zaveri Bazaar Gold Demand; Surat Diamond Bourse Reports Fresh Export Orders",
+      gu: "લગ્નસરાની સીઝનમાં ઝવેરી બજારમાં સોનાની માંગમાં વધારો; સુરત ડાયમંડ બુર્સમાં નવા નિકાસ ઓર્ડર",
+    },
+    summary: {
+      en: "Jewellery retailers in Mumbai, Ahmedabad, and Surat report 18% higher footfall as hallmarking compliance boosts buyer confidence.",
+      gu: "મુંબઈ, અમદાવાદ અને સુરતના જ્વેલરી બજારોમાં ૧૮% વધુ ઘરાકી; હોલમાર્કિંગથી ગ્રાહકોનો વિશ્વાસ વધ્યો.",
+    },
+    teaserParagraphs: {
+      en: [
+        "MUMBAI / SURAT: Bullion traders in Mumbai's Zaveri Bazaar and polished diamond exporters at the Surat Diamond Bourse reported an uptick in wedding-season bookings this week.",
+        "Industry bodies expect festive and wedding jewellery sales across Gujarat and Maharashtra to grow steadily through the winter quarter.",
+      ],
+      gu: [
+        "મુંબઈ / સુરત: લગ્નસરાની સીઝન શરૂ થતાં મુંબઈના ઝવેરી બજારમાં સોના-ચાંદીની ખરીદીમાં તેજી આવી છે અને સુરત ડાયમંડ બુર્સમાં નવા નિકાસ ઓર્ડર મળ્યા છે.",
+        "વ્યાપારી સંગઠનોના મતે ગુજરાત અને મહારાષ્ટ્રમાં શિયાળુ સીઝન દરમિયાન જ્વેલરી વેચાણમાં મજબૂત વૃદ્ધિ રહેશે.",
+      ],
+    },
+    author: { en: "Commodities Desk", gu: "કોમોડિટીઝ વિભાગ" },
+    location: { en: "Mumbai / Surat", gu: "મુંબઈ / સુરત" },
+    publishedAt: "2026-11-21T14:10:00+05:30",
+    readTimeMinutes: 3,
+    imageUrl: "https://images.unsplash.com/photo-1610375461246-83df859d849d?auto=format&fit=crop&w=800&q=80",
+    imageCaption: {
+      en: "Bullion and jewellery trade overview.",
+      gu: "સોના-ચાંદી અને હીરા બજાર.",
+    },
+    epaperPageNumber: 9,
+    epaperEdition: { en: "Mumbai Main Edition", gu: "મુંબઈ મુખ્ય આવૃત્તિ" },
+    isDemonstrationData: true,
+  },
+  {
+    id: "jb-sports-03",
+    slug: "india-beats-new-zealand-5th-odi-lakshya-sen-japan-masters",
+    category: "sports",
+    categoryLabel: { en: "Sports", gu: "રમતગમત" },
+    title: {
+      en: "India Defeats New Zealand by 22 Runs in Thrilling 5th ODI; Lakshya Sen Clinches Japan Masters Title",
+      gu: "ભારતે ૫મી વન-ડેમાં ન્યુઝીલેન્ડને ૨૨ રને હરાવ્યું; લક્ષ્ય સેને જાપાન માસ્ટર્સ ટાઇટલ જીત્યું",
+    },
+    summary: {
+      en: "Disciplined death bowling seals series victory for India while badminton star Lakshya Sen dominates the Kumamoto final in straight games.",
+      gu: "ભારતીય બોલરોના શાનદાર પ્રદર્શનથી શ્રેણી વિજય; બેડમિન્ટનમાં લક્ષ્ય સેને સીધા સેટમાં ફાઇનલ જીતી.",
+    },
+    teaserParagraphs: {
+      en: [
+        "MUMBAI: India registered a commanding 22-run victory over New Zealand in the fifth ODI, powered by a crucial middle-order partnership and clinical death-overs bowling.",
+        "Meanwhile, in badminton, India's Lakshya Sen captured the Japan Masters title with a dominant straight-games triumph in the final.",
+      ],
+      gu: [
+        "મુંબઈ: ભારતીય ક્રિકેટ ટીમે પાંચમી વન-ડે મેચમાં શાનદાર બેટિંગ અને અંતિમ ઓવરોમાં ચુસ્ત બોલિંગની મદદથી ન્યુઝીલેન્ડને ૨૨ રને પરાજય આપ્યો છે.",
+        "બીજી તરફ બેડમિન્ટનમાં ભારતના સ્ટાર ખેલાડી લક્ષ્ય સેને જાપાન માસ્ટર્સની ફાઇનલમાં સીધા સેટમાં વિજય મેળવી ટાઇટલ પોતાના નામે કર્યું છે.",
+      ],
+    },
+    author: { en: "Sports Desk", gu: "રમતગમત વિભાગ" },
+    location: { en: "Mumbai", gu: "મુંબઈ" },
+    publishedAt: "2026-11-22T09:00:00+05:30",
+    readTimeMinutes: 3,
+    imageUrl: "https://images.unsplash.com/photo-1531415074968-036ba1b575da?auto=format&fit=crop&w=800&q=80",
+    imageCaption: {
+      en: "International cricket and badminton highlights.",
+      gu: "ક્રિકેટ અને બેડમિન્ટન વિજયની ક્ષણો.",
+    },
+    epaperPageNumber: 11,
+    epaperEdition: { en: "Mumbai Main Edition", gu: "મુંબઈ મુખ્ય આવૃત્તિ" },
+    isDemonstrationData: true,
+  },
+  {
+    id: "jb-sports-04",
+    slug: "gujarat-table-tennis-chess-championship-ahmedabad-vadodra",
+    category: "sports",
+    categoryLabel: { en: "Sports", gu: "રમતગમત" },
+    title: {
+      en: "State Junior Chess & Table Tennis Championships Draw Record 1,200 Entries Across Gujarat",
+      gu: "ગુજરાત રાજ્ય જુનિયર ચેસ અને ટેબલ ટેનિસ સ્પર્ધામાં રેકોર્ડ ૧,૨૦૦ ખેલાડીઓએ ભાગ લીધો",
+    },
+    summary: {
+      en: "Young prodigies from Ahmedabad, Vadodra, Surat, and Rajkot compete for national selection berths.",
+      gu: "અમદાવાદ, વડોદરા, સુરત અને રાજકોટના યુવા ખેલાડીઓ રાષ્ટ્રીય પસંદગી માટે સ્પર્ધામાં ઉતર્યા.",
+    },
+    teaserParagraphs: {
+      en: [
+        "AHMEDABAD: Over 1,200 junior athletes from across Gujarat have converged for the annual State Chess and Table Tennis Championships.",
+        "Coaches highlighted the rapid rise of academy infrastructure in Vadodra, Surat, and Ahmedabad over the past three seasons.",
+      ],
+      gu: [
+        "અમદાવાદ: ગુજરાત રાજ્ય જુનિયર ચેસ અને ટેબલ ટેનિસ ચેમ્પિયનશિપમાં રાજ્યભરમાંથી ૧,૨૦૦થી વધુ યુવા ખેલાડીઓ ઉત્સાહભેર ભાગ લઈ રહ્યા છે.",
+        "કોચિંગ નિષ્ણાતોએ વડોદરા, સુરત અને અમદાવાદમાં આધુનિક સ્પોર્ટ્સ અકાદમીઓના વિકાસની પ્રશંસા કરી હતી.",
+      ],
+    },
+    author: { en: "Sports Correspondent", gu: "રમતગમત સંવાદદાતા" },
+    location: { en: "Ahmedabad", gu: "અમદાવાદ" },
+    publishedAt: "2026-11-20T17:20:00+05:30",
+    readTimeMinutes: 3,
+    imageUrl: "https://images.unsplash.com/photo-1529699211952-734e80c4d42b?auto=format&fit=crop&w=800&q=80",
+    imageCaption: {
+      en: "State junior chess championship hall.",
+      gu: "રાજ્ય કક્ષાની જુનિયર ચેસ સ્પર્ધા.",
+    },
+    epaperPageNumber: 11,
+    epaperEdition: { en: "Mumbai Main Edition", gu: "મુંબઈ મુખ્ય આવૃત્તિ" },
+    isDemonstrationData: true,
+  },
+  {
+    id: "jb-ent-03",
+    slug: "mumbai-film-shooting-tourism-policy-gujarati-cinema-showcase",
+    category: "entertainment",
+    categoryLabel: { en: "Entertainment", gu: "મનોરંજન" },
+    title: {
+      en: "Mumbai Launches Film Shooting Tourism Circuit; Gujarati Cinema Wins Acclaim at National Festival",
+      gu: "મુંબઈમાં ફિલ્મ શૂટિંગ ટુરિઝમની નવી પહેલ; રાષ્ટ્રીય મહોત્સવમાં ગુજરાતી સિનેમાની પ્રશંસા",
+    },
+    summary: {
+      en: "Heritage studios in Mumbai open guided visitor trails while three contemporary Gujarati films earn jury honours.",
+      gu: "મુંબઈના ઐતિહાસિક સ્ટુડિયોમાં પ્રવાસીઓ માટે ગાઇડેડ ટુર; ત્રણ ગુજરાતી ફિલ્મોને રાષ્ટ્રીય સ્તરે સન્માન.",
+    },
+    teaserParagraphs: {
+      en: [
+        "MUMBAI: Maharashtra's cultural department has unveiled a Film Shooting Tourism circuit connecting iconic Mumbai studios with heritage cinema landmarks.",
+        "Meanwhile, three contemporary Gujarati family dramas received standing ovations and jury commendations at the National Regional Film Showcase.",
+      ],
+      gu: [
+        "મુંબઈ: મુંબઈમાં પ્રવાસનને વેગ આપવા માટે ફિલ્મ શૂટિંગ ટુરિઝમ સર્કિટ શરૂ કરવામાં આવી છે, જેમાં પ્રવાસીઓ ઐતિહાસિક સ્ટુડિયોની મુલાકાત લઈ શકશે.",
+        "આ સાથે જ રાષ્ટ્રીય પ્રાદેશિક ફિલ્મ મહોત્સવમાં ત્રણ ગુજરાતી ફિલ્મોને જ્યુરી દ્વારા વિશેષ સન્માન પ્રાપ્ત થયું છે.",
+      ],
+    },
+    author: { en: "Arts & Cinema Desk", gu: "કલા અને સિનેમા વિભાગ" },
+    location: { en: "Mumbai", gu: "મુંબઈ" },
+    publishedAt: "2026-11-22T12:15:00+05:30",
+    readTimeMinutes: 3,
+    imageUrl: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=800&q=80",
+    imageCaption: {
+      en: "Cinema auditorium and film festival showcase.",
+      gu: "સિનેમા મહોત્સવ અને કલા પ્રદર્શન.",
+    },
+    epaperPageNumber: 7,
+    epaperEdition: { en: "Mumbai Main Edition", gu: "મુંબઈ મુખ્ય આવૃત્તિ" },
+    isDemonstrationData: true,
+  },
+  {
+    id: "jb-ent-04",
+    slug: "winter-gujarati-sahitya-kavi-sammelan-mumbai-surat",
+    category: "entertainment",
+    categoryLabel: { en: "Entertainment", gu: "મનોરંજન" },
+    title: {
+      en: "Annual Gujarati Sahitya & Kavi Sammelan Series Opens Across Mumbai, Surat, and Vadodra",
+      gu: "મુંબઈ, સુરત અને વડોદરામાં વાર્ષિક ગુજરાતી સાહિત્ય અને કવિ સંમેલન શ્રેણીનો ભવ્ય પ્રારંભ",
+    },
+    summary: {
+      en: "Renowned poets, folk artists, and literary critics gather for three evenings celebrating Gujarati ghazals and folk heritage.",
+      gu: "જાણીતા કવિઓ, ગઝલકારો અને લોકકલાકારો ત્રિદિવસીય સાહિત્યિક મહોત્સવમાં પ્રસ્તુતિ કરશે.",
+    },
+    teaserParagraphs: {
+      en: [
+        "MUMBAI: Lovers of Gujarati poetry and folk music packed the Bharatiya Vidya Bhavan auditorium for the opening evening of the winter Kavi Sammelan series.",
+        "Following the Mumbai premiere, the travelling literary festival will stage evening sessions in Surat and Vadodra next week.",
+      ],
+      gu: [
+        "મુંબઈ: ભારતીય વિદ્યા ભવન સભાગૃહમાં શિયાળુ ગુજરાતી કવિ સંમેલન અને ગઝલ સંધ્યાનો ભવ્ય પ્રારંભ થયો, જેમાં મોટી સંખ્યામાં સાહિત્યપ્રેમીઓ ઉમટ્યા હતા.",
+        "મુંબઈ બાદ આગામી સપ્તાહે સુરત અને વડોદરામાં પણ આ સાંસ્કૃતિક કાર્યક્રમોનું આયોજન કરાયું છે.",
+      ],
+    },
+    author: { en: "Culture & Literature Desk", gu: "સાહિત્ય અને સંસ્કૃતિ વિભાગ" },
+    location: { en: "Mumbai / Surat", gu: "મુંબઈ / સુરત" },
+    publishedAt: "2026-11-21T16:00:00+05:30",
+    readTimeMinutes: 3,
+    imageUrl: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80",
+    imageCaption: {
+      en: "Evening cultural music and poetry festival.",
+      gu: "સાંસ્કૃતિક કવિ સંમેલન અને સંગીત સંધ્યા.",
+    },
+    epaperPageNumber: 8,
+    epaperEdition: { en: "Mumbai Main Edition", gu: "મુંબઈ મુખ્ય આવૃત્તિ" },
+    isDemonstrationData: true,
+  },
+  {
+    id: "jb-nat-04",
+    slug: "national-digital-health-telemedicine-rural-expansion-india",
+    category: "national",
+    categoryLabel: { en: "National", gu: "રાષ્ટ્રીય" },
+    title: {
+      en: "Centre Expands National Telemedicine & Digital Health Network to 25,000 Additional Rural Centres",
+      gu: "કેન્દ્ર સરકારે ૨૫,૦૦૦ વધુ ગ્રામીણ કેન્દ્રોમાં રાષ્ટ્રીય ટેલિમેડિસિન અને ડિજિટલ આરોગ્ય સેવા વિસ્તારી",
+    },
+    summary: {
+      en: "New specialist video consultation hubs connect district hospitals in Gujarat, Maharashtra, and Delhi with village primary care units.",
+      gu: "ગુજરાત, મહારાષ્ટ્ર અને દિલ્હીની જિલ્લા હોસ્પિટલોને ગ્રામીણ આરોગ્ય કેન્દ્રો સાથે જોડતી નવી પહેલ.",
+    },
+    teaserParagraphs: {
+      en: [
+        "NEW DELHI: The Union Health Ministry announced the expansion of its national telemedicine network to 25,000 additional rural health and wellness centres.",
+        "Patients in remote talukas will gain direct video access to cardiologists, paediatricians, and diagnostic referrals without long-distance travel.",
+      ],
+      gu: [
+        "નવી દિલ્હી: કેન્દ્રીય આરોગ્ય મંત્રાલયે દેશના ૨૫,૦૦૦ વધુ ગ્રામીણ આરોગ્ય કેન્દ્રોમાં રાષ્ટ્રીય ટેલિમેડિસિન સેવાઓના વિસ્તરણની જાહેરાત કરી છે.",
+        "આ સુવિધાથી અંતરિયાળ વિસ્તારના દર્દીઓને નિષ્ણાત તબીબોની ઓનલાઈન સલાહ અને નિદાન સરળતાથી મળી રહેશે.",
+      ],
+    },
+    author: { en: "New Delhi Bureau", gu: "નવી દિલ્હી બ્યુરો" },
+    location: { en: "New Delhi", gu: "નવી દિલ્હી" },
+    publishedAt: "2026-11-22T08:00:00+05:30",
+    readTimeMinutes: 3,
+    imageUrl: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80",
+    imageCaption: {
+      en: "National digital healthcare initiative.",
+      gu: "રાષ્ટ્રીય ડિજિટલ આરોગ્ય અને ટેલિમેડિસિન સેવા.",
+    },
+    epaperPageNumber: 5,
+    epaperEdition: { en: "Mumbai Main Edition", gu: "મુંબઈ મુખ્ય આવૃત્તિ" },
+    isDemonstrationData: true,
+  },
 ];
 
 export const MOCK_EDITORIALS: EditorialArticle[] = [

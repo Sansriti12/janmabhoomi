@@ -53,6 +53,7 @@ const ALL_PUBLICATIONS = [
   { id: "pub-janmabhoomi", name: "Janmabhoomi (જન્મભૂમિ)", code: "JB" },
   { id: "pub-pravasi", name: "Janmabhoomi Pravasi (પ્રવાસી)", code: "JP" },
   { id: "pub-purti", name: "Janmabhoomi Purti (પૂર્તિ)", code: "PURTI" },
+  { id: "pub-madhuvan", name: "Madhuvan (મધુવન)", code: "MDH" },
 ];
 
 export function EpaperAdminDashboard({ lang }: { lang: string }) {
@@ -85,16 +86,72 @@ export function EpaperAdminDashboard({ lang }: { lang: string }) {
   const [newNameEn, setNewNameEn] = useState("Janmabhoomi Daily Evening Edition");
   const [newIssueNumber, setNewIssueNumber] = useState<number>(1);
   const [newFreePreviewLimit, setNewFreePreviewLimit] = useState<number>(2);
-  const [newEditionFile, setNewEditionFile] = useState<File | null>(null);
+  const [newEditionFiles, setNewEditionFiles] = useState<File[]>([]);
 
-  // Upload Modal State
+  // Upload Modal State (Supports 1 combined PDF or multiple page-wise PDFs)
   const [uploadTargetEdition, setUploadTargetEdition] = useState<EditionSummary | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
   const [fileValidationError, setFileValidationError] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const pdfFileInputRef = React.useRef<HTMLInputElement | null>(null);
+
+  const validateAndSortPdfFiles = (incoming: FileList | File[], existing: File[] = []): File[] | null => {
+    const arr = Array.from(incoming);
+    if (arr.length === 0) return existing;
+
+    for (const file of arr) {
+      if (!file.name.toLowerCase().endsWith(".pdf") && file.type !== "application/pdf") {
+        setFileValidationError(
+          isGu
+            ? `અમાન્ય ફાઇલ પ્રકાર (${file.name}). કૃપા કરીને માત્ર પીડીએફ (.pdf) ફાઇલો પસંદ કરો.`
+            : `Invalid file type (${file.name}). Please upload only PDF files (.pdf).`
+        );
+        return null;
+      }
+      if (file.size > 100 * 1024 * 1024) {
+        setFileValidationError(
+          isGu
+            ? `${file.name} નું કદ ૧૦૦ MB કરતાં વધુ છે.`
+            : `${file.name} exceeds the 100 MB per-file limit.`
+        );
+        return null;
+      }
+    }
+
+    const merged = [...existing];
+    for (const f of arr) {
+      if (!merged.some((e) => e.name === f.name && e.size === f.size)) {
+        merged.push(f);
+      }
+    }
+
+    if (merged.length > 60) {
+      setFileValidationError(
+        isGu
+          ? "એક આવૃત્તિમાં વધુમાં વધુ ૬૦ પીડીએફ ફાઇલો અપલોડ કરી શકાય છે."
+          : "Maximum 60 PDF files can be uploaded per edition."
+      );
+      return null;
+    }
+
+    // Natural numeric sort so Page_2.pdf comes before Page_10.pdf
+    merged.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" }));
+    setFileValidationError(null);
+    return merged;
+  };
+
+  const moveSelectedFile = (index: number, direction: -1 | 1) => {
+    setSelectedFiles((prev) => {
+      const nextIdx = index + direction;
+      if (nextIdx < 0 || nextIdx >= prev.length) return prev;
+      const copy = [...prev];
+      const [moved] = copy.splice(index, 1);
+      copy.splice(nextIdx, 0, moved);
+      return copy;
+    });
+  };
 
   // Hotspot Editor Modal State
   const [activeEditorEdition, setActiveEditorEdition] = useState<any | null>(null);
@@ -162,10 +219,12 @@ export function EpaperAdminDashboard({ lang }: { lang: string }) {
 
       const createdId = data.edition?.id || data.data?.id;
 
-      // If PDF file was selected directly in the modal, upload it immediately!
-      if (newEditionFile && createdId) {
+      // If 1 or multiple page-wise PDF files were selected in the modal, upload them immediately!
+      if (newEditionFiles.length > 0 && createdId) {
         const formData = new FormData();
-        formData.append("file", newEditionFile);
+        for (const pdfFile of newEditionFiles) {
+          formData.append("file", pdfFile);
+        }
         const upRes = await fetch(`${baseUrl}/api/v1/epaper/admin/editions/${createdId}/upload`, {
           method: "POST",
           headers: getAuthHeaders(),
@@ -178,7 +237,7 @@ export function EpaperAdminDashboard({ lang }: { lang: string }) {
       }
 
       setIsNewModalOpen(false);
-      setNewEditionFile(null);
+      setNewEditionFiles([]);
       fetchEditions();
     } catch (err: unknown) {
       setErrorMessage(err instanceof Error ? err.message : "Error creating edition");
@@ -189,7 +248,7 @@ export function EpaperAdminDashboard({ lang }: { lang: string }) {
 
   const handleUploadSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!uploadTargetEdition || !selectedFile) return;
+    if (!uploadTargetEdition || selectedFiles.length === 0) return;
 
     setIsUploading(true);
     setUploadSuccess(null);
@@ -197,7 +256,9 @@ export function EpaperAdminDashboard({ lang }: { lang: string }) {
 
     const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
     const formData = new FormData();
-    formData.append("file", selectedFile);
+    for (const pdfFile of selectedFiles) {
+      formData.append("file", pdfFile);
+    }
 
     try {
       const res = await fetch(`${baseUrl}/api/v1/epaper/admin/editions/${uploadTargetEdition.id}/upload`, {
@@ -208,10 +269,18 @@ export function EpaperAdminDashboard({ lang }: { lang: string }) {
 
       const data = await res.json();
       if (res.ok && data.success) {
-        setUploadSuccess(isGu ? "પીડીએફ સફળતાપૂર્વક અપલોડ અને પ્રોસેસ થઈ ગયું છે!" : "PDF successfully uploaded and processed into broadsheet pages!");
+        setUploadSuccess(
+          selectedFiles.length > 1
+            ? isGu
+              ? `${selectedFiles.length} પેજ-વાઇઝ પીડીએફ મર્જ થઈને ${data.pageCount || selectedFiles.length} પાના સફળતાપૂર્વક પ્રોસેસ થયા!`
+              : `Merged ${selectedFiles.length} page-wise PDFs and processed ${data.pageCount || selectedFiles.length} broadsheet pages!`
+            : isGu
+            ? "પીડીએફ સફળતાપૂર્વક અપલોડ અને પ્રોસેસ થઈ ગયું છે!"
+            : "PDF successfully uploaded and processed into broadsheet pages!"
+        );
         setTimeout(() => {
           setUploadTargetEdition(null);
-          setSelectedFile(null);
+          setSelectedFiles([]);
           fetchEditions();
         }, 1500);
       } else {
@@ -480,9 +549,10 @@ export function EpaperAdminDashboard({ lang }: { lang: string }) {
                           type="button"
                           onClick={() => {
                             setUploadTargetEdition(ed);
-                            setSelectedFile(null);
+                            setSelectedFiles([]);
                             setUploadSuccess(null);
                             setErrorMessage(null);
+                            setFileValidationError(null);
                           }}
                           className="p-1.5 rounded hover:bg-neutral-100 text-neutral-700 hover:text-[#016BB7] transition-colors"
                           title={
@@ -628,24 +698,33 @@ export function EpaperAdminDashboard({ lang }: { lang: string }) {
               <div>
                 <label className="block font-bold text-neutral-700 mb-1">
                   {isGu
-                    ? "અખબાર PDF ફાઇલ (વૈકલ્પિક — પછી પણ અપલોડ કરી શકાય છે)"
-                    : "Newspaper PDF File (Optional — can also be uploaded later)"}
+                    ? "અખબાર PDF ફાઇલ(ઓ) — ૧ સંયુક્ત અથવા અનેક પેજ-વાઇઝ PDF (વૈકલ્પિક)"
+                    : "Newspaper PDF File(s) — 1 Combined or Multiple Page-Wise PDFs (Optional)"}
                 </label>
                 <input
                   type="file"
-                  accept="application/pdf"
-                  onChange={(e) => setNewEditionFile(e.target.files?.[0] || null)}
+                  multiple
+                  accept=".pdf,application/pdf"
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files.length > 0) {
+                      const valid = validateAndSortPdfFiles(e.target.files, []);
+                      if (valid) setNewEditionFiles(valid);
+                    } else {
+                      setNewEditionFiles([]);
+                    }
+                  }}
                   className="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-[#016BB7] hover:file:bg-blue-100 border border-slate-300 rounded-lg px-2 py-1.5 bg-white cursor-pointer"
                 />
-                {newEditionFile ? (
+                {newEditionFiles.length > 0 ? (
                   <p className="text-[11px] text-emerald-600 font-medium mt-1">
-                    ✓ {newEditionFile.name} ({(newEditionFile.size / (1024 * 1024)).toFixed(2)} MB)
+                    ✓ {newEditionFiles.length} PDF {newEditionFiles.length > 1 ? "files selected (auto-sorted in page order)" : `(${newEditionFiles[0].name})`} —{" "}
+                    {(newEditionFiles.reduce((s, f) => s + f.size, 0) / (1024 * 1024)).toFixed(2)} MB total
                   </p>
                 ) : (
                   <p className="text-[10px] text-neutral-400 mt-0.5">
                     {isGu
-                      ? "જો તમારી પાસે PDF તૈયાર હોય તો અત્યારે જ પસંદ કરો, અથવા આવૃત્તિ બનાવ્યા પછી ગમે ત્યારે અપલોડ કરી શકો છો (Max 100 MB)."
-                      : "Select the PDF now for instant processing, or leave blank to upload later (Max 100 MB)."}
+                      ? "તમે ૧ સંયુક્ત PDF અથવા ૧૨ અલગ-અલગ પેજ-વાઇઝ PDF એકસાથે પસંદ કરી શકો છો (Max 60 files)."
+                      : "Select 1 combined PDF or select all page-wise PDFs together (e.g. 12 PDFs, up to 60 files)."}
                   </p>
                 )}
               </div>
@@ -748,26 +827,9 @@ export function EpaperAdminDashboard({ lang }: { lang: string }) {
                 onDrop={(e) => {
                   e.preventDefault();
                   setIsDragOver(false);
-                  const file = e.dataTransfer.files?.[0];
-                  if (!file) return;
-                  if (!file.name.toLowerCase().endsWith(".pdf") && file.type !== "application/pdf") {
-                    setFileValidationError(
-                      isGu
-                        ? "અમાન્ય ફાઇલ પ્રકાર. કૃપા કરીને પીડીએફ (.pdf) ફાઇલ પસંદ કરો."
-                        : "Invalid file type. Please upload a PDF file (.pdf)."
-                    );
-                    return;
-                  }
-                  if (file.size > 100 * 1024 * 1024) {
-                    setFileValidationError(
-                      isGu
-                        ? "ફાઇલનું કદ ૧૦૦ MB કરતાં વધુ છે. કૃપા કરીને ૧૦૦ MB થી નાની ફાઇલ પસંદ કરો."
-                        : "File size exceeds 100 MB limit."
-                    );
-                    return;
-                  }
-                  setFileValidationError(null);
-                  setSelectedFile(file);
+                  if (!e.dataTransfer.files || e.dataTransfer.files.length === 0) return;
+                  const valid = validateAndSortPdfFiles(e.dataTransfer.files, selectedFiles);
+                  if (valid) setSelectedFiles(valid);
                 }}
                 className={`border-2 border-dashed rounded-xl p-6 text-center transition-all ${
                   isDragOver
@@ -777,37 +839,26 @@ export function EpaperAdminDashboard({ lang }: { lang: string }) {
               >
                 <Upload className="h-9 w-9 mx-auto text-[#016BB7] mb-2" />
                 <p className="text-xs font-bold text-slate-800">
-                  {isGu ? "બ્રોડશીટ પીડીએફ અહીં ડ્રેગ કરો અથવા બ્રાઉઝ કરો" : "Drag and drop broadsheet PDF or browse files"}
+                  {isGu
+                    ? "૧ સંયુક્ત અથવા અનેક પેજ-વાઇઝ PDF (દા.ત. ૧૨ PDF) અહીં ડ્રેગ કરો અથવા પસંદ કરો"
+                    : "Drag & drop 1 combined PDF or multiple page-wise PDFs (e.g., 12 PDFs)"}
                 </p>
                 <p className="text-[11px] text-slate-400 mt-1">
-                  MIME: application/pdf (Max limit: 100 MB)
+                  MIME: application/pdf • Up to 60 PDFs per edition (Max 100 MB each)
                 </p>
 
-                {/* Hidden native file input */}
+                {/* Hidden native multi-file input */}
                 <input
                   ref={pdfFileInputRef}
                   type="file"
+                  multiple
                   accept=".pdf,application/pdf"
                   className="hidden"
                   onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
-                    if (!file.name.toLowerCase().endsWith(".pdf") && file.type !== "application/pdf") {
-                      setFileValidationError(
-                        isGu
-                          ? "અમાન્ય ફાઇલ પ્રકાર. કૃપા કરીને પીડીએફ (.pdf) ફાઇલ પસંદ કરો."
-                          : "Invalid file type. Please upload a PDF file (.pdf)."
-                      );
-                      return;
-                    }
-                    if (file.size > 100 * 1024 * 1024) {
-                      setFileValidationError(
-                        isGu ? "ફાઇલનું કદ ૧૦૦ MB કરતાં વધુ છે." : "File size exceeds 100 MB limit."
-                      );
-                      return;
-                    }
-                    setFileValidationError(null);
-                    setSelectedFile(file);
+                    if (!e.target.files || e.target.files.length === 0) return;
+                    const valid = validateAndSortPdfFiles(e.target.files, selectedFiles);
+                    if (valid) setSelectedFiles(valid);
+                    e.target.value = "";
                   }}
                 />
 
@@ -818,7 +869,15 @@ export function EpaperAdminDashboard({ lang }: { lang: string }) {
                   className="mt-3 px-4 py-2 rounded-lg bg-[#016BB7] text-white text-xs font-semibold hover:bg-[#015896] transition-colors shadow-2xs cursor-pointer inline-flex items-center gap-1.5"
                 >
                   <FileText className="w-3.5 h-3.5" />
-                  <span>{isGu ? "પીડીએફ ફાઇલ પસંદ કરો (Choose PDF)" : "Choose PDF / Browse Files"}</span>
+                  <span>
+                    {selectedFiles.length > 0
+                      ? isGu
+                        ? "વધુ પીડીએફ ઉમેરો (+ Add More PDFs)"
+                        : "+ Add More Page PDFs"
+                      : isGu
+                      ? "પીડીએફ ફાઇલ(ઓ) પસંદ કરો (Choose PDFs)"
+                      : "Choose PDF(s) / Browse Files"}
+                  </span>
                 </button>
               </div>
 
@@ -829,38 +888,84 @@ export function EpaperAdminDashboard({ lang }: { lang: string }) {
                 </div>
               )}
 
-              {selectedFile && (
-                <div className="bg-slate-50 border border-slate-200 p-3 rounded-lg flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2 overflow-hidden">
-                    <FileText className="h-5 w-5 text-[#016BB7] shrink-0" />
-                    <div className="overflow-hidden">
-                      <p className="font-semibold text-slate-800 truncate">{selectedFile.name}</p>
-                      <p className="font-mono text-[11px] text-slate-500">
-                        {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB • application/pdf
-                      </p>
-                    </div>
+              {selectedFiles.length > 0 && (
+                <div className="bg-slate-50 border border-slate-200 p-3 rounded-lg space-y-2 text-xs">
+                  <div className="flex items-center justify-between pb-1.5 border-b border-slate-200">
+                    <span className="font-bold text-slate-800">
+                      {selectedFiles.length}{" "}
+                      {selectedFiles.length === 1
+                        ? isGu
+                          ? "પીડીએફ ફાઇલ પસંદ કરેલ"
+                          : "PDF selected"
+                        : isGu
+                        ? "પેજ-વાઇઝ પીડીએફ (ક્રમમાં મર્જ થશે)"
+                        : "Page-wise PDFs (will merge in this order)"}
+                    </span>
+                    <button
+                      type="button"
+                      disabled={isUploading}
+                      onClick={() => setSelectedFiles([])}
+                      className="text-[11px] font-semibold text-rose-600 hover:underline disabled:opacity-50 cursor-pointer"
+                    >
+                      {isGu ? "બધું હટાવો" : "Clear All"}
+                    </button>
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0">
-                    <button
-                      type="button"
-                      disabled={isUploading}
-                      onClick={() => pdfFileInputRef.current?.click()}
-                      className="px-2 py-1 rounded border border-slate-300 text-slate-700 text-[11px] font-medium hover:bg-slate-100 disabled:opacity-50"
-                    >
-                      {isGu ? "બદલો" : "Replace"}
-                    </button>
-                    <button
-                      type="button"
-                      disabled={isUploading}
-                      onClick={() => {
-                        setSelectedFile(null);
-                        if (pdfFileInputRef.current) pdfFileInputRef.current.value = "";
-                      }}
-                      className="text-rose-600 hover:text-rose-800 p-1"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
+                  <div className="max-h-44 overflow-y-auto space-y-1.5 pr-1">
+                    {selectedFiles.map((file, idx) => (
+                      <div
+                        key={`${file.name}-${file.size}-${idx}`}
+                        className="flex items-center justify-between gap-2 bg-white border border-slate-200 rounded-md px-2.5 py-1.5"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="inline-flex items-center justify-center h-5 w-5 rounded bg-[#016BB7]/10 text-[#016BB7] font-black text-[10px] shrink-0">
+                            {idx + 1}
+                          </span>
+                          <div className="min-w-0">
+                            <p className="font-semibold text-slate-800 truncate">{file.name}</p>
+                            <p className="font-mono text-[10px] text-slate-400">
+                              {(file.size / (1024 * 1024)).toFixed(2)} MB
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1 shrink-0">
+                          {selectedFiles.length > 1 && (
+                            <>
+                              <button
+                                type="button"
+                                disabled={isUploading || idx === 0}
+                                onClick={() => moveSelectedFile(idx, -1)}
+                                className="px-1.5 py-0.5 rounded border border-slate-200 text-slate-600 hover:bg-slate-100 disabled:opacity-30 cursor-pointer"
+                                title="Move up"
+                              >
+                                ↑
+                              </button>
+                              <button
+                                type="button"
+                                disabled={isUploading || idx === selectedFiles.length - 1}
+                                onClick={() => moveSelectedFile(idx, 1)}
+                                className="px-1.5 py-0.5 rounded border border-slate-200 text-slate-600 hover:bg-slate-100 disabled:opacity-30 cursor-pointer"
+                                title="Move down"
+                              >
+                                ↓
+                              </button>
+                            </>
+                          )}
+                          <button
+                            type="button"
+                            disabled={isUploading}
+                            onClick={() =>
+                              setSelectedFiles((prev) => prev.filter((_, i) => i !== idx))
+                            }
+                            className="text-rose-600 hover:text-rose-800 p-0.5 cursor-pointer"
+                            title="Remove file"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
@@ -894,7 +999,7 @@ export function EpaperAdminDashboard({ lang }: { lang: string }) {
                 </button>
                 <button
                   type="submit"
-                  disabled={!selectedFile || isUploading}
+                  disabled={selectedFiles.length === 0 || isUploading}
                   className="px-4 py-2 rounded bg-[#016BB7] text-white text-xs font-bold hover:bg-[#016BB7]/90 disabled:opacity-50 flex items-center gap-2"
                 >
                   <Upload className="h-3.5 w-3.5" />
@@ -926,6 +1031,17 @@ export function EpaperAdminDashboard({ lang }: { lang: string }) {
               page={activeEditorEdition.pages[activeEditorPageIdx]}
               totalPages={activeEditorEdition.pages.length}
               lang={lang}
+              onHotspotsSynced={(pageId, updatedHotspots) => {
+                setActiveEditorEdition((prev: any) => {
+                  if (!prev) return prev;
+                  return {
+                    ...prev,
+                    pages: prev.pages.map((p: any) =>
+                      p.id === pageId ? { ...p, hotspots: updatedHotspots } : p
+                    ),
+                  };
+                });
+              }}
               onNavigatePage={(pageNo) => {
                 const idx = activeEditorEdition.pages.findIndex(
                   (p: any) => p.pageNumber === pageNo

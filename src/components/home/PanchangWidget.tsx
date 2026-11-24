@@ -9,13 +9,13 @@ import {
   ArrowRight,
   Clock,
   MapPin,
-  Sparkles,
 } from "lucide-react";
 import { PanchangData, getLocalizedText } from "@/lib/data/types";
 import { Locale } from "@/lib/i18n/config";
 import { Dictionary } from "@/lib/i18n/dictionaries";
+import { SponsorStrip } from "@/components/ads/SponsorStrip";
 
-type CityKey = "mumbai" | "rajkot" | "bhuj" | "surat";
+type CityKey = "mumbai" | "delhi" | "ahmedabad" | "surat" | "vadodara";
 
 interface CitySchedule {
   key: CityKey;
@@ -47,32 +47,32 @@ const CITY_PANCHANG_SCHEDULES: Record<CityKey, CitySchedule> = {
     yogaKarana: { en: "Siddhi Yoga • Vanija", gu: "સિદ્ધિ યોગ • વણિજ કરણ" },
     vikramSamvat: { en: "Vikram Samvat 2083", gu: "વિક્રમ સંવત ૨૦૮૩" },
   },
-  rajkot: {
-    key: "rajkot",
-    en: "Rajkot",
-    gu: "રાજકોટ",
-    sunrise: "07:01 AM",
-    sunset: "06:04 PM",
-    rahuKaal: "09:47 AM – 11:10 AM",
-    rahuStartMin: 9 * 60 + 47,
-    rahuEndMin: 11 * 60 + 10,
+  delhi: {
+    key: "delhi",
+    en: "Delhi",
+    gu: "દિલ્હી",
+    sunrise: "06:50 AM",
+    sunset: "05:25 PM",
+    rahuKaal: "09:29 AM – 10:48 AM",
+    rahuStartMin: 9 * 60 + 29,
+    rahuEndMin: 10 * 60 + 48,
+    tithi: { en: "Kartik Shukla Ekadashi", gu: "કારતક સુદ એકાદશી" },
+    nakshatra: { en: "Uttara Bhadrapada", gu: "ઉત્તરા ભાદ્રપદ" },
+    yogaKarana: { en: "Siddhi Yoga • Vanija", gu: "સિદ્ધિ યોગ • વણિજ કરણ" },
+    vikramSamvat: { en: "Vikram Samvat 2083", gu: "વિક્રમ સંવત ૨૦૮૩" },
+  },
+  ahmedabad: {
+    key: "ahmedabad",
+    en: "Ahmedabad",
+    gu: "અમદાવાદ",
+    sunrise: "06:58 AM",
+    sunset: "05:56 PM",
+    rahuKaal: "09:42 AM – 11:04 AM",
+    rahuStartMin: 9 * 60 + 42,
+    rahuEndMin: 11 * 60 + 4,
     tithi: { en: "Kartik Shukla Ekadashi", gu: "કારતક સુદ એકાદશી" },
     nakshatra: { en: "Uttara Bhadrapada", gu: "ઉત્તરા ભાદ્રપદ" },
     yogaKarana: { en: "Siddhi Yoga • Vishti", gu: "સિદ્ધિ યોગ • વિષ્ટિ કરણ" },
-    vikramSamvat: { en: "Vikram Samvat 2083", gu: "વિક્રમ સંવત ૨૦૮૩" },
-  },
-  bhuj: {
-    key: "bhuj",
-    en: "Bhuj",
-    gu: "ભુજ",
-    sunrise: "07:07 AM",
-    sunset: "06:07 PM",
-    rahuKaal: "09:52 AM – 11:15 AM",
-    rahuStartMin: 9 * 60 + 52,
-    rahuEndMin: 11 * 60 + 15,
-    tithi: { en: "Kartik Shukla Ekadashi", gu: "કારતક સુદ એકાદશી" },
-    nakshatra: { en: "Revati (after 4:15 PM)", gu: "રેવતી (સાંજે ૪:૧૫ પછી)" },
-    yogaKarana: { en: "Vyatipata • Bava", gu: "વ્યતિપાત યોગ • બવ કરણ" },
     vikramSamvat: { en: "Vikram Samvat 2083", gu: "વિક્રમ સંવત ૨૦૮૩" },
   },
   surat: {
@@ -89,9 +89,23 @@ const CITY_PANCHANG_SCHEDULES: Record<CityKey, CitySchedule> = {
     yogaKarana: { en: "Siddhi Yoga • Vanija", gu: "સિદ્ધિ યોગ • વણિજ કરણ" },
     vikramSamvat: { en: "Vikram Samvat 2083", gu: "વિક્રમ સંવત ૨૦૮૩" },
   },
+  vadodara: {
+    key: "vadodara",
+    en: "Vadodra",
+    gu: "વડોદરા",
+    sunrise: "06:54 AM",
+    sunset: "05:56 PM",
+    rahuKaal: "09:39 AM – 11:02 AM",
+    rahuStartMin: 9 * 60 + 39,
+    rahuEndMin: 11 * 60 + 2,
+    tithi: { en: "Kartik Shukla Ekadashi", gu: "કારતક સુદ એકાદશી" },
+    nakshatra: { en: "Uttara Bhadrapada", gu: "ઉત્તરા ભાદ્રપદ" },
+    yogaKarana: { en: "Siddhi Yoga • Bava", gu: "સિદ્ધિ યોગ • બવ કરણ" },
+    vikramSamvat: { en: "Vikram Samvat 2083", gu: "વિક્રમ સંવત ૨૦૮૩" },
+  },
 };
 
-const CITY_ORDER: CityKey[] = ["mumbai", "rajkot", "bhuj", "surat"];
+const CITY_ORDER: CityKey[] = ["mumbai", "delhi", "ahmedabad", "surat", "vadodara"];
 
 interface LiveStatusInfo {
   tone: "good" | "amber" | "neutral";
@@ -367,7 +381,7 @@ export function PanchangWidget({
           </div>
 
           <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500">
-            <Sparkles className="h-3.5 w-3.5 text-[#016BB7]" />
+            <Compass className="h-3.5 w-3.5 text-[#016BB7]" />
             <span>
               {isGu
                 ? `${cityData.gu} પ્રાદેશિક ખગોળ ગણતરી (IST)`
@@ -531,6 +545,11 @@ export function PanchangWidget({
             </div>
           </div>
         )}
+
+        {/* Monetized Panchang 'Powered By' Sponsor Strip */}
+        <div className="px-4 sm:px-5 pb-3.5 pt-2 border-t border-slate-100">
+          <SponsorStrip slotKey="panchang_sponsor" lang={lang} />
+        </div>
       </div>
     </section>
   );

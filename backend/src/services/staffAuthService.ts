@@ -18,6 +18,7 @@ export const PERMITTED_PUBLICATION_IDS = [
   "pub-janmabhoomi",
   "pub-pravasi",
   "pub-purti",
+  "pub-madhuvan",
 ] as const;
 
 export type PermittedPublicationId = (typeof PERMITTED_PUBLICATION_IDS)[number];

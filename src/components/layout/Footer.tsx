@@ -221,6 +221,14 @@ export function Footer({ lang, dict }: FooterProps) {
             </div>
             <ul className="space-y-1 text-xs text-white/90 pt-1">
               <li>
+                <Link
+                  href={`/${lang}/advertise`}
+                  className="font-bold text-amber-300 hover:underline transition-colors"
+                >
+                  {isGu ? "જાહેરાત વિભાગ (Advertise)" : "Advertise With Us"}
+                </Link>
+              </li>
+              <li>
                 <Link href={`/${lang}/about`} className="hover:text-white transition-colors">
                   {dict.header.aboutUs}
                 </Link>

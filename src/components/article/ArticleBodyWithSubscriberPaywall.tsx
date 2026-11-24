@@ -9,7 +9,6 @@ import {
   Volume2,
   Square as StopIcon,
   Play,
-  Sparkles,
   ShieldCheck,
   UserCheck,
   ArrowRight,
@@ -49,7 +48,7 @@ export function ArticleBodyWithSubscriberPaywall({
     return () => {
       stopSpeaking();
     };
-  }, []);
+  }, [article?.slug]);
 
   // Determine if user has active subscriber privileges (real subscriber or test guest user)
   const localToken =
@@ -64,22 +63,18 @@ export function ArticleBodyWithSubscriberPaywall({
       Boolean(localToken?.startsWith("guest-token-")) ||
       Boolean(localToken?.startsWith("google-token-")));
 
-  // In-depth subscriber continuation paragraphs
-  const continuationParagraphs: string[] = isGu
-    ? [
-        "વિભાગીય આંકડાકીય વિશ્લેષણ અનુસાર, આ પ્રોજેક્ટના અમલીકરણથી મુંબઈ મેટ્રોપોલિટન રિજન (MMR) અને પશ્ચિમી ઔદ્યોગિક કોરિડોર વચ્ચે દૈનિક યાત્રી પ્રવાસ સમયમાં સરેરાશ ૪૫ મિનિટનો ચોખ્ખો ઘટાડો નોંધાશે. પીક-અવર્સ દરમિયાન દર ૩.૫ મિનિટે ટ્રેન ઉપલબ્ધ બનશે, જેનાથી લોકલ ટ્રેનો પરનું ભારણ નોંધપાત્ર રીતે ઘટશે.",
-        "નગર વિકાસ મંત્રાલય અને રેલવે મંડળના સંયુક્ત નિવેદન મુજબ, તમામ મુખ્ય ઇન્ટરચેન્જ સ્ટેશનો પર નેશનલ કોમન મોબિલિટી કાર્ડ (NCMC) દ્વારા સિંગલ-ટિકિટિંગ સુવિધા અમલી બનાવવામાં આવી છે. આ ઉપરાંત ફીડર ઇલેક્ટ્રિક બસ સેવાઓ પણ મેટ્રો સમયપત્રક સાથે સુમેળ સાધશે.",
-        "આ યોજનાના બીજા અને ત્રીજા તબક્કા માટે રૂ. ૧૨,૮૫૦ કરોડનું વધારાનું કેપિટલ આઉટલે મંજૂર કરવામાં આવ્યું છે. નાણાકીય બજેટ, પર્યાવરણીય પ્રભાવ મૂલ્યાંકન અને સૌરાષ્ટ્ર-કચ્છના ઔદ્યોગિક સંગઠનોના પ્રતિભાવો આજની પ્રિન્ટ અને ઈ-પેપર આવૃત્તિમાં વિગતવાર રજૂ કરાયા છે.",
-      ]
-    : [
-        "According to comprehensive departmental metrics, the commissioning of this corridor directly reduces daily peak-hour commuter transit duration by an estimated 45 minutes across key central business districts. Train headway frequencies will operate at 3.5-minute intervals during peak morning and evening rushes.",
-        "A joint communique issued by the Urban Development Ministry and transit planners confirmed that all major interchange junctions now support unified National Common Mobility Card (NCMC) ticketing, with synchronized zero-emission feeder bus connections serving peripheral suburban zones.",
-        "An additional capital outlay of ₹12,850 crore has been sanctioned for subsequent feeder spurs and depot infrastructure. Complete expenditure tables, carbon offset assessments, and industry reactions are documented in today's official Janmabhoomi digital broadsheet.",
-      ];
+  // Build paragraphs strictly from the clicked article itself (never hardcoded unrelated text)
+  const articleSummary = getLocalizedText(article.summary, locale);
+  const articleBodyParagraphs: string[] = Array.isArray(initialTeaserParagraphs)
+    ? initialTeaserParagraphs.filter((p) => typeof p === "string" && p.trim().length > 0)
+    : [];
 
-  const allParagraphs = hasAccess
-    ? [...initialTeaserParagraphs, ...continuationParagraphs]
-    : initialTeaserParagraphs;
+  const allParagraphs =
+    articleBodyParagraphs.length > 0
+      ? articleBodyParagraphs
+      : articleSummary
+      ? [articleSummary]
+      : [];
 
   const handleToggleAudio = () => {
     if (isSpeaking) {
@@ -88,13 +83,20 @@ export function ArticleBodyWithSubscriberPaywall({
       return;
     }
 
-    const fullText = [
-      getLocalizedText(article.title, locale),
-      ...allParagraphs,
-    ].join(". ");
+    stopSpeaking();
+
+    const titleText = getLocalizedText(article.title, locale);
+    const parts = [titleText];
+    if (articleSummary && !allParagraphs.some((p) => p.includes(articleSummary.slice(0, 30)))) {
+      parts.push(articleSummary);
+    }
+    parts.push(...allParagraphs);
+
+    const fullText = parts.filter(Boolean).join(". ");
+    const hasGujaratiScript = /[\u0A80-\u0AFF]/.test(fullText);
 
     const started = speakText(fullText, {
-      lang: isGu ? "gu" : "en",
+      lang: hasGujaratiScript ? "gu" : isGu ? "gu" : "en",
       onStart: () => setIsSpeaking(true),
       onEnd: () => setIsSpeaking(false),
       onError: () => setIsSpeaking(false),

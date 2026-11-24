@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { Compass, MapPin, Save, CheckCircle2, RotateCcw } from "lucide-react";
 
-type CityKey = "mumbai" | "rajkot" | "bhuj" | "surat";
+type CityKey = "mumbai" | "delhi" | "ahmedabad" | "surat" | "vadodara";
 
 interface CitySchedule {
   key: CityKey;
@@ -42,35 +42,35 @@ const DEFAULT_SCHEDULES: Record<CityKey, CitySchedule> = {
     vikramSamvatEn: "Vikram Samvat 2083",
     vikramSamvatGu: "વિક્રમ સંવત ૨૦૮૩",
   },
-  rajkot: {
-    key: "rajkot",
-    en: "Rajkot",
-    gu: "રાજકોટ",
-    sunrise: "07:01 AM",
-    sunset: "06:04 PM",
-    rahuKaal: "09:47 AM – 11:10 AM",
+  delhi: {
+    key: "delhi",
+    en: "Delhi",
+    gu: "દિલ્હી",
+    sunrise: "06:50 AM",
+    sunset: "05:25 PM",
+    rahuKaal: "09:29 AM – 10:48 AM",
+    tithiEn: "Kartik Shukla Ekadashi",
+    tithiGu: "કારતક સુદ એકાદશી",
+    nakshatraEn: "Uttara Bhadrapada",
+    nakshatraGu: "ઉત્તરા ભાદ્રપદ",
+    yogaEn: "Siddhi Yoga • Vanija",
+    yogaGu: "સિદ્ધિ યોગ • વણિજ કરણ",
+    vikramSamvatEn: "Vikram Samvat 2083",
+    vikramSamvatGu: "વિક્રમ સંવત ૨૦૮૩",
+  },
+  ahmedabad: {
+    key: "ahmedabad",
+    en: "Ahmedabad",
+    gu: "અમદાવાદ",
+    sunrise: "06:58 AM",
+    sunset: "05:56 PM",
+    rahuKaal: "09:42 AM – 11:04 AM",
     tithiEn: "Kartik Shukla Ekadashi",
     tithiGu: "કારતક સુદ એકાદશી",
     nakshatraEn: "Uttara Bhadrapada",
     nakshatraGu: "ઉત્તરા ભાદ્રપદ",
     yogaEn: "Siddhi Yoga • Vishti",
     yogaGu: "સિદ્ધિ યોગ • વિષ્ટિ કરણ",
-    vikramSamvatEn: "Vikram Samvat 2083",
-    vikramSamvatGu: "વિક્રમ સંવત ૨૦૮૩",
-  },
-  bhuj: {
-    key: "bhuj",
-    en: "Bhuj",
-    gu: "ભુજ",
-    sunrise: "07:07 AM",
-    sunset: "06:07 PM",
-    rahuKaal: "09:52 AM – 11:15 AM",
-    tithiEn: "Kartik Shukla Ekadashi",
-    tithiGu: "કારતક સુદ એકાદશી",
-    nakshatraEn: "Revati (after 4:15 PM)",
-    nakshatraGu: "રેવતી (સાંજે ૪:૧૫ પછી)",
-    yogaEn: "Vyatipata • Bava",
-    yogaGu: "વ્યતિપાત યોગ • બવ કરણ",
     vikramSamvatEn: "Vikram Samvat 2083",
     vikramSamvatGu: "વિક્રમ સંવત ૨૦૮૩",
   },
@@ -87,6 +87,22 @@ const DEFAULT_SCHEDULES: Record<CityKey, CitySchedule> = {
     nakshatraGu: "ઉત્તરા ભાદ્રપદ",
     yogaEn: "Siddhi Yoga • Vanija",
     yogaGu: "સિદ્ધિ યોગ • વણિજ કરણ",
+    vikramSamvatEn: "Vikram Samvat 2083",
+    vikramSamvatGu: "વિક્રમ સંવત ૨૦૮૩",
+  },
+  vadodara: {
+    key: "vadodara",
+    en: "Vadodra",
+    gu: "વડોદરા",
+    sunrise: "06:54 AM",
+    sunset: "05:56 PM",
+    rahuKaal: "09:39 AM – 11:02 AM",
+    tithiEn: "Kartik Shukla Ekadashi",
+    tithiGu: "કારતક સુદ એકાદશી",
+    nakshatraEn: "Uttara Bhadrapada",
+    nakshatraGu: "ઉત્તરા ભાદ્રપદ",
+    yogaEn: "Siddhi Yoga • Bava",
+    yogaGu: "સિદ્ધિ યોગ • બવ કરણ",
     vikramSamvatEn: "Vikram Samvat 2083",
     vikramSamvatGu: "વિક્રમ સંવત ૨૦૮૩",
   },
@@ -149,12 +165,12 @@ export default function AdminPanchangPage() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2.5">
             <Compass className="h-6 w-6 text-[#016BB7]" />
-            <span>{isGu ? "દૈનિક પંચાંગ સંચાલન (૪ શહેરો)" : "Daily Multi-City Panchang Manager"}</span>
+            <span>{isGu ? "દૈનિક પંચાંગ સંચાલન (૫ શહેરો)" : "Daily Multi-City Panchang Manager (5 Cities)"}</span>
           </h1>
           <p className="text-sm text-slate-500 mt-1">
             {isGu
-              ? "મુંબઈ, રાજકોટ, ભુજ અને સુરત માટે દૈનિક તિથિ, નક્ષત્ર, સૂર્યોદય-સૂર્યાસ્ત અને રાહુકાળ અપડેટ કરો."
-              : "Update daily Tithi, Nakshatra, Solar timings, and Rahu Kaal for Mumbai, Rajkot, Bhuj, and Surat."}
+              ? "મુંબઈ, દિલ્હી, અમદાવાદ, સુરત અને વડોદરા માટે દૈનિક તિથિ, નક્ષત્ર, સૂર્યોદય-સૂર્યાસ્ત અને રાહુકાળ અપડેટ કરો."
+              : "Update daily Tithi, Nakshatra, Solar timings, and Rahu Kaal for Mumbai, Delhi, Ahmedabad, Surat, and Vadodra."}
           </p>
         </div>
 
@@ -177,7 +193,7 @@ export default function AdminPanchangPage() {
 
       {/* City Tabs */}
       <div className="flex flex-wrap gap-2">
-        {(["mumbai", "rajkot", "bhuj", "surat"] as CityKey[]).map((key) => {
+        {(["mumbai", "delhi", "ahmedabad", "surat", "vadodara"] as CityKey[]).map((key) => {
           const c = schedules[key];
           const active = selectedCity === key;
           return (

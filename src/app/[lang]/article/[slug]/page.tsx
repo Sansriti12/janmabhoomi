@@ -18,6 +18,7 @@ import { DemoBadge } from "@/components/shared/DemoBadge";
 import { NewsCard } from "@/components/shared/NewsCard";
 import { NewsArticleJsonLd } from "@/components/shared/NewsArticleJsonLd";
 import { ArticleBodyWithSubscriberPaywall } from "@/components/article/ArticleBodyWithSubscriberPaywall";
+import { AdPlacement } from "@/components/home/AdPlacement";
 
 export async function generateMetadata({
   params,
@@ -218,22 +219,31 @@ export default async function ArticlePage({
           />
         </article>
 
-        {/* Sidebar: Related Category Stories */}
+        {/* Sidebar: Sticky Right-Rail Ad + Related Category Stories */}
         <aside className="lg:col-span-4 space-y-5">
-          <div className="rounded-md border border-[#292725]/15 bg-white p-5">
-            <h2 className="text-base font-extrabold uppercase tracking-wider text-[#016BB7] border-b-2 border-[#016BB7] pb-2 mb-4">
-              {locale === "gu" ? "સંબંધિત સમાચાર" : "More in This Section"}
-            </h2>
-            <div className="space-y-4">
-              {relatedArticles.slice(0, 3).map((rel) => (
-                <NewsCard
-                  key={rel.id}
-                  article={rel}
-                  lang={locale}
-                  readInEpaperLabel={dict.home.readInEpaper}
-                  compact
-                />
-              ))}
+          <div className="lg:sticky lg:top-24 space-y-5">
+            <AdPlacement
+              slotKey="article_sidebar"
+              lang={locale}
+              variant="sidebar"
+              label={dict.home.advertisementLabel}
+            />
+
+            <div className="rounded-md border border-[#292725]/15 bg-white p-5">
+              <h2 className="text-base font-extrabold uppercase tracking-wider text-[#016BB7] border-b-2 border-[#016BB7] pb-2 mb-4">
+                {locale === "gu" ? "સંબંધિત સમાચાર" : "More in This Section"}
+              </h2>
+              <div className="space-y-4">
+                {relatedArticles.slice(0, 3).map((rel) => (
+                  <NewsCard
+                    key={rel.id}
+                    article={rel}
+                    lang={locale}
+                    readInEpaperLabel={dict.home.readInEpaper}
+                    compact
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </aside>

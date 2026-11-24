@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ExternalLink, Globe2, Sparkles } from "lucide-react";
+import { ExternalLink, Globe2 } from "lucide-react";
 import { Locale } from "@/lib/i18n/config";
 import { getAllPublications } from "@/lib/data/config/publications";
 
@@ -93,7 +93,6 @@ export function PublicationStrip({ lang }: PublicationStripProps) {
                 className={pillClass}
                 title={`${displayLabel} — ${pub.tagline[lang] || pub.tagline.gu}`}
               >
-                {isMain && <Sparkles className="h-3 w-3 text-sky-200 shrink-0" />}
                 <span>{displayLabel}</span>
               </Link>
             );
