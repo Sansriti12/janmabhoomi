@@ -16,9 +16,11 @@ import {
   Archive,
   Calendar,
   BookMarked,
+  Smartphone,
 } from "lucide-react";
 import { useSubscriberAuth } from "@/lib/context/SubscriberAuthContext";
 import { ReaderComfortControls } from "@/components/layout/ReaderComfortControls";
+import { MobileAppSmartBanner } from "@/components/shared/AppDownloadComponents";
 import {
   FacebookIcon,
   TwitterIcon,
@@ -195,6 +197,12 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
       href: `/${lang}/events`,
       icon: <Calendar className="h-4 w-4 text-[#016BB7]" />,
     },
+    {
+      label: lang === "gu" ? "મોબાઇલ એપ ડાઉનલોડ કરો" : "Download Mobile App",
+      desc: lang === "gu" ? "Android અને iOS પર જન્મભૂમિ વાંચો" : "Read Janmabhoomi on Android & iOS",
+      href: `/${lang}#download-app`,
+      icon: <Smartphone className="h-4 w-4 text-[#016BB7]" />,
+    },
   ];
 
   const isActive = (href: string, exact?: boolean) => {
@@ -217,6 +225,9 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white border-b border-[#016BB7]/20 shadow-xs">
+      {/* MOBILE SMART APP BANNER (< 768px, dismissible) */}
+      <MobileAppSmartBanner lang={lang} />
+
       {/* ROW 1 – TOP INFORMATION BAR (Exact Janmabhoomi Brand Blue #016BB7) */}
       <div
         style={{ backgroundColor: "#016BB7" }}
@@ -270,7 +281,7 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
             >
               <Link
                 href={`/${lang}/advertise`}
-                className="inline-flex items-center gap-1 rounded bg-amber-400 px-2 py-0.5 text-[11px] font-black text-[#071F3A] hover:bg-amber-300 transition-colors"
+                className="inline-flex items-center gap-1 rounded-md bg-white px-2.5 py-0.5 text-[11px] font-extrabold text-[#004E89] hover:bg-[#DCEEFF] transition-colors shadow-xs border border-[#93C5FD]/60"
               >
                 <span>{lang === "gu" ? "જાહેરાત આપો" : "Advertise"}</span>
               </Link>
@@ -362,6 +373,16 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
             >
               <Search className="h-4 w-4" />
             </button>
+
+            {/* Download Mobile App CTA Button (Before E-PAPER) */}
+            <Link
+              href={`/${lang}#download-app`}
+              className="hidden sm:inline-flex items-center gap-1.5 rounded-lg border-2 border-[#016BB7] bg-[#EAF3FB] hover:bg-[#016BB7] text-[#016BB7] hover:text-white px-2.5 sm:px-3 py-1 text-xs sm:text-sm font-bold tracking-wide transition-colors shadow-2xs shrink-0"
+              title={lang === "gu" ? "જન્મભૂમિ મોબાઇલ એપ ડાઉનલોડ કરો" : "Download Janmabhoomi Mobile App"}
+            >
+              <Smartphone className="h-3.5 w-3.5 shrink-0" />
+              <span>{lang === "gu" ? "એપ ડાઉનલોડ" : "Download App"}</span>
+            </Link>
 
             {/* Prominent E-PAPER CTA Button */}
             <Link
@@ -485,6 +506,22 @@ export function Header({ lang, dict, searchableArticles }: HeaderProps) {
           >
             {primaryNav.map((item) => {
               const active = isActive(item.href, item.exact);
+              const isAdvertise = item.href.endsWith("/advertise");
+              if (isAdvertise) {
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`inline-flex items-center justify-center rounded-full px-3.5 py-1 text-xs font-extrabold tracking-wide whitespace-nowrap transition-all shadow-xs ${
+                      active
+                        ? "bg-[#004E89] text-white ring-2 ring-[#016BB7]/40"
+                        : "bg-[#016BB7] hover:bg-[#004E89] text-white"
+                    }`}
+                  >
+                    <span>{item.label}</span>
+                  </Link>
+                );
+              }
               return (
                 <Link
                   key={item.href}

@@ -12,6 +12,7 @@ import {
 import { Locale } from "@/lib/i18n/config";
 import { Dictionary } from "@/lib/i18n/dictionaries";
 import { BrandLogo } from "@/components/shared/BrandLogo";
+import { PreFooterAppStrip } from "@/components/shared/AppDownloadComponents";
 import { getAllPublications } from "@/lib/data/config/publications";
 
 interface FooterProps {
@@ -37,10 +38,14 @@ export function Footer({ lang, dict }: FooterProps) {
   const otherPublications = publications.filter((pub) => pub.id !== "pub-janmabhoomi");
 
   return (
-    <footer
-      style={{ backgroundColor: "#016BB7" }}
-      className="mt-8 border-t-2 border-[#016BB7] bg-[#016BB7] text-white"
-    >
+    <div className="mt-8">
+      {/* Global Pre-Footer Mobile App Download Strip */}
+      <PreFooterAppStrip lang={lang} />
+
+      <footer
+        style={{ backgroundColor: "#016BB7" }}
+        className="border-t-2 border-[#016BB7] bg-[#016BB7] text-white"
+      >
       <div className="container-wide py-6 sm:py-7">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 pb-5 border-b border-white/20">
           {/* Col 1 (4 Cols): Janmabhoomi Brand, Verified Short Intro & Socials */}
@@ -220,10 +225,10 @@ export function Footer({ lang, dict }: FooterProps) {
               <p>Fort, Mumbai 400001</p>
             </div>
             <ul className="space-y-1 text-xs text-white/90 pt-1">
-              <li>
+              <li className="pb-1">
                 <Link
                   href={`/${lang}/advertise`}
-                  className="font-bold text-amber-300 hover:underline transition-colors"
+                  className="inline-flex items-center rounded-md bg-white text-[#004E89] hover:bg-[#DCEEFF] px-2.5 py-1 font-extrabold transition-colors shadow-xs"
                 >
                   {isGu ? "જાહેરાત વિભાગ (Advertise)" : "Advertise With Us"}
                 </Link>
@@ -282,5 +287,6 @@ export function Footer({ lang, dict }: FooterProps) {
         </div>
       </div>
     </footer>
+    </div>
   );
 }

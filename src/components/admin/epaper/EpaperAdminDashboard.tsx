@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useStaffAuth } from "@/lib/context/StaffAuthContext";
+import { useAdminPublication } from "@/lib/context/AdminPublicationContext";
 import {
   Newspaper,
   Upload,
@@ -71,16 +72,32 @@ export function EpaperAdminDashboard({ lang }: { lang: string }) {
     return headers;
   };
 
+  const { selectedPublication: globalSelectedPub } = useAdminPublication();
   const [editions, setEditions] = useState<EditionSummary[]>([]);
-  const [selectedPublication, setSelectedPublication] = useState<string>("all");
+  const [selectedPublication, setSelectedPublication] = useState<string>(globalSelectedPub || "all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  // Sync with global header publication selection
+  useEffect(() => {
+    if (globalSelectedPub) {
+      setSelectedPublication(globalSelectedPub);
+      if (globalSelectedPub !== "all") {
+        setNewPubId(globalSelectedPub);
+        if (globalSelectedPub === "pub-pravasi") {
+          setNewNameEn("Janmabhoomi Pravasi Sunday Edition");
+        } else if (globalSelectedPub === "pub-janmabhoomi") {
+          setNewNameEn("Janmabhoomi Daily Evening Edition");
+        }
+      }
+    }
+  }, [globalSelectedPub]);
+
   // New Edition Modal State
   const [isNewModalOpen, setIsNewModalOpen] = useState(false);
-  const [newPubId, setNewPubId] = useState("pub-janmabhoomi");
+  const [newPubId, setNewPubId] = useState(globalSelectedPub !== "all" ? globalSelectedPub : "pub-janmabhoomi");
   const [newDate, setNewDate] = useState(new Date().toISOString().split("T")[0]);
   const [newCity, setNewCity] = useState("Mumbai");
   const [newNameEn, setNewNameEn] = useState("Janmabhoomi Daily Evening Edition");
@@ -213,8 +230,15 @@ export function EpaperAdminDashboard({ lang }: { lang: string }) {
       });
 
       const data = await res.json();
+      if (res.status === 401) {
+        throw new Error(
+          isGu
+            ? "તમારું એડમિન સેશન સમાપ્ત થયું છે. કૃપા કરીને Logout કરી ફરીથી Login કરો."
+            : "Your admin session has expired. Please click Logout (bottom-left) and sign in again."
+        );
+      }
       if (!res.ok || !data.success) {
-        throw new Error(data.error || "Failed to create e-paper edition.");
+        throw new Error(data.error?.message || data.error || "Failed to create e-paper edition.");
       }
 
       const createdId = data.edition?.id || data.data?.id;
@@ -745,6 +769,12 @@ export function EpaperAdminDashboard({ lang }: { lang: string }) {
                   {isGu ? "પ્રથમ કેટલા પાના જાહેરમાં વાંચવા મળશે. ત્યારપછી સબ્સ્ક્રિપ્શન જરૂરી રહેશે." : "Number of pages available without login. Remaining pages require an active subscription."}
                 </p>
               </div>
+
+              {errorMessage && (
+                <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700">
+                  {errorMessage}
+                </div>
+              )}
 
               <div className="flex justify-end gap-2 pt-3 border-t">
                 <button

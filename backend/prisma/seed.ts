@@ -126,7 +126,7 @@ async function main() {
       logoAssetPath: "/assets/logos/janmabhoomi-pravasi-logo.svg",
       logoPlaceholderCode: "પ્રવાસી",
       epaperFreePreviewPages: 0,
-      status: PublicationStatus.PLANNED,
+      status: PublicationStatus.ACTIVE,
     },
     {
       id: "pub-panchang",
@@ -180,8 +180,11 @@ async function main() {
   }
 
   // 2. Seed News Categories
-  console.log("\n[2/5] Seeding 12 Categories...");
+  console.log("\n[2/5] Seeding Categories (Janmabhoomi & Pravasi)...");
   const categories = [
+    { id: "madhuvan", slug: "madhuvan", nameEn: "Madhuvan Purti", nameGu: "મધુવન પૂર્તિ" },
+    { id: "sahitya", slug: "sahitya", nameEn: "Literature & Arts", nameGu: "સાહિત્ય અને કલા" },
+    { id: "culture", slug: "culture", nameEn: "Culture & Heritage", nameGu: "સંસ્કૃતિ અને વારસો" },
     { id: "national", slug: "national", nameEn: "National", nameGu: "રાષ્ટ્રીય" },
     { id: "city", slug: "city", nameEn: "City", nameGu: "શહેર" },
     { id: "business", slug: "business", nameEn: "Business & Markets", nameGu: "વ્યાપાર અને બજાર" },
@@ -205,8 +208,10 @@ async function main() {
     console.log(`  ✓ Category: ${cat.nameEn} (${cat.nameGu})`);
   }
 
-  // 3. Seed Publication Categories for Janmabhoomi
-  console.log("\n[3/5] Mapping Categories to Janmabhoomi...");
+  // 3. Seed Publication Categories for Janmabhoomi & Janmabhoomi Pravasi
+  console.log("\n[3/5] Mapping Categories to Publications...");
+  
+  // Mapping for Janmabhoomi Daily
   for (let i = 0; i < categories.length; i++) {
     await prisma.publicationCategory.upsert({
       where: {
@@ -224,6 +229,39 @@ async function main() {
       },
     });
   }
+
+  // Mapping for Janmabhoomi Pravasi (Weekly)
+  const pravasiCategories = [
+    "madhuvan",
+    "sahitya",
+    "culture",
+    "national",
+    "city",
+    "business",
+    "sports",
+    "entertainment",
+    "maran",
+    "religion-culture",
+    "special-coverage",
+  ];
+  for (let i = 0; i < pravasiCategories.length; i++) {
+    await prisma.publicationCategory.upsert({
+      where: {
+        publicationId_categoryId: {
+          publicationId: "pub-pravasi",
+          categoryId: pravasiCategories[i],
+        },
+      },
+      update: { displayOrder: i + 1, isNavVisible: true },
+      create: {
+        publicationId: "pub-pravasi",
+        categoryId: pravasiCategories[i],
+        displayOrder: i + 1,
+        isNavVisible: true,
+      },
+    });
+  }
+  console.log(`  ✓ Mapped ${pravasiCategories.length} categories to Janmabhoomi Pravasi (pub-pravasi)`);
 
   // 4. Seed Standard RBAC Roles
   console.log("\n[4/5] Seeding Staff Roles...");

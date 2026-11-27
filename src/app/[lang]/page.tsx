@@ -9,6 +9,7 @@ import { AdPlacement } from "@/components/home/AdPlacement";
 import { PanchangWidget } from "@/components/home/PanchangWidget";
 import { LatestEventsSection } from "@/components/home/LatestEventsSection";
 import { CategoryCarousel, CategoryCardItem } from "@/components/home/CategoryCarousel";
+import { HomepageAppDownloadSection } from "@/components/shared/AppDownloadComponents";
 
 export default async function HomePage({
   params,
@@ -177,6 +178,9 @@ export default async function HomePage({
         lang={locale}
         dict={dict}
       />
+
+      {/* SECTION 2B – High-Intent Mobile App Download Banner (Above Daily Panchang) */}
+      <HomepageAppDownloadSection lang={locale} />
 
       {/* SECTION 3 – City-Switchable Live Daily Panchang */}
       <PanchangWidget

@@ -36,8 +36,8 @@ export function PublicationStrip({ lang }: PublicationStripProps) {
           <span>{isGu ? "સૌરાષ્ટ્ર ટ્રસ્ટ" : "Saurashtra Trust"}</span>
         </Link>
 
-        {/* Scrollable Horizontal Pill Strip with Snap */}
-        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto scrollbar-none snap-x snap-mandatory py-0.5 flex-1">
+        {/* Full-Width Evenly Distributed Pill Strip (Scrollable on Mobile) */}
+        <div className="flex items-center lg:justify-between gap-1.5 sm:gap-2 overflow-x-auto scrollbar-none snap-x snap-mandatory py-0.5 flex-1">
           {publications.map((pub) => {
             const isMain = pub.id === "pub-janmabhoomi";
             const isExternal = pub.websiteUrl.startsWith("http");
@@ -64,7 +64,7 @@ export function PublicationStrip({ lang }: PublicationStripProps) {
                 : "Janmabhoomi Main"
               : pub.name[lang] || pub.name.gu;
 
-            const pillClass = `snap-start shrink-0 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] sm:text-xs font-bold transition-all border ${
+            const pillClass = `snap-start shrink-0 lg:flex-1 inline-flex items-center justify-center gap-1.5 rounded-full px-3 py-1 text-[11px] sm:text-xs font-bold whitespace-nowrap transition-all border ${
               isActive || isMain
                 ? "bg-[#016BB7] text-white border-[#016BB7] shadow-2xs"
                 : "bg-white text-[#1F2937] border-[#016BB7]/20 hover:border-[#016BB7] hover:text-[#016BB7] hover:bg-blue-50/40"

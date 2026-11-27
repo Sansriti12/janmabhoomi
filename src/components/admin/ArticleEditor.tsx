@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useStaffAuth } from "@/lib/context/StaffAuthContext";
+import { useAdminPublication } from "@/lib/context/AdminPublicationContext";
 import {
   Save,
   Send,
@@ -46,6 +47,7 @@ export function ArticleEditor({ lang, articleId }: ArticleEditorProps) {
   const router = useRouter();
   const isGu = lang === "gu";
   const { token } = useStaffAuth();
+  const { selectedPublication: globalSelectedPub } = useAdminPublication();
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:4000";
 
   // Helper to resolve media URLs (serves via relative Next.js proxy route, fallback in onError)
@@ -56,7 +58,11 @@ export function ArticleEditor({ lang, articleId }: ArticleEditorProps) {
   };
 
   // Form State
-  const [publicationId, setPublicationId] = useState<string>("pub-janmabhoomi");
+  const [publicationId, setPublicationId] = useState<string>(
+    !articleId && globalSelectedPub && globalSelectedPub !== "all"
+      ? globalSelectedPub
+      : "pub-janmabhoomi"
+  );
   const [categoryId, setCategoryId] = useState<string>("national");
   const [headlineGu, setHeadlineGu] = useState<string>("");
   const [summaryGu, setSummaryGu] = useState<string>("");

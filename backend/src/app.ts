@@ -46,14 +46,32 @@ export function buildApp(): FastifyInstance {
     crossOriginResourcePolicy: { policy: "cross-origin" },
   });
 
-  // CORS configuration
-  const allowedOrigins = env.CORS_ORIGIN.split(",").map((o) => o.trim());
+  // CORS configuration (supports Janmabhoomi + Janmabhoomi Pravasi + wildcard subdomains like https://*.vercel.app)
+  const allowedOrigins = env.CORS_ORIGIN.split(",").map((o) => o.trim()).filter(Boolean);
   app.register(cors, {
     origin: (origin, cb) => {
       // Allow requests with no origin (like mobile apps, curl, server-to-server)
       if (!origin) return cb(null, true);
       if (allowedOrigins.includes(origin) || allowedOrigins.includes("*")) {
         return cb(null, true);
+      }
+      // Allow local dev servers (ports 3000-3005) in development
+      if (
+        env.NODE_ENV === "development" &&
+        /^http:\/\/(localhost|127\.0\.0\.1):300[0-5]$/.test(origin)
+      ) {
+        return cb(null, true);
+      }
+      // Allow wildcard suffix patterns configured in CORS_ORIGIN (e.g. https://*.vercel.app)
+      for (const pattern of allowedOrigins) {
+        if (pattern.includes("*")) {
+          const escaped = pattern
+            .replace(/[.+?^${}()|[\]\\]/g, "\\$&")
+            .replace(/\*/g, "[^/]+");
+          if (new RegExp(`^${escaped}$`).test(origin)) {
+            return cb(null, true);
+          }
+        }
       }
       return cb(new Error("Not allowed by CORS"), false);
     },

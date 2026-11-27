@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { StaffAuthProvider, useStaffAuth } from "@/lib/context/StaffAuthContext";
+import { AdminPublicationProvider, useAdminPublication } from "@/lib/context/AdminPublicationContext";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { Loader2 } from "lucide-react";
@@ -17,9 +18,9 @@ function AdminLayoutInner({
   const pathname = usePathname();
   const router = useRouter();
   const { isAuthenticated, isLoading } = useStaffAuth();
+  const { selectedPublication, setSelectedPublication } = useAdminPublication();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [selectedPublication, setSelectedPublication] = useState("all");
 
   const isLoginPage = pathname.includes("/admin/login");
 
@@ -114,7 +115,9 @@ export default function AdminLayout({
 
   return (
     <StaffAuthProvider lang={resolvedParams.lang}>
-      <AdminLayoutInner lang={resolvedParams.lang}>{children}</AdminLayoutInner>
+      <AdminPublicationProvider>
+        <AdminLayoutInner lang={resolvedParams.lang}>{children}</AdminLayoutInner>
+      </AdminPublicationProvider>
     </StaffAuthProvider>
   );
 }

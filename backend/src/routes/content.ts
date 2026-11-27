@@ -94,7 +94,7 @@ export const contentRoutes: FastifyPluginAsync = async (app: FastifyInstance) =>
       }
 
       // 2. Fetch lead story (include all translations for bilingual support)
-      const leadStory = await app.prisma.article.findFirst({
+      let leadStory = await app.prisma.article.findFirst({
         where: {
           publicationId: publication,
           status: "PUBLISHED",
@@ -107,6 +107,22 @@ export const contentRoutes: FastifyPluginAsync = async (app: FastifyInstance) =>
         },
         orderBy: { publishedAt: "desc" },
       });
+
+      // Fallback to latest published article for this publication if none is explicitly marked as lead
+      if (!leadStory) {
+        leadStory = await app.prisma.article.findFirst({
+          where: {
+            publicationId: publication,
+            status: "PUBLISHED",
+          },
+          include: {
+            translations: true,
+            category: true,
+            author: true,
+          },
+          orderBy: { publishedAt: "desc" },
+        });
+      }
 
       const leadGu = leadStory?.translations.find((t) => t.language === "gu");
       const leadEn = leadStory?.translations.find((t) => t.language === "en");
@@ -314,12 +330,14 @@ export const contentRoutes: FastifyPluginAsync = async (app: FastifyInstance) =>
       lang = "gu",
       publication = "pub-janmabhoomi",
       category,
+      q,
     } = request.query as {
       page?: string;
       limit?: string;
       lang?: string;
       publication?: string;
       category?: string;
+      q?: string;
     };
 
     const targetLang = lang === "en" ? "en" : "gu";
@@ -337,6 +355,18 @@ export const contentRoutes: FastifyPluginAsync = async (app: FastifyInstance) =>
         { categoryId: category },
         { category: { slug: category } },
       ];
+    }
+
+    if (q && q.trim()) {
+      const search = q.trim();
+      where.translations = {
+        some: {
+          OR: [
+            { headline: { contains: search, mode: "insensitive" } },
+            { summary: { contains: search, mode: "insensitive" } },
+          ],
+        },
+      };
     }
 
     try {

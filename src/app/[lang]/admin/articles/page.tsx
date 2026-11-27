@@ -4,6 +4,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useStaffAuth } from "@/lib/context/StaffAuthContext";
+import { useAdminPublication } from "@/lib/context/AdminPublicationContext";
 import {
   FileText,
   Plus,
@@ -61,8 +62,11 @@ export default function ArticlesAdminPage() {
   const [error, setError] = useState<string | null>(null);
 
   // Filters
+  const { selectedPublication } = useAdminPublication();
   const [search, setSearch] = useState("");
-  const [publicationFilter, setPublicationFilter] = useState("");
+  const [publicationFilter, setPublicationFilter] = useState(
+    selectedPublication === "all" ? "" : selectedPublication
+  );
   const [statusFilter, setStatusFilter] = useState("");
   const [transStatusFilter, setTransStatusFilter] = useState("");
   const [page, setPage] = useState(1);
@@ -70,6 +74,12 @@ export default function ArticlesAdminPage() {
   const [totalCount, setTotalCount] = useState(0);
   const [exporting, setExporting] = useState(false);
   const [previewArticle, setPreviewArticle] = useState<ArticleItem | null>(null);
+
+  // Sync when top header publication changes
+  useEffect(() => {
+    setPublicationFilter(selectedPublication === "all" ? "" : selectedPublication);
+    setPage(1);
+  }, [selectedPublication]);
 
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:4000";
 

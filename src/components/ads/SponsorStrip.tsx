@@ -68,16 +68,16 @@ export function SponsorStrip({
         compact ? "px-2.5 py-1.5 text-[11px]" : "px-3.5 py-2 text-xs"
       } ${
         isDark
-          ? "bg-white/10 border-white/15 text-blue-100 hover:bg-white/15"
-          : "bg-[#FAF8F3] border-[#016BB7]/20 text-slate-700 hover:border-[#016BB7]"
+          ? "bg-[#016BB7]/30 border-[#7DD3FC]/35 text-blue-50 hover:bg-[#016BB7]/45"
+          : "bg-[#EAF3FB] border-[#016BB7]/35 text-[#0B2239] hover:border-[#016BB7] shadow-2xs"
       }`}
     >
       <div className="flex items-center gap-2 min-w-0">
         <span
-          className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider shrink-0 ${
+          className={`inline-flex items-center gap-1 rounded px-2 py-0.5 text-[9px] font-black uppercase tracking-wider shrink-0 ${
             isDark
-              ? "bg-amber-400 text-[#071F3A]"
-              : "bg-[#016BB7]/10 text-[#016BB7]"
+              ? "bg-white text-[#004E89]"
+              : "bg-[#016BB7] text-white"
           }`}
         >
           <Megaphone className="h-2.5 w-2.5" />
@@ -85,7 +85,7 @@ export function SponsorStrip({
         </span>
         <span
           className={`font-bold truncate ${
-            isDark ? "text-white" : "text-slate-900"
+            isDark ? "text-white" : "text-[#0B2239]"
           }`}
         >
           {campaign.isHouseAd ? headline : `${campaign.sponsorName} — ${headline}`}
@@ -94,7 +94,7 @@ export function SponsorStrip({
 
       <span
         className={`inline-flex items-center gap-0.5 font-extrabold shrink-0 ${
-          isDark ? "text-amber-300" : "text-[#016BB7]"
+          isDark ? "text-[#BAE6FD]" : "text-[#004E89]"
         }`}
       >
         <span>{ctaText}</span>

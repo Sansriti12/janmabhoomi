@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+const MAX_GU_CHUNK_CHARS = 220; // Gujarati UTF-8 expands ~9x in URLs; 220 chars stays safely under ~2000 URL bytes
+
 async function translateChunkGuToEn(text: string): Promise<string> {
   const clean = text.trim();
   if (!clean) return "";
@@ -25,30 +27,56 @@ async function translateChunkGuToEn(text: string): Promise<string> {
   }
 }
 
+function splitIntoSafeChunks(text: string, maxChars = MAX_GU_CHUNK_CHARS): string[] {
+  const clean = text.trim();
+  if (!clean) return [];
+  if (clean.length <= maxChars) return [clean];
+
+  const sentences = clean.split(/(?<=[.!?।])\s+/);
+  const chunks: string[] = [];
+  let buf = "";
+
+  for (const s of sentences) {
+    if (s.length > maxChars) {
+      if (buf) {
+        chunks.push(buf);
+        buf = "";
+      }
+      // Split overly long sentence by words
+      const words = s.split(/\s+/);
+      let wordBuf = "";
+      for (const w of words) {
+        if ((wordBuf + " " + w).trim().length > maxChars && wordBuf) {
+          chunks.push(wordBuf.trim());
+          wordBuf = w;
+        } else {
+          wordBuf = wordBuf ? `${wordBuf} ${w}` : w;
+        }
+      }
+      if (wordBuf.trim()) chunks.push(wordBuf.trim());
+    } else if ((buf + " " + s).trim().length > maxChars && buf) {
+      chunks.push(buf.trim());
+      buf = s;
+    } else {
+      buf = buf ? `${buf} ${s}` : s;
+    }
+  }
+  if (buf.trim()) chunks.push(buf.trim());
+  return chunks;
+}
+
 async function translateLongTextGuToEn(fullText: string): Promise<string> {
   if (!fullText.trim()) return "";
   const paragraphs = fullText.split(/\n+/).map((p) => p.trim()).filter(Boolean);
   const translated: string[] = [];
 
   for (const para of paragraphs) {
-    if (para.length <= 1400) {
-      translated.push(await translateChunkGuToEn(para));
-    } else {
-      // Split very long paragraph into ~1200-char sentence chunks
-      const sentences = para.split(/(?<=[.!?।])\s+/);
-      let buf = "";
-      const outParts: string[] = [];
-      for (const s of sentences) {
-        if ((buf + " " + s).length > 1200 && buf) {
-          outParts.push(await translateChunkGuToEn(buf));
-          buf = s;
-        } else {
-          buf = buf ? `${buf} ${s}` : s;
-        }
-      }
-      if (buf) outParts.push(await translateChunkGuToEn(buf));
-      translated.push(outParts.join(" "));
+    const chunks = splitIntoSafeChunks(para);
+    const outParts: string[] = [];
+    for (const chunk of chunks) {
+      outParts.push(await translateChunkGuToEn(chunk));
     }
+    translated.push(outParts.join(" "));
   }
 
   return translated.join("\n\n");
@@ -62,8 +90,8 @@ export async function POST(req: NextRequest) {
     const bodyTextGu = typeof body.bodyTextGu === "string" ? body.bodyTextGu : "";
 
     const [headlineEn, subHeadlineEn, bodyTextEn] = await Promise.all([
-      headlineGu ? translateChunkGuToEn(headlineGu) : Promise.resolve(""),
-      subHeadlineGu ? translateChunkGuToEn(subHeadlineGu) : Promise.resolve(""),
+      headlineGu ? translateLongTextGuToEn(headlineGu) : Promise.resolve(""),
+      subHeadlineGu ? translateLongTextGuToEn(subHeadlineGu) : Promise.resolve(""),
       bodyTextGu ? translateLongTextGuToEn(bodyTextGu) : Promise.resolve(""),
     ]);
 

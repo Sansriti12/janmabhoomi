@@ -184,7 +184,17 @@ export const epaperRoutes: FastifyPluginAsync = async (app) => {
 
       const allowedPubIds = ["pub-janmabhoomi", "pub-pravasi", "pub-purti", "pub-madhuvan"];
       if (pubId && pubId !== "all") {
-        whereClause.publicationId = allowedPubIds.includes(pubId) ? pubId : { in: [] };
+        const requestedPubs = pubId
+          .split(",")
+          .map((s) => s.trim())
+          .filter((p) => allowedPubIds.includes(p));
+        if (requestedPubs.length === 1) {
+          whereClause.publicationId = requestedPubs[0];
+        } else if (requestedPubs.length > 1) {
+          whereClause.publicationId = { in: requestedPubs };
+        } else {
+          whereClause.publicationId = { in: [] };
+        }
       } else {
         whereClause.publicationId = { in: allowedPubIds };
       }
@@ -225,61 +235,51 @@ export const epaperRoutes: FastifyPluginAsync = async (app) => {
   app.get("/editions/:id", async (req, reply) => {
     const { id } = req.params as { id: string };
 
-    try {
-      const edition = await app.prisma.ePaperEdition.findUnique({
-        where: { id },
-        include: {
-          publication: true,
-          pages: {
-            orderBy: { pageNumber: "asc" },
-            select: {
-              id: true,
-              pageNumber: true,
-              labelEn: true,
-              labelGu: true,
-              widthPx: true,
-              heightPx: true,
-              isFreePreview: true,
-              imageThumbnailKey: true,
-              hotspots: true,
-            },
-          },
+    const editionInclude = {
+      publication: true,
+      pages: {
+        orderBy: { pageNumber: "asc" as const },
+        select: {
+          id: true,
+          pageNumber: true,
+          labelEn: true,
+          labelGu: true,
+          widthPx: true,
+          heightPx: true,
+          isFreePreview: true,
+          imageThumbnailKey: true,
+          hotspots: true,
         },
-      });
+      },
+    };
+
+    try {
+      let edition = null;
+
+      // Support publication-scoped "-latest" aliases (e.g. edition-pub-pravasi-latest, edition-pub-madhuvan-latest)
+      const latestAliasMatch = id.match(/^edition-(pub-[a-z-]+)-latest$/);
+      if (latestAliasMatch) {
+        const targetPubId = latestAliasMatch[1];
+        edition = await app.prisma.ePaperEdition.findFirst({
+          where: {
+            publicationId: targetPubId,
+            status: { in: ["PUBLISHED", "READY"] },
+          },
+          orderBy: { editionDate: "desc" },
+          include: editionInclude,
+        });
+      } else {
+        // Direct UUID lookup
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        if (uuidRegex.test(id)) {
+          edition = await app.prisma.ePaperEdition.findUnique({
+            where: { id },
+            include: editionInclude,
+          });
+        }
+      }
 
       if (!edition || (edition.status !== "PUBLISHED" && edition.status !== "READY")) {
-        const fallbackEdition = await app.prisma.ePaperEdition.findFirst({
-          where: { status: { in: ["PUBLISHED", "READY"] } },
-          include: {
-            publication: true,
-            pages: {
-              orderBy: { pageNumber: "asc" },
-              select: {
-                id: true,
-                pageNumber: true,
-                labelEn: true,
-                labelGu: true,
-                widthPx: true,
-                heightPx: true,
-                isFreePreview: true,
-                imageThumbnailKey: true,
-                hotspots: true,
-              },
-            },
-          },
-        });
-        if (fallbackEdition) {
-          return {
-            success: true,
-            edition: {
-              ...fallbackEdition,
-              id,
-              fileSizeBytes: fallbackEdition.fileSizeBytes
-                ? fallbackEdition.fileSizeBytes.toString()
-                : null,
-            },
-          };
-        }
         reply.status(404);
         return { success: false, error: "E-Paper edition not found or not yet published." };
       }
@@ -375,31 +375,34 @@ export const epaperRoutes: FastifyPluginAsync = async (app) => {
     const { id } = req.params as { id: string };
 
     try {
-      const edition = await app.prisma.ePaperEdition.findUnique({
-        where: { id },
-        select: {
-          id: true,
-          coverImageUrl: true,
-          pages: {
-            where: { pageNumber: 1 },
-            select: { imageThumbnailKey: true, imageHighresKey: true },
-          },
+      const coverSelect = {
+        id: true,
+        coverImageUrl: true,
+        pages: {
+          where: { pageNumber: 1 },
+          select: { imageThumbnailKey: true, imageHighresKey: true },
         },
-      });
+      };
 
-      let targetEdition = edition;
-      if (!targetEdition) {
+      let targetEdition = null;
+      const latestAliasMatch = id.match(/^edition-(pub-[a-z-]+)-latest$/);
+      if (latestAliasMatch) {
         targetEdition = await app.prisma.ePaperEdition.findFirst({
-          where: { status: { in: ["PUBLISHED", "READY"] } },
-          select: {
-            id: true,
-            coverImageUrl: true,
-            pages: {
-              where: { pageNumber: 1 },
-              select: { imageThumbnailKey: true, imageHighresKey: true },
-            },
+          where: {
+            publicationId: latestAliasMatch[1],
+            status: { in: ["PUBLISHED", "READY"] },
           },
+          orderBy: { editionDate: "desc" },
+          select: coverSelect,
         });
+      } else {
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        if (uuidRegex.test(id)) {
+          targetEdition = await app.prisma.ePaperEdition.findUnique({
+            where: { id },
+            select: coverSelect,
+          });
+        }
       }
 
       if (!targetEdition) {

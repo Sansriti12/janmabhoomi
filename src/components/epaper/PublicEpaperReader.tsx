@@ -119,30 +119,12 @@ const JANMABHOOMI_PUBLICATIONS = [
     city: "Mumbai",
   },
   {
-    id: "pub-pravasi",
-    code: "JBP",
-    nameEn: "Janmabhoomi Pravasi",
-    nameGu: "જન્મભૂમિ પ્રવાસી",
-    freqEn: "Sunday Weekly",
-    freqGu: "સાપ્તાહિક રવિવારીય",
-    city: "Mumbai",
-  },
-  {
     id: "pub-purti",
     code: "JPT",
     nameEn: "Janmabhoomi Purti",
     nameGu: "જન્મભૂમિ પૂર્તિ",
     freqEn: "Special Supplements",
     freqGu: "વિશેષ સાપ્તાહિક પૂર્તિઓ",
-    city: "Mumbai",
-  },
-  {
-    id: "pub-madhuvan",
-    code: "MDH",
-    nameEn: "Madhuvan",
-    nameGu: "મધુવન",
-    freqEn: "Sunday Magazine Supplement",
-    freqGu: "રવિવારીય મધુવન પૂર્તિ",
     city: "Mumbai",
   },
 ];
@@ -541,9 +523,13 @@ export function PublicEpaperReader({
 }: PublicEpaperReaderProps) {
   const isGu = lang === "gu";
 
-  // Catalog / Edition state
+  // Catalog / Edition state — defaults strictly to today's local date
+  const getTodayDateStr = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  };
   const [selectedPubId, setSelectedPubId] = useState<string>(initialPublicationId);
-  const [selectedDateFilter, setSelectedDateFilter] = useState<string>("");
+  const [selectedDateFilter, setSelectedDateFilter] = useState<string>(() => getTodayDateStr());
   const [editionsList, setEditionsList] = useState<EditionSummaryItem[]>([]);
   const [selectedEditionId, setSelectedEditionId] = useState<string | null>(null);
   const [editionDetail, setEditionDetail] = useState<PublicEditionDetail | null>(null);
@@ -905,7 +891,7 @@ export function PublicEpaperReader({
     const hasGujaratiScript = /[\u0A80-\u0AFF]/.test(textToRead);
 
     const started = speakText(textToRead, {
-      lang: hasGujaratiScript ? "gu" : isGu ? "gu" : "en",
+      lang: hasGujaratiScript ? "gu" : modalLang,
       rate: customRate || ttsSpeed,
       onStart: () => setIsSpeaking(true),
       onEnd: () => setIsSpeaking(false),
@@ -1264,12 +1250,28 @@ export function PublicEpaperReader({
     ? "આજની આવૃત્તિ"
     : "Today's Edition";
 
-  const filteredEditions = editionsList.filter((ed) => {
-    const matchesPub = selectedPubId === "all" || ed.publicationId === selectedPubId;
+  const todayDateStr = getTodayDateStr();
+  const activeDateFilter = selectedDateFilter || todayDateStr;
+  const pubMatchedEditions = editionsList.filter(
+    (ed) => selectedPubId === "all" || ed.publicationId === selectedPubId
+  );
+  const filteredEditions = pubMatchedEditions.filter((ed) => {
     const edDateOnly = ed.editionDate ? ed.editionDate.split("T")[0] : "";
-    const matchesDate = !selectedDateFilter || edDateOnly === selectedDateFilter;
-    return matchesPub && matchesDate;
+    return edDateOnly === activeDateFilter;
   });
+  const latestAvailableDate =
+    pubMatchedEditions
+      .map((e) => (e.editionDate ? e.editionDate.split("T")[0] : ""))
+      .filter(Boolean)
+      .sort((a, b) => b.localeCompare(a))[0] || "";
+
+  const formatDdMmYyyy = (isoDate: string) => {
+    const parts = isoDate.split("-");
+    if (parts.length === 3) return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    return isoDate;
+  };
+  const activeDateDisplay = formatDdMmYyyy(activeDateFilter);
+  const latestAvailableDisplay = latestAvailableDate ? formatDdMmYyyy(latestAvailableDate) : "";
 
   // Guard against garbled legacy DTP font mojibake (Shree-Guj / Terafont mapped onto Latin-1)
   const isGarbledLegacyText = (txt?: string) => {
@@ -1356,17 +1358,17 @@ export function PublicEpaperReader({
                 <Calendar className="h-3.5 w-3.5 text-[#016BB7] shrink-0" />
                 <input
                   type="date"
-                  value={selectedDateFilter}
-                  onChange={(e) => setSelectedDateFilter(e.target.value)}
+                  value={activeDateFilter}
+                  onChange={(e) => setSelectedDateFilter(e.target.value || getTodayDateStr())}
                   aria-label={isGu ? "તારીખ પસંદ કરો" : "Filter E-Paper by date"}
                   className="bg-transparent text-xs font-bold text-slate-800 focus:outline-none cursor-pointer"
                 />
-                {selectedDateFilter && (
+                {activeDateFilter !== todayDateStr && (
                   <button
                     type="button"
-                    onClick={() => setSelectedDateFilter("")}
+                    onClick={() => setSelectedDateFilter(todayDateStr)}
                     className="ml-1 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-700 p-0.5 cursor-pointer"
-                    title={isGu ? "તમામ તારીખો જુઓ" : "Show all dates"}
+                    title={isGu ? "આજની તારીખ પર પાછા જાઓ" : "Back to today's date"}
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -1385,13 +1387,31 @@ export function PublicEpaperReader({
           <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center text-slate-600 space-y-3 shadow-xs">
             <Newspaper className="h-12 w-12 text-slate-300 mx-auto" />
             <h3 className="text-base font-bold text-slate-800">
-              {isGu ? "આ કેટેગરીમાં હાલ કોઈ આવૃત્તિ ઉપલબ્ધ નથી" : "No editions found for this selection"}
+              {isGu
+                ? `${activeDateDisplay} તારીખનું ઇ-પેપર ઉપલબ્ધ નથી`
+                : `No E-Paper available for ${activeDateDisplay}`}
             </h3>
             <p className="text-xs text-slate-500">
               {isGu
-                ? "કૃપા કરીને 'તમામ આવૃત્તિઓ' પસંદ કરો અથવા અન્ય તારીખ તપાસો."
-                : "Please select 'All Editions' or check back soon."}
+                ? "અન્ય દિવસનું ઇ-પેપર વાંચવા માટે ઉપરના કેલેન્ડરમાંથી તારીખ પસંદ કરો."
+                : "Use the date picker above to select another day's E-Paper edition."}
             </p>
+            {latestAvailableDate && latestAvailableDate !== activeDateFilter && (
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedDateFilter(latestAvailableDate)}
+                  className="inline-flex items-center gap-2 rounded-xl bg-[#016BB7] hover:bg-[#004E89] text-white px-4 py-2 text-xs font-bold shadow-xs transition-colors cursor-pointer"
+                >
+                  <Calendar className="h-3.5 w-3.5" />
+                  <span>
+                    {isGu
+                      ? `તાજેતરનું ઉપલબ્ધ ઇ-પેપર જુઓ (${latestAvailableDisplay})`
+                      : `View Latest Available Edition (${latestAvailableDisplay})`}
+                  </span>
+                </button>
+              </div>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

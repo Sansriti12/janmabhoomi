@@ -592,9 +592,121 @@ export function runAutomatedQualityChecks(
 }
 
 /**
+ * Live Google Translate Gujarati -> English provider (no API key required).
+ * Safely chunks Gujarati text (220 chars per request so UTF-8 URL encoding stays < 2KB)
+ * and falls back to MockTranslationProvider only if the network is offline.
+ */
+export class GoogleWebTranslationProvider implements ITranslationProvider {
+  name = "Google-Translate-Gu-En";
+  private fallback = new MockTranslationProvider();
+
+  private async translateChunk(text: string): Promise<string> {
+    const clean = text.trim();
+    if (!clean) return "";
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=gu&tl=en&dt=t&q=${encodeURIComponent(clean)}`;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const res = await fetch(url, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        },
+      });
+      if (res.ok) {
+        const data: any = await res.json();
+        if (Array.isArray(data) && Array.isArray(data[0])) {
+          const out = data[0]
+            .map((seg: any) => (Array.isArray(seg) && typeof seg[0] === "string" ? seg[0] : ""))
+            .join("")
+            .trim();
+          if (out) return out;
+        }
+      }
+      await new Promise((r) => setTimeout(r, 250));
+    }
+    throw new Error("Google Translate request failed");
+  }
+
+  private splitSafeChunks(text: string, maxChars = 220): string[] {
+    const clean = text.trim();
+    if (!clean) return [];
+    if (clean.length <= maxChars) return [clean];
+    const sentences = clean.split(/(?<=[.!?।])\s+/);
+    const chunks: string[] = [];
+    let buf = "";
+    for (const s of sentences) {
+      if (s.length > maxChars) {
+        if (buf) {
+          chunks.push(buf);
+          buf = "";
+        }
+        let wordBuf = "";
+        for (const w of s.split(/\s+/)) {
+          if ((wordBuf + " " + w).trim().length > maxChars && wordBuf) {
+            chunks.push(wordBuf.trim());
+            wordBuf = w;
+          } else {
+            wordBuf = wordBuf ? `${wordBuf} ${w}` : w;
+          }
+        }
+        if (wordBuf.trim()) chunks.push(wordBuf.trim());
+      } else if ((buf + " " + s).trim().length > maxChars && buf) {
+        chunks.push(buf.trim());
+        buf = s;
+      } else {
+        buf = buf ? `${buf} ${s}` : s;
+      }
+    }
+    if (buf.trim()) chunks.push(buf.trim());
+    return chunks;
+  }
+
+  private async translateText(text: string): Promise<string> {
+    const chunks = this.splitSafeChunks(normalizeGujaratiDigits(text));
+    const parts: string[] = [];
+    for (const c of chunks) {
+      parts.push(await this.translateChunk(c));
+    }
+    return parts.join(" ");
+  }
+
+  async translate(input: TranslationInput): Promise<TranslationOutput> {
+    try {
+      const paragraphs = extractParagraphs(input.contentHtmlGu);
+      const [headlineEn, summaryEn] = await Promise.all([
+        this.translateText(input.headlineGu),
+        this.translateText(input.summaryGu),
+      ]);
+
+      const translatedParas: string[] = [];
+      for (const p of paragraphs) {
+        translatedParas.push(await this.translateText(p));
+      }
+
+      const contentHtmlEn =
+        translatedParas.length > 0
+          ? translatedParas.map((p) => `<p>${p}</p>`).join("\n")
+          : `<p>${summaryEn}</p>`;
+
+      return {
+        headlineEn,
+        summaryEn,
+        contentHtmlEn,
+        metaTitleEn: `${headlineEn} | Janmabhoomi`,
+        metaDescriptionEn: summaryEn.slice(0, 160),
+        provider: this.name,
+        model: "gtx-gu-en",
+        tokensUsed: 0,
+        estimatedCostUsd: 0,
+      };
+    } catch {
+      return this.fallback.translate(input);
+    }
+  }
+}
+
+/**
  * Factory to resolve the active translation provider based on environment variables.
  * Configurable via:
- * - TRANSLATION_PROVIDER: 'gemini' | 'openai' | 'mock' | 'auto' (default: 'auto')
+ * - TRANSLATION_PROVIDER: 'gemini' | 'openai' | 'google' | 'mock' | 'auto' (default: 'auto')
  * - GEMINI_API_KEY & GEMINI_MODEL (default: 'gemini-1.5-flash')
  * - OPENAI_API_KEY & OPENAI_MODEL (default: 'gpt-4o-mini')
  */
@@ -609,19 +721,17 @@ export function getTranslationProvider(): ITranslationProvider {
     if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim() !== "") {
       return new GeminiTranslationProvider(process.env.GEMINI_API_KEY, process.env.GEMINI_MODEL);
     }
-    // Fall back if key missing
-    return new MockTranslationProvider();
+    return new GoogleWebTranslationProvider();
   }
 
   if (preferred === "openai") {
     if (process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY.trim() !== "") {
       return new OpenAITranslationProvider(process.env.OPENAI_API_KEY, process.env.OPENAI_MODEL);
     }
-    // Fall back if key missing
-    return new MockTranslationProvider();
+    return new GoogleWebTranslationProvider();
   }
 
-  // 'auto' mode: check Gemini, then OpenAI, then fallback to Mock
+  // 'auto' mode: check Gemini, then OpenAI, then real Google Translate (with Mock fallback only if offline)
   if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim() !== "") {
     return new GeminiTranslationProvider(process.env.GEMINI_API_KEY, process.env.GEMINI_MODEL);
   }
@@ -629,5 +739,5 @@ export function getTranslationProvider(): ITranslationProvider {
     return new OpenAITranslationProvider(process.env.OPENAI_API_KEY, process.env.OPENAI_MODEL);
   }
 
-  return new MockTranslationProvider();
+  return new GoogleWebTranslationProvider();
 }

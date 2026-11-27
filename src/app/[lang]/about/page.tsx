@@ -55,17 +55,25 @@ export default async function AboutPage({
             </div>
           </div>
 
-          {/* MAIN NARRATIVE */}
+          {/* MAIN NARRATIVE — Official About Saurashtra Trust Document */}
           <div className="mt-6 space-y-4 text-sm sm:text-base text-[#1F2937]/90 leading-relaxed font-normal">
+            <h2 className="text-lg sm:text-xl font-extrabold text-[#016BB7]">
+              {isGu ? "સૌરાષ્ટ્ર ટ્રસ્ટ વિશે" : "About Saurashtra Trust"}
+            </h2>
             <p>
               {isGu
-                ? "૯૩ વર્ષથી વધુ સમયથી, Saurashtra Trustના નેજા હેઠળનું જન્મભૂમિ ગ્રુપ ગુજરાતી પત્રકારિતા, જાહેર સંચાર અને બિઝનેસ પબ્લિશિંગ ક્ષેત્રે એક પ્રતિષ્ઠિત સંસ્થા તરીકે કાર્યરત છે. સમાચારોની વિશ્વસનીયતા, સ્થાનિક સમજ અને સેવા કાર્યો દ્વારા સમાજની પડખે રહેવાની મજબૂત પરંપરા સાથે જન્મભૂમિ ગ્રુપે પેઢી દર પેઢી લાખો વાચકો સાથે વિશ્વાસપૂર્ણ અને મજબૂત સંબંધ સ્થાપિત કર્યો છે."
-                : "For more than 93 years, under the aegis of Saurashtra Trust, the Janmabhoomi Group has operated as an esteemed institution in Gujarati journalism, public communication, and business publishing. With a robust tradition of journalistic credibility, nuanced local insight, and steadfast solidarity through public service, the Janmabhoomi Group has built an enduring relationship of trust with millions of readers across generations."}
+                ? "મહાન દેશભક્ત અને સ્વાતંત્ર્ય સેનાની શ્રી અમૃતલાલ શેઠે ૧૯૩૧માં 'સૌરાષ્ટ્ર ટ્રસ્ટ'ની સ્થાપના કરી હતી. તેમણે ૯ જૂન, ૧૯૩૪ના રોજ મુંબઈથી 'જનની જન્મભૂમિશ્ચ સ્વર્ગાદપિ ગરીયસી' (માતા અને માતૃભૂમિ સ્વર્ગ કરતાં પણ શ્રેષ્ઠ છે) - આ સૂત્ર સાથે ગુજરાતી દૈનિક 'જન્મભૂમિ'નું પ્રકાશન શરૂ કર્યું."
+                : "Shri Amrutlal Sheth, a great patriot and freedom fighter established \"Saurashtra Trust\" in 1931 and on 9th June 1934, started publishing Gujarati Daily ‘Janmabhoomi’ from Mumbai, with a motto of ‘जननी जन्मभूमिश्च स्वर्गादपि गरीयसी’ (Mother and motherland are superior to Heaven.)"}
             </p>
             <p>
               {isGu
-                ? "Saurashtra Trustની સ્થાપના ૧૯૩૧માં પ્રતિષ્ઠિત સ્વાતંત્ર્ય સેનાની શ્રી અમૃતલાલ શેઠ દ્વારા કરવામાં આવી હતી. ૯ જૂન ૧૯૩૪ના રોજ ટ્રસ્ટે મુંબઈથી ગુજરાતી દૈનિક ‘જન્મભૂમિ’નું પ્રકાશન શરૂ કર્યું. ટ્રસ્ટની સ્થાપનાનો મુખ્ય ઉદ્દેશ અખબારો અને સામયિકોનું પ્રકાશન તથા સામાજિક સંસ્થાઓને તેમની કામગીરી અને સેવાકીય પ્રયાસોમાં સહયોગ આપવાનો રહ્યો છે."
-                : "Saurashtra Trust was established in 1931 by veteran freedom fighter Shri Amritlal Sheth. On 9 June 1934, the Trust launched the Gujarati daily 'Janmabhoomi' from Mumbai. The foundational objective of the Trust has always been the publication of newspapers and periodicals, alongside actively partnering with social and public institutions in their philanthropic endeavors."}
+                ? "આ ટ્રસ્ટની સ્થાપનાનો મુખ્ય ઉદ્દેશ્ય સમાચારપત્રો અને સામયિકોનું પ્રકાશન કરવાનો, તેમજ સામાજિક સંસ્થાઓને તેમના કાર્યો અને પ્રયાસોમાં મદદરૂપ થવાનો હતો. આ ટ્રસ્ટ કોઈ પણ રાજકીય પક્ષ સાથે જોડાયેલું નથી કે તેની સાથે કોઈ રાજકીય સંબંધ ધરાવતું નથી."
+                : "The main aim of establishing the Trust was to publish newspapers and magazines and also to be helpful to social institutions in their work and efforts. This trust is not politically affiliated or associated with any political party."}
+            </p>
+            <p>
+              {isGu
+                ? "સૌરાષ્ટ્ર ટ્રસ્ટનો આશય અને દ્રષ્ટિકોણ સાચા અર્થમાં રાષ્ટ્રવાદી રહેવાનો છે. ટ્રસ્ટ વિશ્વસનીય સમાચાર અને તટસ્થ વિશ્લેષણ પ્રદાન કરવા માટે પ્રતિબદ્ધ છે. 'જન્મભૂમિ' પ્રકાશન સમૂહ - જેમાં 'જન્મભૂમિ', 'જન્મભૂમિ પ્રવાસી' (સાપ્તાહિક), 'વ્યાપાર' (ગુજરાતી અને હિન્દી), 'ફૂલછાબ' (રાજકોટ), 'કચ્છમિત્ર' (ભુજ), 'કવિતા' (દ્વિ-માસિક) અને 'જન્મભૂમિ પંચાંગ' (વાર્ષિક)નો સમાવેશ થાય છે - તે આ સિદ્ધાંતનું પાલન કરે છે."
+                : "The intention and vision of Saurashtra Trust is to be nationalist in real sense. Trust is committed to its trustworthy news and its neutral analysis. Janmabhoomi Group of publications viz. Janmabhoomi, Janmabhoomi Pravasi (Weekly), Vyapar (Gujarati and Hindi), Phulchhab (Rajkot), Kutchmitra (Bhuj), Kavita (Two monthly) and Janmabhoomi Panchang (Yearly) follows this principle."}
             </p>
           </div>
 

@@ -98,8 +98,8 @@ export function AdPlacement({
             />
           </a>
         ) : (
-          <div className="bg-linear-to-br from-[#071F3A] via-[#0B3563] to-[#016BB7] text-white p-5 space-y-3">
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-400/20 border border-amber-300/35 px-2.5 py-0.5 text-[10px] font-extrabold text-amber-300">
+          <div className="bg-linear-to-br from-[#062849] via-[#015594] to-[#016BB7] text-white p-5 space-y-3">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-white/15 border border-[#93C5FD]/45 px-2.5 py-0.5 text-[10px] font-extrabold text-[#E0F2FE]">
               <Megaphone className="h-3 w-3" />
               <span>{campaign.sponsorName}</span>
             </div>
@@ -109,7 +109,7 @@ export function AdPlacement({
               <Link
                 href={resolvedHref}
                 onClick={handleClick}
-                className="w-full inline-flex items-center justify-center gap-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-[#071F3A] px-4 py-2.5 text-xs font-black transition-colors shadow-sm"
+                className="w-full inline-flex items-center justify-center gap-1.5 rounded-lg bg-white hover:bg-[#E0F2FE] text-[#004E89] px-4 py-2.5 text-xs font-black transition-colors shadow-md"
               >
                 <span>{ctaText}</span>
                 <ArrowRight className="h-3.5 w-3.5" />
@@ -154,29 +154,29 @@ export function AdPlacement({
             />
           </a>
         ) : (
-          <div className="bg-linear-to-r from-[#071F3A] via-[#0B3563] to-[#016BB7] text-white px-5 py-4 sm:px-7 sm:py-5">
+          <div className="bg-linear-to-r from-[#062849] via-[#015594] to-[#016BB7] text-white px-5 py-4 sm:px-7 sm:py-5">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex items-start gap-3.5 min-w-0">
-                <div className="hidden sm:flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-400/20 border border-amber-300/35 text-amber-300">
+                <div className="hidden sm:flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/15 border border-[#93C5FD]/45 text-[#E0F2FE]">
                   <Megaphone className="h-5 w-5" />
                 </div>
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2 mb-1">
-                    <span className="rounded bg-amber-400 text-[#071F3A] px-2 py-0.5 text-[10px] font-black uppercase tracking-wider">
+                    <span className="rounded bg-[#E0F2FE] text-[#004E89] px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider">
                       {campaign.isHouseAd
                         ? isGu
                           ? "જાહેરાત માટે ઉપલબ્ધ"
                           : "PRIME AD SLOT"
                         : campaign.sponsorName}
                     </span>
-                    <span className="text-[11px] font-semibold text-blue-200">
+                    <span className="text-[11px] font-semibold text-blue-100">
                       {campaign.monthlyEstImpressions}
                     </span>
                   </div>
                   <p className="text-sm sm:text-base font-black text-white leading-snug">
                     {headline}
                   </p>
-                  <p className="text-xs text-blue-100/85 mt-0.5 line-clamp-2">
+                  <p className="text-xs text-blue-100/90 mt-0.5 line-clamp-2">
                     {subtext}
                   </p>
                 </div>
@@ -189,7 +189,7 @@ export function AdPlacement({
                     target="_blank"
                     rel="noopener noreferrer sponsored"
                     onClick={handleClick}
-                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-amber-400 hover:bg-amber-300 text-[#071F3A] px-5 py-2.5 text-xs font-black shadow-md transition-all"
+                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-white hover:bg-[#E0F2FE] text-[#004E89] px-5 py-2.5 text-xs font-black shadow-md transition-all"
                   >
                     <span>{ctaText}</span>
                     <ArrowRight className="h-3.5 w-3.5" />
@@ -198,7 +198,7 @@ export function AdPlacement({
                   <Link
                     href={resolvedHref}
                     onClick={handleClick}
-                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-amber-400 hover:bg-amber-300 text-[#071F3A] px-5 py-2.5 text-xs font-black shadow-md transition-all"
+                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-white hover:bg-[#E0F2FE] text-[#004E89] px-5 py-2.5 text-xs font-black shadow-md transition-all"
                   >
                     <span>{ctaText}</span>
                     <ArrowRight className="h-3.5 w-3.5" />
