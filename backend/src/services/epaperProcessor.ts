@@ -272,54 +272,52 @@ export class EpaperPdfProcessor {
         // standby mode
       }
 
-      // 6. Real PDF Page Rasterization
-      // Use pdf-to-img to render ultra-crisp high-resolution broadsheet pages at scale 3.0 (~220+ DPI)
-      const RENDER_SCALE = 3.0;
-      const highresDoc = await pdf(pdfBuffer, { scale: RENDER_SCALE, format: "png" });
-      const thumbDoc = await pdf(pdfBuffer, { scale: 0.55, format: "png" });
-
-      const generatedPages: ProcessPdfResult["pages"] = [];
-      let pageIndex = 0;
-
-      // Extract high-res buffers
-      const highresBuffers: Buffer[] = [];
-      for await (const highresPage of highresDoc) {
-        highresBuffers.push(highresPage);
+      // 6. Real PDF Page Rasterization (Memory-Safe Streaming for Cloud Containers)
+      // Stream one page at a time directly to storage so multi-page broadsheets never OOM on 512MB instances
+      const RENDER_SCALE = process.env.NODE_ENV === "production" ? 1.5 : 2.2;
+      const pageSizes: Array<{ width: number; height: number }> = [];
+      for (let i = 0; i < pageCount; i++) {
+        const { width, height } = pdfDoc.getPage(i).getSize();
+        pageSizes.push({ width, height });
       }
 
-      // Extract thumbnail buffers
-      const thumbBuffers: Buffer[] = [];
+      const highresKeys: string[] = [];
+      const highresDoc = await pdf(pdfBuffer, { scale: RENDER_SCALE, format: "png" });
+      let hiIdx = 0;
+      for await (const highresPage of highresDoc) {
+        hiIdx++;
+        if (
+          highresPage[0] !== 0x89 ||
+          highresPage[1] !== 0x50 ||
+          highresPage[2] !== 0x4e ||
+          highresPage[3] !== 0x47
+        ) {
+          throw new Error(`Rendered page ${hiIdx} is not a valid PNG image.`);
+        }
+        const saved = await epaperStorage.savePageImage(editionId, hiIdx, highresPage, false);
+        highresKeys.push(saved.storageKey);
+      }
+
+      const thumbKeys: string[] = [];
+      const thumbDoc = await pdf(pdfBuffer, { scale: 0.45, format: "png" });
+      let thIdx = 0;
       for await (const thumbPage of thumbDoc) {
-        thumbBuffers.push(thumbPage);
+        thIdx++;
+        const saved = await epaperStorage.savePageImage(editionId, thIdx, thumbPage, true);
+        thumbKeys.push(saved.storageKey);
       }
 
       // 6B. Auto-extract real Unicode article text blocks & bounding boxes per page
       const extractedHotspotsByPage = await extractPageHotspotsFromPdf(pdfBuffer);
 
-      for (let i = 0; i < highresBuffers.length; i++) {
+      const generatedPages: ProcessPdfResult["pages"] = [];
+      for (let i = 0; i < highresKeys.length; i++) {
         const pageNumber = i + 1;
-        const highresBuffer = highresBuffers[i];
-        const thumbBuffer = thumbBuffers[i] || highresBuffer;
-
-        // Verify genuine PNG magic bytes (0x89 0x50 0x4E 0x47)
-        if (
-          highresBuffer[0] !== 0x89 ||
-          highresBuffer[1] !== 0x50 ||
-          highresBuffer[2] !== 0x4e ||
-          highresBuffer[3] !== 0x47
-        ) {
-          throw new Error(`Rendered page ${pageNumber} is not a valid PNG image.`);
-        }
-
-        // Get actual page dimension from PDFDocument
-        const page = pdfDoc.getPage(i);
-        const { width, height } = page.getSize();
+        const highresKey = highresKeys[i];
+        const thumbKey = thumbKeys[i] || highresKey;
+        const { width, height } = pageSizes[i] || { width: 800, height: 1200 };
         const widthPx = Math.round(width * RENDER_SCALE);
         const heightPx = Math.round(height * RENDER_SCALE);
-
-        // Save genuine rendered images to isolated storage
-        const highres = await epaperStorage.savePageImage(editionId, pageNumber, highresBuffer, false);
-        const thumb = await epaperStorage.savePageImage(editionId, pageNumber, thumbBuffer, true);
 
         const isFree = pageNumber <= freePreviewLimit;
 
@@ -334,8 +332,8 @@ export class EpaperPdfProcessor {
               pageNumber,
               labelEn,
               labelGu,
-              imageHighresKey: highres.storageKey,
-              imageThumbnailKey: thumb.storageKey,
+              imageHighresKey: highresKey,
+              imageThumbnailKey: thumbKey,
               widthPx,
               heightPx,
               isFreePreview: isFree,
@@ -364,8 +362,8 @@ export class EpaperPdfProcessor {
           pageNumber,
           widthPx,
           heightPx,
-          highresKey: highres.storageKey,
-          thumbnailKey: thumb.storageKey,
+          highresKey,
+          thumbnailKey: thumbKey,
           isFreePreview: isFree,
         });
       }
