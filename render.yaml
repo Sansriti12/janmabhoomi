@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: janmabhoomi-api
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install && npx prisma generate && npm run build
+    startCommand: npx prisma db push --skip-generate && npm run start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: CORS_ORIGIN
+        value: https://janmabhoomi-dun.vercel.app,https://janmabhoomi-pravasi.vercel.app,https://*.vercel.app
+      - key: EPAPER_STORAGE_DIR
+        value: /tmp/janmabhoomi-epaper
+      - key: MAX_PDF_UPLOAD_SIZE_MB
+        value: "100"
+      - key: SUBSCRIBER_JWT_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: janmabhoomi-db
+          property: connectionString
+
+databases:
+  - name: janmabhoomi-db
+    plan: free
+    databaseName: janmabhoomi_prod
+    user: janmabhoomi

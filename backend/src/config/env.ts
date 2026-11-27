@@ -16,8 +16,14 @@ const envSchema = z.object({
     .refine((val) => !isNaN(val) && val > 0 && val < 65536, {
       message: "PORT must be a valid integer between 1 and 65535",
     }),
-  HOST: z.string().default("127.0.0.1"),
-  CORS_ORIGIN: z.string().default("http://localhost:3000"),
+  HOST: z
+    .string()
+    .default(process.env.NODE_ENV === "production" ? "0.0.0.0" : "127.0.0.1"),
+  CORS_ORIGIN: z
+    .string()
+    .default(
+      "http://localhost:3000,http://localhost:3001,https://janmabhoomi-dun.vercel.app,https://janmabhoomi-pravasi.vercel.app,https://*.vercel.app"
+    ),
   DATABASE_URL: z
     .string()
     .default("postgresql://postgres:postgres@localhost:5432/janmabhoomi_dev?schema=public"),

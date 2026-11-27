@@ -1,6 +1,7 @@
 import { buildApp } from "./app.js";
 import { env } from "./config/env.js";
 import { publishDueScheduledArticles } from "./routes/adminArticles.js";
+import { bootstrapCloudDatabase } from "./bootstrapCloudDb.js";
 
 async function startServer(): Promise<void> {
   const app = buildApp();
@@ -15,6 +16,9 @@ async function startServer(): Promise<void> {
     app.log.info(
       `Janmabhoomi Backend Service listening at ${address} [Environment: ${env.NODE_ENV}]`
     );
+
+    // Ensure cloud DB has core publications, categories, bilingual hotspot columns & initial admin
+    void bootstrapCloudDatabase(app.prisma, app.log);
 
     // Development & In-Process Persistent Scheduler:
     // 1. Immediate backlog evaluation on startup (recovers any articles scheduled during downtime)
